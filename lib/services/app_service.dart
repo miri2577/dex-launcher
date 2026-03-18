@@ -1,0 +1,39 @@
+import 'package:flutter/services.dart';
+import '../models/app_info.dart';
+
+class AppService {
+  static const _channel = MethodChannel('com.dexlauncher/apps');
+
+  Future<List<AppInfo>> getInstalledApps() async {
+    final List<dynamic> result = await _channel.invokeMethod('getInstalledApps');
+    return result.map((app) {
+      final map = Map<String, dynamic>.from(app as Map);
+      return AppInfo(
+        name: map['name'] as String,
+        packageName: map['packageName'] as String,
+        icon: map['icon'] != null ? Uint8List.fromList(List<int>.from(map['icon'])) : null,
+        isSystemApp: map['isSystemApp'] as bool? ?? false,
+      );
+    }).toList();
+  }
+
+  Future<void> launchApp(String packageName) async {
+    await _channel.invokeMethod('launchApp', {'packageName': packageName});
+  }
+
+  Future<void> openAppInfo(String packageName) async {
+    await _channel.invokeMethod('openAppInfo', {'packageName': packageName});
+  }
+
+  Future<void> uninstallApp(String packageName) async {
+    await _channel.invokeMethod('uninstallApp', {'packageName': packageName});
+  }
+
+  Future<List<String>> getRecentApps({int limit = 10}) async {
+    final List<dynamic> result = await _channel.invokeMethod(
+      'getRecentApps',
+      {'limit': limit},
+    );
+    return result.cast<String>();
+  }
+}
