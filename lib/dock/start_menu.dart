@@ -25,6 +25,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
   String _searchQuery = '';
   final _searchController = TextEditingController();
   bool _showSystemApps = false;
+  AppCategory? _selectedCategory;
   late AnimationController _animController;
   late Animation<double> _slideAnim;
 
@@ -33,12 +34,26 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
     if (!_showSystemApps) {
       apps = apps.where((a) => !a.isSystemApp).toList();
     }
+    if (_selectedCategory != null) {
+      apps = apps.where((a) => a.category == _selectedCategory).toList();
+    }
     if (_searchQuery.isEmpty) return apps;
     final query = _searchQuery.toLowerCase();
     return apps.where((app) =>
       app.name.toLowerCase().contains(query) ||
       app.packageName.toLowerCase().contains(query)
     ).toList();
+  }
+
+  /// Kategorien die tatsächlich Apps enthalten
+  List<AppCategory> get _availableCategories {
+    var apps = widget.apps;
+    if (!_showSystemApps) {
+      apps = apps.where((a) => !a.isSystemApp).toList();
+    }
+    final cats = apps.map((a) => a.category).toSet().toList();
+    cats.sort((a, b) => a.index.compareTo(b.index));
+    return cats;
   }
 
   @override
@@ -70,7 +85,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
         opacity: _slideAnim,
         child: Container(
           width: 480,
-          height: 520,
+          height: 560,
           margin: const EdgeInsets.only(left: 16, bottom: 4),
           decoration: BoxDecoration(
             color: const Color(0xF0202020),
@@ -144,6 +159,31 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                   ],
                 ),
               ),
+              // Kategorie-Chips
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _CategoryChip(
+                      label: 'Alle',
+                      icon: Icons.apps,
+                      isSelected: _selectedCategory == null,
+                      onTap: () => setState(() => _selectedCategory = null),
+                    ),
+                    for (final cat in _availableCategories)
+                      _CategoryChip(
+                        label: cat.label,
+                        icon: cat.icon,
+                        isSelected: _selectedCategory == cat,
+                        onTap: () => setState(() =>
+                          _selectedCategory = _selectedCategory == cat ? null : cat,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
               // App count
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -177,6 +217,75 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CategoryChip({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_CategoryChip> createState() => _CategoryChipState();
+}
+
+class _CategoryChipState extends State<_CategoryChip> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: widget.isSelected
+                  ? Colors.blueAccent.withValues(alpha: 0.3)
+                  : _hovering
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.white.withValues(alpha: 0.05),
+              border: widget.isSelected
+                  ? Border.all(color: Colors.blueAccent.withValues(alpha: 0.5))
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  widget.icon,
+                  size: 14,
+                  color: widget.isSelected ? Colors.blueAccent : Colors.white54,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  widget.label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: widget.isSelected ? Colors.blueAccent : Colors.white70,
+                    fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

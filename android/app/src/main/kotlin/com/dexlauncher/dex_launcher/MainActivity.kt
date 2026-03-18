@@ -3,6 +3,7 @@ package com.dexlauncher.dex_launcher
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
@@ -101,11 +102,18 @@ class MainActivity : FlutterActivity() {
                     null
                 }
 
+                val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    appInfo.category
+                } else {
+                    -1
+                }
+
                 mapOf(
                     "name" to (pm.getApplicationLabel(appInfo)?.toString() ?: "Unknown"),
                     "packageName" to resolveInfo.activityInfo.packageName,
                     "icon" to icon,
-                    "isSystemApp" to (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0)
+                    "isSystemApp" to (appInfo.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM != 0),
+                    "category" to category
                 )
             }
             .sortedBy { (it["name"] as String).lowercase() }

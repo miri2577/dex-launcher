@@ -13,6 +13,7 @@ class AppService {
         packageName: map['packageName'] as String,
         icon: map['icon'] != null ? Uint8List.fromList(List<int>.from(map['icon'])) : null,
         isSystemApp: map['isSystemApp'] as bool? ?? false,
+        category: AppCategory.fromAndroidCategory(map['category'] as int?),
       );
     }).toList();
   }
