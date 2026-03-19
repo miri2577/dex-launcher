@@ -37,4 +37,29 @@ class AppService {
     );
     return result.cast<String>();
   }
+
+  Future<bool> isFreeformEnabled() async {
+    return await _channel.invokeMethod<bool>('isFreeformEnabled') ?? false;
+  }
+
+  Future<bool> enableFreeform() async {
+    return await _channel.invokeMethod<bool>('enableFreeform') ?? false;
+  }
+
+  /// Startet App in Freeform-Fenster mit gegebenen Bounds (Pixel)
+  Future<bool> launchAppFreeform(
+    String packageName, {
+    required int left,
+    required int top,
+    required int right,
+    required int bottom,
+  }) async {
+    return await _channel.invokeMethod<bool>('launchAppFreeform', {
+      'packageName': packageName,
+      'left': left,
+      'top': top,
+      'right': right,
+      'bottom': bottom,
+    }) ?? false;
+  }
 }

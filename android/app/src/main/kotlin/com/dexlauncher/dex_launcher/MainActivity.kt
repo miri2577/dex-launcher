@@ -1,9 +1,12 @@
 package com.dexlauncher.dex_launcher
 
+import android.app.ActivityOptions
 import android.app.usage.UsageStatsManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Rect
 import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -70,6 +73,26 @@ class MainActivity : FlutterActivity() {
                 }
                 "getSystemStatus" -> {
                     result.success(getSystemStatus())
+                }
+                "isFreeformEnabled" -> {
+                    result.success(isFreeformEnabled())
+                }
+                "launchAppFreeform" -> {
+                    val packageName = call.argument<String>("packageName")
+                    val left = call.argument<Int>("left") ?: 100
+                    val top = call.argument<Int>("top") ?: 100
+                    val right = call.argument<Int>("right") ?: 900
+                    val bottom = call.argument<Int>("bottom") ?: 600
+                    if (packageName != null) {
+                        val success = launchAppFreeform(packageName, left, top, right, bottom)
+                        result.success(success)
+                    } else {
+                        result.error("INVALID_ARGUMENT", "packageName is required", null)
+                    }
+                }
+                "enableFreeform" -> {
+                    val success = enableFreeform()
+                    result.success(success)
                 }
                 else -> result.notImplemented()
             }
@@ -150,6 +173,51 @@ class MainActivity : FlutterActivity() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(intent)
+    }
+
+    private fun isFreeformEnabled(): Boolean {
+        return try {
+            val value = Settings.Global.getInt(contentResolver, "enable_freeform_support", 0)
+            value == 1
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun enableFreeform(): Boolean {
+        return try {
+            // Funktioniert nur mit WRITE_SECURE_SETTINGS (per ADB gewährt)
+            Settings.Global.putInt(contentResolver, "enable_freeform_support", 1)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun launchAppFreeform(
+        packageName: String,
+        left: Int, top: Int, right: Int, bottom: Int
+    ): Boolean {
+        val pm = getPackageManager()
+        val launchIntent = pm.getLaunchIntentForPackage(packageName) ?: return false
+
+        launchIntent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+            Intent.FLAG_ACTIVITY_MULTIPLE_TASK or
+            Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT
+        )
+
+        val options = ActivityOptions.makeBasic()
+        options.setLaunchBounds(Rect(left, top, right, bottom))
+
+        try {
+            startActivity(launchIntent, options.toBundle())
+            return true
+        } catch (e: Exception) {
+            // Fallback: normaler Launch ohne Freeform
+            launchApp(packageName)
+            return false
+        }
     }
 
     private fun getRecentApps(limit: Int): List<String> {

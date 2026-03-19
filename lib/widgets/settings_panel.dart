@@ -81,6 +81,61 @@ class SettingsPanel extends StatelessWidget {
                     onChanged: state.setIconSize,
                   ),
                   const SizedBox(height: 24),
+                  _SectionTitle('Fenstermodus'),
+                  const SizedBox(height: 8),
+                  _ToggleTile(
+                    icon: Icons.picture_in_picture_alt,
+                    label: 'Freeform-Fenster',
+                    value: state.freeformEnabled,
+                    onChanged: (value) async {
+                      if (value && !state.freeformEnabled) {
+                        final success = await state.enableFreeform();
+                        if (!success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Freeform konnte nicht aktiviert werden.\n'
+                                'Bitte per ADB: adb shell settings put global enable_freeform_support 1',
+                              ),
+                              duration: Duration(seconds: 5),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  if (state.freeformEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12, top: 4),
+                      child: Text(
+                        'Apps werden in verschiebbaren Fenstern gestartet',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  if (!state.freeformEnabled)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12, top: 4),
+                      child: Text(
+                        'ADB: adb shell settings put global enable_freeform_support 1',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  if (state.runningWindows.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _InfoTile(
+                      icon: Icons.window,
+                      label: 'Offene Fenster',
+                      value: '${state.runningWindows.length}',
+                    ),
+                  ],
+                  const SizedBox(height: 24),
                   _SectionTitle('Info'),
                   const SizedBox(height: 8),
                   _InfoTile(

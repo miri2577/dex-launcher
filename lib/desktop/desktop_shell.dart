@@ -45,6 +45,9 @@ class _DesktopShellState extends State<DesktopShell> {
             );
           }
 
+          // Bildschirmgröße für Fenster-Positionierung
+          state.updateScreenSize(MediaQuery.of(context).size);
+
           return CursorOverlay(
             child: Shortcuts(
               shortcuts: {

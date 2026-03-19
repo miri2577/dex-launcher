@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
 import '../models/desktop_state.dart';
+import '../models/window_info.dart';
 import '../services/system_status_service.dart';
 import '../widgets/context_menu.dart';
 import '../widgets/app_icon_widget.dart';
@@ -65,13 +66,38 @@ class _DockState extends State<Dock> {
                 _divider(),
                 // Pinned Apps
                 Expanded(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: state.pinnedApps.length,
-                    itemBuilder: (context, index) {
-                      final app = state.pinnedApps[index];
-                      return _DockAppItem(app: app);
-                    },
+                  child: Row(
+                    children: [
+                      // Pinned
+                      Flexible(
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          itemCount: state.pinnedApps.length,
+                          itemBuilder: (context, index) {
+                            final app = state.pinnedApps[index];
+                            return _DockAppItem(app: app);
+                          },
+                        ),
+                      ),
+                      // Running Apps Separator (nur wenn laufende Fenster)
+                      if (state.runningWindows.isNotEmpty) ...[
+                        Container(
+                          width: 1,
+                          height: 24,
+                          margin: const EdgeInsets.symmetric(horizontal: 6),
+                          color: Colors.white.withValues(alpha: 0.15),
+                        ),
+                        // Running Windows
+                        ...state.runningWindows.map((window) {
+                          final app = state.allApps.where(
+                            (a) => a.packageName == window.packageName,
+                          ).firstOrNull;
+                          if (app == null) return const SizedBox.shrink();
+                          return _DockRunningItem(app: app, window: window);
+                        }),
+                      ],
+                    ],
                   ),
                 ),
                 _divider(),
@@ -225,6 +251,109 @@ class _DockAppItemState extends State<_DockAppItem> {
             ),
             padding: const EdgeInsets.all(6),
             child: AppIconWidget(app: widget.app, size: 32),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DockRunningItem extends StatefulWidget {
+  final AppInfo app;
+  final WindowInfo window;
+
+  const _DockRunningItem({required this.app, required this.window});
+
+  @override
+  State<_DockRunningItem> createState() => _DockRunningItemState();
+}
+
+class _DockRunningItemState extends State<_DockRunningItem> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isMinimized = widget.window.isMinimized;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: Tooltip(
+        message: '${widget.app.name} (Fenster)',
+        waitDuration: const Duration(milliseconds: 500),
+        child: GestureDetector(
+          onTap: () {
+            final state = context.read<DesktopState>();
+            if (isMinimized) {
+              state.toggleMinimizeWindow(widget.app.packageName);
+              state.launchAppFreeform(widget.app);
+            } else {
+              state.launchAppFreeform(widget.app);
+            }
+          },
+          onSecondaryTapUp: (details) {
+            final state = context.read<DesktopState>();
+            ContextMenu.show(
+              context: context,
+              position: details.globalPosition,
+              items: [
+                ContextMenuItem(
+                  icon: Icons.open_in_new,
+                  label: 'Fenster anzeigen',
+                  onTap: () => state.launchAppFreeform(widget.app),
+                ),
+                ContextMenuItem(
+                  icon: Icons.fullscreen,
+                  label: 'Vollbild',
+                  onTap: () {
+                    state.closeWindow(widget.app.packageName);
+                    state.launchAppFullscreen(widget.app);
+                  },
+                ),
+                ContextMenuItem(
+                  icon: Icons.close,
+                  label: 'Fenster schliessen',
+                  onTap: () => state.closeWindow(widget.app.packageName),
+                  isDanger: true,
+                ),
+              ],
+            );
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 44,
+            height: 44,
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: _hovering ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
+            ),
+            padding: const EdgeInsets.all(6),
+            child: Stack(
+              children: [
+                Opacity(
+                  opacity: isMinimized ? 0.5 : 1.0,
+                  child: AppIconWidget(app: widget.app, size: 32),
+                ),
+                // Running-Indicator: kleiner Punkt unten
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      width: 6,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: isMinimized
+                            ? Colors.white38
+                            : Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

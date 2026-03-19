@@ -101,6 +101,18 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
           label: 'Oeffnen',
           onTap: () => state.launchApp(widget.app),
         ),
+        if (state.freeformEnabled)
+          ContextMenuItem(
+            icon: Icons.picture_in_picture,
+            label: 'Im Fenster oeffnen',
+            onTap: () => state.launchAppFreeform(widget.app),
+          ),
+        if (state.freeformEnabled)
+          ContextMenuItem(
+            icon: Icons.fullscreen,
+            label: 'Vollbild oeffnen',
+            onTap: () => state.launchAppFullscreen(widget.app),
+          ),
         ContextMenuItem(
           icon: widget.app.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
           label: widget.app.isPinned ? 'Von Dock entfernen' : 'An Dock anheften',
