@@ -78,10 +78,10 @@ class MainActivity : FlutterActivity() {
                     result.success(getSystemStatus())
                 }
                 "startOverlay" -> {
-                    if (Settings.canDrawOverlays(this@MainActivity)) {
+                    try {
                         startService(Intent(this@MainActivity, OverlayService::class.java))
                         result.success(true)
-                    } else {
+                    } catch (e: Exception) {
                         result.success(false)
                     }
                 }
@@ -90,7 +90,10 @@ class MainActivity : FlutterActivity() {
                     result.success(true)
                 }
                 "canDrawOverlays" -> {
-                    result.success(Settings.canDrawOverlays(this@MainActivity))
+                    // Auf Android TV gibt canDrawOverlays oft false zurück
+                    // obwohl appops SYSTEM_ALERT_WINDOW allow gesetzt ist.
+                    // Wir versuchen es einfach — der Service fängt den Fehler ab.
+                    result.success(true)
                 }
                 "getWallpaperImages" -> {
                     result.success(getWallpaperImages())
