@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/desktop_state.dart';
+import '../services/system_status_service.dart';
 import '../desktop/desktop_background.dart';
 
 class SettingsPanel extends StatelessWidget {
@@ -79,6 +80,18 @@ class SettingsPanel extends StatelessWidget {
                     min: 32,
                     max: 72,
                     onChanged: state.setIconSize,
+                  ),
+                  const SizedBox(height: 12),
+                  Consumer<SystemStatusService>(
+                    builder: (context, service, _) => _InfoTile(
+                      icon: service.status.hasExternalMouse
+                          ? Icons.mouse
+                          : Icons.gamepad,
+                      label: 'Cursor',
+                      value: service.status.hasExternalMouse
+                          ? 'System-Maus'
+                          : 'D-Pad Cursor',
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _SectionTitle('Fenstermodus'),

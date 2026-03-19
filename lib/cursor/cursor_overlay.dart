@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../services/system_status_service.dart';
 
+/// Cursor-Overlay das intelligent entscheidet:
+/// - Externe Maus erkannt → System-Cursor nutzen, Custom-Cursor aus
+/// - Keine Maus → Custom-Cursor per D-Pad steuern
 class CursorOverlay extends StatefulWidget {
   final Widget child;
 
@@ -12,30 +17,41 @@ class CursorOverlay extends StatefulWidget {
 
 class _CursorOverlayState extends State<CursorOverlay> {
   Offset _cursorPosition = Offset.zero;
-  bool _visible = false;
-  bool _mouseMode = false; // true = echte Maus, false = D-Pad Cursor
+  bool _customCursorVisible = false;
   static const _cursorSpeed = 8.0;
 
   @override
   Widget build(BuildContext context) {
+    final hasExternalMouse = context.select<SystemStatusService, bool>(
+      (s) => s.status.hasExternalMouse,
+    );
+
+    // Externe Maus vorhanden → System-Cursor nutzen, kein Custom-Cursor
+    if (hasExternalMouse) {
+      return KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: (_) {}, // D-Pad ignorieren wenn Maus da
+        child: widget.child,
+      );
+    }
+
+    // Keine externe Maus → Custom-Cursor per D-Pad
     return Listener(
       onPointerHover: _onMouseMove,
       onPointerMove: _onMouseMove,
       onPointerDown: (_) {
-        if (!_visible) setState(() => _visible = true);
+        if (!_customCursorVisible) setState(() => _customCursorVisible = true);
       },
       child: MouseRegion(
         cursor: SystemMouseCursors.none,
-        onExit: (_) {
-          if (_mouseMode) setState(() => _visible = false);
-        },
+        onExit: (_) => setState(() => _customCursorVisible = false),
         child: KeyboardListener(
           focusNode: FocusNode(),
           onKeyEvent: _handleKeyEvent,
           child: Stack(
             children: [
               widget.child,
-              if (_visible)
+              if (_customCursorVisible)
                 Positioned(
                   left: _cursorPosition.dx,
                   top: _cursorPosition.dy,
@@ -53,8 +69,7 @@ class _CursorOverlayState extends State<CursorOverlay> {
   void _onMouseMove(PointerEvent event) {
     setState(() {
       _cursorPosition = event.position;
-      _visible = true;
-      _mouseMode = true;
+      _customCursorVisible = true;
     });
   }
 
@@ -74,13 +89,12 @@ class _CursorOverlayState extends State<CursorOverlay> {
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       dx = (dx + _cursorSpeed).clamp(0, screenSize.width);
     } else {
-      return; // Andere Tasten ignorieren
+      return;
     }
 
     setState(() {
       _cursorPosition = Offset(dx, dy);
-      _visible = true;
-      _mouseMode = false;
+      _customCursorVisible = true;
     });
   }
 }

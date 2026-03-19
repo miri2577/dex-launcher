@@ -11,6 +11,7 @@ class SystemStatus {
   final bool ethernetConnected;
   final int volumePercent;
   final bool isMuted;
+  final bool hasExternalMouse;
 
   const SystemStatus({
     this.batteryLevel = -1,
@@ -21,6 +22,7 @@ class SystemStatus {
     this.ethernetConnected = false,
     this.volumePercent = 0,
     this.isMuted = false,
+    this.hasExternalMouse = false,
   });
 
   bool get hasBattery => batteryLevel >= 0;
@@ -87,6 +89,7 @@ class SystemStatusService extends ChangeNotifier {
         ethernetConnected: result['ethernetConnected'] as bool? ?? false,
         volumePercent: result['volumePercent'] as int? ?? 0,
         isMuted: result['isMuted'] as bool? ?? false,
+        hasExternalMouse: result['hasExternalMouse'] as bool? ?? false,
       );
       notifyListeners();
     } catch (_) {

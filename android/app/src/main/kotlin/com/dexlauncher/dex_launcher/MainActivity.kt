@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Rect
+import android.hardware.input.InputManager
 import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -15,6 +16,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.view.InputDevice
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -89,6 +91,9 @@ class MainActivity : FlutterActivity() {
                     } else {
                         result.error("INVALID_ARGUMENT", "packageName is required", null)
                     }
+                }
+                "hasExternalMouse" -> {
+                    result.success(hasExternalMouse())
                 }
                 "enableFreeform" -> {
                     val success = enableFreeform()
@@ -173,6 +178,19 @@ class MainActivity : FlutterActivity() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         startActivity(intent)
+    }
+
+    private fun hasExternalMouse(): Boolean {
+        val inputDevices = InputDevice.getDeviceIds()
+        for (id in inputDevices) {
+            val device = InputDevice.getDevice(id) ?: continue
+            val sources = device.sources
+            // SOURCE_MOUSE = echte Maus (USB/Bluetooth)
+            if (sources and InputDevice.SOURCE_MOUSE == InputDevice.SOURCE_MOUSE) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun isFreeformEnabled(): Boolean {
@@ -294,7 +312,8 @@ class MainActivity : FlutterActivity() {
             "wifiStrength" to wifiStrength,
             "ethernetConnected" to ethernetConnected,
             "volumePercent" to volumePercent,
-            "isMuted" to isMuted
+            "isMuted" to isMuted,
+            "hasExternalMouse" to hasExternalMouse()
         )
     }
 
