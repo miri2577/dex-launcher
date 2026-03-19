@@ -30,6 +30,7 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _settingsOpen = false;
   bool _appSwitcherOpen = false;
   bool _dockVisible = true;
+  bool _forceCloseStartMenu = false;
   final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
 
   @override
@@ -140,10 +141,14 @@ class _DesktopShellState extends State<DesktopShell> {
                         bottom: _dockVisible ? 72 : 0,
                         child: GestureDetector(
                           onTap: () {
-                            // Tap auf leere Fläche schließt Settings
-                            if (_settingsOpen) {
-                              setState(() => _settingsOpen = false);
-                            }
+                            setState(() {
+                              _settingsOpen = false;
+                              _forceCloseStartMenu = true;
+                            });
+                            // Reset nach einem Frame
+                            Future.microtask(() {
+                              if (mounted) setState(() => _forceCloseStartMenu = false);
+                            });
                           },
                           onSecondaryTapUp: (details) {
                             _showDesktopContextMenu(details.globalPosition, state);
@@ -180,6 +185,7 @@ class _DesktopShellState extends State<DesktopShell> {
                         child: Dock(
                           onSettingsOpen: () =>
                               setState(() => _settingsOpen = !_settingsOpen),
+                          forceCloseStartMenu: _forceCloseStartMenu,
                         ),
                       ),
 

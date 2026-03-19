@@ -14,8 +14,9 @@ import 'start_menu.dart';
 
 class Dock extends StatefulWidget {
   final VoidCallback onSettingsOpen;
+  final bool forceCloseStartMenu;
 
-  const Dock({super.key, required this.onSettingsOpen});
+  const Dock({super.key, required this.onSettingsOpen, this.forceCloseStartMenu = false});
 
   @override
   State<Dock> createState() => _DockState();
@@ -23,6 +24,14 @@ class Dock extends StatefulWidget {
 
 class _DockState extends State<Dock> {
   bool _startMenuOpen = false;
+
+  @override
+  void didUpdateWidget(covariant Dock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.forceCloseStartMenu && _startMenuOpen) {
+      setState(() => _startMenuOpen = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

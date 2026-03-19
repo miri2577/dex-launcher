@@ -168,7 +168,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                   child: Row(
                     children: [
                       _MiniAppButton(
-                        icon: Icons.folder, label: 'Dateien', color: Colors.amber,
+                        icon: Icons.folder, label: 'Dateien', color: Colors.white,
                         toolId: 'file_manager',
                         onTap: () {
                           widget.onClose();
@@ -179,7 +179,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.language, label: 'Browser', color: Colors.blueAccent,
+                        icon: Icons.language, label: 'Browser', color: Colors.white,
                         toolId: 'browser',
                         onTap: () {
                           widget.onClose();
@@ -190,7 +190,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.calculate, label: 'Rechner', color: Colors.tealAccent,
+                        icon: Icons.calculate, label: 'Rechner', color: Colors.white,
                         toolId: 'calculator',
                         onTap: () {
                           widget.onClose();
@@ -201,7 +201,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.wifi, label: 'WLAN', color: Colors.lightBlueAccent,
+                        icon: Icons.wifi, label: 'WLAN', color: Colors.white,
                         toolId: 'wifi_manager',
                         onTap: () {
                           widget.onClose();
@@ -212,7 +212,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.bluetooth, label: 'Bluetooth', color: Colors.blue,
+                        icon: Icons.bluetooth, label: 'Bluetooth', color: Colors.white,
                         toolId: 'bluetooth_manager',
                         onTap: () {
                           widget.onClose();
@@ -223,7 +223,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.monitor_heart, label: 'System', color: Colors.greenAccent,
+                        icon: Icons.monitor_heart, label: 'System', color: Colors.white,
                         toolId: 'system_monitor',
                         onTap: () {
                           widget.onClose();
@@ -234,7 +234,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                         },
                       ),
                       _MiniAppButton(
-                        icon: Icons.terminal, label: 'Terminal', color: Colors.green,
+                        icon: Icons.terminal, label: 'Terminal', color: Colors.white,
                         toolId: 'terminal',
                         onTap: () {
                           widget.onClose();
