@@ -20,6 +20,7 @@ class WindowManager extends ChangeNotifier {
     Offset? position,
     Size? size,
     IconData icon = Icons.window,
+    Map<String, dynamic>? initialData,
   }) {
     // Kaskadierte Position
     final offset = (_windows.length % 6) * 30.0;
@@ -32,6 +33,7 @@ class WindowManager extends ChangeNotifier {
       zOrder: _nextZ++,
       isFocused: true,
       icon: icon,
+      initialData: initialData,
     );
 
     // Alle anderen Fenster unfocusen

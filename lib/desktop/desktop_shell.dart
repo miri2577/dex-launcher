@@ -237,6 +237,7 @@ class _DesktopShellState extends State<DesktopShell> {
     return switch (window.appType) {
       'file_manager' => const FileManagerApp(),
       'browser' => WebBrowserApp(
+          initialUrl: window.initialData?['url'] as String?,
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
       'calculator' => const CalculatorApp(),

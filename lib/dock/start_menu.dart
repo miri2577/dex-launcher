@@ -57,6 +57,17 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
     return cats;
   }
 
+  void _openWebApp(BuildContext context, String title, String url) {
+    widget.onClose();
+    context.read<WindowManager>().openWindow(
+      appType: 'browser',
+      title: title,
+      icon: Icons.language,
+      size: const Size(700, 450),
+      initialData: {'url': url},
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -276,6 +287,54 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                             icon: Icons.movie, size: const Size(500, 400),
                           );
                         },
+                      ),
+                    ],
+                  ),
+                ),
+              // Google Dienste
+              if (_searchQuery.isEmpty)
+                Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      _MiniAppButton(
+                        icon: Icons.search, label: 'Google', color: Colors.white,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'browser', title: 'Google',
+                            icon: Icons.language, size: const Size(700, 450),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.cloud, label: 'Drive', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Google Drive', 'https://drive.google.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.description, label: 'Docs', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Google Docs', 'https://docs.google.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.table_chart, label: 'Sheets', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Google Sheets', 'https://sheets.google.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.slideshow, label: 'Slides', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Google Slides', 'https://slides.google.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.mail, label: 'Gmail', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Gmail', 'https://mail.google.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.play_circle, label: 'YouTube', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'YouTube', 'https://www.youtube.com'),
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.map, label: 'Maps', color: Colors.white,
+                        onTap: () => _openWebApp(context, 'Google Maps', 'https://maps.google.com'),
                       ),
                     ],
                   ),

@@ -13,6 +13,8 @@ class MDIWindow {
   bool isFocused;
   IconData icon;
 
+  Map<String, dynamic>? initialData;
+
   MDIWindow({
     required this.id,
     required this.appType,
@@ -24,6 +26,7 @@ class MDIWindow {
     this.isMinimized = false,
     this.isFocused = true,
     this.icon = Icons.window,
+    this.initialData,
   });
 
   Rect get bounds => Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
