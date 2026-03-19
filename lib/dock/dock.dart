@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/app_info.dart';
 import '../models/desktop_state.dart';
 import '../models/window_info.dart';
+import '../windows/mdi_window.dart';
+import '../windows/window_manager.dart';
 import '../services/system_status_service.dart';
 import '../widgets/context_menu.dart';
 import '../widgets/app_icon_widget.dart';
@@ -65,6 +67,28 @@ class _DockState extends State<Dock> {
                   tooltip: 'Startmenue',
                 ),
                 _divider(),
+                // Built-in Mini-Apps
+                _DockButton(
+                  icon: Icons.folder,
+                  onTap: () => context.read<WindowManager>().openWindow(
+                    appType: 'file_manager',
+                    title: 'Dateimanager',
+                    icon: Icons.folder,
+                    size: const Size(550, 380),
+                  ),
+                  tooltip: 'Dateimanager',
+                ),
+                _DockButton(
+                  icon: Icons.language,
+                  onTap: () => context.read<WindowManager>().openWindow(
+                    appType: 'browser',
+                    title: 'Browser',
+                    icon: Icons.language,
+                    size: const Size(700, 450),
+                  ),
+                  tooltip: 'Browser',
+                ),
+                _divider(),
                 // Pinned Apps
                 Expanded(
                   child: Row(
@@ -81,23 +105,26 @@ class _DockState extends State<Dock> {
                           },
                         ),
                       ),
-                      // Running Apps Separator (nur wenn laufende Fenster)
-                      if (state.runningWindows.isNotEmpty) ...[
-                        Container(
-                          width: 1,
-                          height: 24,
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                        // Running Windows
-                        ...state.runningWindows.map((window) {
-                          final app = state.allApps.where(
-                            (a) => a.packageName == window.packageName,
-                          ).firstOrNull;
-                          if (app == null) return const SizedBox.shrink();
-                          return _DockRunningItem(app: app, window: window);
-                        }),
-                      ],
+                      // Offene MDI-Fenster
+                      Consumer<WindowManager>(
+                        builder: (context, wm, _) {
+                          if (wm.windows.isEmpty) return const SizedBox.shrink();
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 1, height: 24,
+                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                color: Colors.white.withValues(alpha: 0.15),
+                              ),
+                              ...wm.windows.map((window) => _DockMDIItem(
+                                window: window,
+                                manager: wm,
+                              )),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -355,6 +382,88 @@ class _DockRunningItemState extends State<_DockRunningItem> {
                             : Colors.blueAccent,
                         borderRadius: BorderRadius.circular(2),
                       ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DockMDIItem extends StatefulWidget {
+  final MDIWindow window;
+  final WindowManager manager;
+
+  const _DockMDIItem({required this.window, required this.manager});
+
+  @override
+  State<_DockMDIItem> createState() => _DockMDIItemState();
+}
+
+class _DockMDIItemState extends State<_DockMDIItem> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isMinimized = widget.window.isMinimized;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: Tooltip(
+        message: widget.window.title,
+        waitDuration: const Duration(milliseconds: 300),
+        child: GestureDetector(
+          onTap: () => widget.manager.focusWindow(widget.window.id),
+          onSecondaryTapUp: (details) {
+            ContextMenu.show(
+              context: context,
+              position: details.globalPosition,
+              items: [
+                ContextMenuItem(
+                  icon: Icons.open_in_new,
+                  label: 'Fenster anzeigen',
+                  onTap: () => widget.manager.focusWindow(widget.window.id),
+                ),
+                ContextMenuItem(
+                  icon: Icons.minimize,
+                  label: isMinimized ? 'Wiederherstellen' : 'Minimieren',
+                  onTap: () => widget.manager.minimizeWindow(widget.window.id),
+                ),
+                ContextMenuItem(
+                  icon: Icons.close,
+                  label: 'Schliessen',
+                  onTap: () => widget.manager.closeWindow(widget.window.id),
+                  isDanger: true,
+                ),
+              ],
+            );
+          },
+          child: Container(
+            width: 44,
+            height: 44,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: _hovering ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(
+                  opacity: isMinimized ? 0.4 : 1.0,
+                  child: Icon(widget.window.icon, color: Colors.white, size: 22),
+                ),
+                Positioned(
+                  bottom: 4,
+                  child: Container(
+                    width: 6, height: 3,
+                    decoration: BoxDecoration(
+                      color: widget.window.isFocused ? Colors.blueAccent : Colors.white38,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
