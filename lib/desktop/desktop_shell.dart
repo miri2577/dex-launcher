@@ -156,17 +156,16 @@ class _DesktopShellState extends State<DesktopShell> {
                         ),
                       ),
 
-                      // Settings Panel (Slide-In)
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                        right: _settingsOpen ? 0 : -420,
-                        top: 0,
-                        bottom: 72,
-                        child: SettingsPanel(
-                          onClose: () => setState(() => _settingsOpen = false),
+                      // Settings Panel
+                      if (_settingsOpen)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 72,
+                          child: SettingsPanel(
+                            onClose: () => setState(() => _settingsOpen = false),
+                          ),
                         ),
-                      ),
 
                       // App Switcher (Alt+Tab)
                       if (_appSwitcherOpen)

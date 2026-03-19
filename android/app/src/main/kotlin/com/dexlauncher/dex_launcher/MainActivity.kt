@@ -346,26 +346,44 @@ class MainActivity : FlutterActivity() {
         var wifiConnected = false
         var wifiName: String? = null
         var wifiStrength = -1
+        var ethernetConnected = false
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
         if (cm != null) {
-            val network = cm.activeNetwork
-            val caps = cm.getNetworkCapabilities(network)
-            wifiConnected = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+            try {
+                val network = cm.activeNetwork
+                val caps = cm.getNetworkCapabilities(network)
+                wifiConnected = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+                ethernetConnected = caps?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true
 
-            if (wifiConnected) {
-                val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-                @Suppress("DEPRECATION")
-                val info = wm?.connectionInfo
-                if (info != null) {
-                    wifiName = info.ssid?.replace("\"", "")
-                    wifiStrength = WifiManager.calculateSignalLevel(info.rssi, 5) // 0-4
+                if (wifiConnected) {
+                    // Android 14+: SSID über TransportInfo aus NetworkCapabilities
+                    val transportInfo = caps?.transportInfo
+                    if (transportInfo is android.net.wifi.WifiInfo) {
+                        val ssid = transportInfo.ssid
+                        if (ssid != null && ssid != "<unknown ssid>") {
+                            wifiName = ssid.replace("\"", "")
+                        }
+                        wifiStrength = WifiManager.calculateSignalLevel(transportInfo.rssi, 5)
+                    }
+
+                    // Fallback: WifiManager (braucht evtl. Location-Permission)
+                    if (wifiName == null || wifiName == "<unknown ssid>") {
+                        val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                        @Suppress("DEPRECATION")
+                        val info = wm?.connectionInfo
+                        if (info != null) {
+                            val ssid = info.ssid?.replace("\"", "")
+                            if (ssid != null && ssid != "<unknown ssid>") {
+                                wifiName = ssid
+                            }
+                            if (wifiStrength < 0) {
+                                wifiStrength = WifiManager.calculateSignalLevel(info.rssi, 5)
+                            }
+                        }
+                    }
                 }
-            }
+            } catch (_: Exception) {}
         }
-
-        // Ethernet
-        val ethernetConnected = cm?.getNetworkCapabilities(cm.activeNetwork)
-            ?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true
 
         // Lautstärke
         val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
