@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
 import '../models/desktop_state.dart';
+import '../windows/window_manager.dart';
 import '../widgets/app_icon_widget.dart';
 import '../widgets/context_menu.dart';
 
@@ -159,6 +160,78 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                   ],
                 ),
               ),
+              // Eingebaute Tools
+              if (_searchQuery.isEmpty)
+                Container(
+                  height: 44,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      _MiniAppButton(
+                        icon: Icons.folder, label: 'Dateien', color: Colors.amber,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'file_manager', title: 'Dateimanager',
+                            icon: Icons.folder, size: const Size(550, 380),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.language, label: 'Browser', color: Colors.blueAccent,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'browser', title: 'Browser',
+                            icon: Icons.language, size: const Size(700, 450),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.calculate, label: 'Rechner', color: Colors.tealAccent,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'calculator', title: 'Rechner',
+                            icon: Icons.calculate, size: const Size(280, 380),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.wifi, label: 'WLAN', color: Colors.lightBlueAccent,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'wifi_manager', title: 'WLAN',
+                            icon: Icons.wifi, size: const Size(400, 420),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.bluetooth, label: 'Bluetooth', color: Colors.blue,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'bluetooth_manager', title: 'Bluetooth',
+                            icon: Icons.bluetooth, size: const Size(400, 400),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.monitor_heart, label: 'System', color: Colors.greenAccent,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'system_monitor', title: 'Systemmonitor',
+                            icon: Icons.monitor_heart, size: const Size(450, 350),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              if (_searchQuery.isEmpty)
+                Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
               // Zuletzt verwendet
               if (_searchQuery.isEmpty && _selectedCategory == null)
                 Consumer<DesktopState>(
@@ -338,6 +411,59 @@ class _CategoryChipState extends State<_CategoryChip> {
                     color: widget.isSelected ? Colors.blueAccent : Colors.white70,
                     fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniAppButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _MiniAppButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  State<_MiniAppButton> createState() => _MiniAppButtonState();
+}
+
+class _MiniAppButtonState extends State<_MiniAppButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovering = true),
+        onExit: (_) => setState(() => _hovering = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: _hovering ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(widget.icon, color: widget.color, size: 18),
+                const SizedBox(height: 2),
+                Text(
+                  widget.label,
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 9),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

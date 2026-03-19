@@ -12,6 +12,8 @@ import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.os.BatteryManager
 import android.os.Build
 import android.content.pm.PackageManager
@@ -94,6 +96,15 @@ class MainActivity : FlutterActivity() {
                     // obwohl appops SYSTEM_ALERT_WINDOW allow gesetzt ist.
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
+                }
+                "getBluetoothDevices" -> {
+                    result.success(getBluetoothDevices())
+                }
+                "isBluetoothEnabled" -> {
+                    result.success(isBluetoothEnabled())
+                }
+                "getSystemInfo" -> {
+                    result.success(getSystemInfo())
                 }
                 "scanWifiNetworks" -> {
                     result.success(scanWifiNetworks())
@@ -306,6 +317,60 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    @Suppress("MissingPermission")
+    private fun getBluetoothDevices(): List<Map<String, Any?>> {
+        val bm = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        val adapter = bm?.adapter ?: return emptyList()
+
+        return try {
+            adapter.bondedDevices?.map { device ->
+                mapOf(
+                    "name" to (device.name ?: "Unbekannt"),
+                    "address" to device.address,
+                    "type" to when (device.type) {
+                        1 -> "Classic"
+                        2 -> "LE"
+                        3 -> "Dual"
+                        else -> "Unbekannt"
+                    },
+                    "bonded" to true,
+                )
+            }?.toList() ?: emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun isBluetoothEnabled(): Boolean {
+        val bm = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+        return bm?.adapter?.isEnabled == true
+    }
+
+    private fun getSystemInfo(): Map<String, Any?> {
+        val runtime = Runtime.getRuntime()
+        val usedMem = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024
+        val totalMem = runtime.totalMemory() / 1024 / 1024
+        val maxMem = runtime.maxMemory() / 1024 / 1024
+
+        // Storage
+        val stat = android.os.StatFs(android.os.Environment.getDataDirectory().path)
+        val totalStorage = stat.totalBytes / 1024 / 1024
+        val freeStorage = stat.availableBytes / 1024 / 1024
+
+        return mapOf(
+            "model" to Build.MODEL,
+            "manufacturer" to Build.MANUFACTURER,
+            "androidVersion" to Build.VERSION.RELEASE,
+            "sdkVersion" to Build.VERSION.SDK_INT,
+            "usedMemoryMB" to usedMem,
+            "totalMemoryMB" to totalMem,
+            "maxMemoryMB" to maxMem,
+            "totalStorageMB" to totalStorage,
+            "freeStorageMB" to freeStorage,
+            "cpuCores" to runtime.availableProcessors(),
+        )
     }
 
     @Suppress("DEPRECATION")

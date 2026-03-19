@@ -9,6 +9,8 @@ import '../apps/file_manager.dart';
 import '../apps/web_browser.dart';
 import '../apps/calculator.dart';
 import '../apps/wifi_manager.dart';
+import '../apps/bluetooth_manager.dart';
+import '../apps/system_monitor.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -235,6 +237,8 @@ class _DesktopShellState extends State<DesktopShell> {
         ),
       'calculator' => const CalculatorApp(),
       'wifi_manager' => const WifiManagerApp(),
+      'bluetooth_manager' => const BluetoothManagerApp(),
+      'system_monitor' => const SystemMonitorApp(),
       _ => Center(
           child: Text(window.appType, style: const TextStyle(color: Colors.white)),
         ),
@@ -243,14 +247,12 @@ class _DesktopShellState extends State<DesktopShell> {
 
   void _showDesktopContextMenu(Offset position, DesktopState state) {
     final overlay = Overlay.of(context);
-    final wm = context.read<WindowManager>();
     late OverlayEntry entry;
 
     entry = OverlayEntry(
       builder: (ctx) {
         return _DesktopContextMenu(
           position: position,
-          windowManager: wm,
           onDismiss: () => entry.remove(),
           onSettings: () {
             entry.remove();
@@ -274,7 +276,6 @@ class _DesktopShellState extends State<DesktopShell> {
 
 class _DesktopContextMenu extends StatelessWidget {
   final Offset position;
-  final WindowManager windowManager;
   final VoidCallback onDismiss;
   final VoidCallback onSettings;
   final VoidCallback onRefresh;
@@ -283,7 +284,6 @@ class _DesktopContextMenu extends StatelessWidget {
 
   const _DesktopContextMenu({
     required this.position,
-    required this.windowManager,
     required this.onDismiss,
     required this.onSettings,
     required this.onRefresh,
@@ -341,47 +341,6 @@ class _DesktopContextMenu extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _menuItem(Icons.folder, 'Dateimanager', () {
-                    onDismiss();
-                    windowManager.openWindow(
-                      appType: 'file_manager',
-                      title: 'Dateimanager',
-                      icon: Icons.folder,
-                      size: const Size(550, 380),
-                    );
-                  }),
-                  _menuItem(Icons.language, 'Webbrowser', () {
-                    onDismiss();
-                    windowManager.openWindow(
-                      appType: 'browser',
-                      title: 'Browser',
-                      icon: Icons.language,
-                      size: const Size(700, 450),
-                    );
-                  }),
-                  _menuItem(Icons.calculate, 'Rechner', () {
-                    onDismiss();
-                    windowManager.openWindow(
-                      appType: 'calculator',
-                      title: 'Rechner',
-                      icon: Icons.calculate,
-                      size: const Size(280, 380),
-                    );
-                  }),
-                  _menuItem(Icons.wifi, 'WLAN-Einstellungen', () {
-                    onDismiss();
-                    windowManager.openWindow(
-                      appType: 'wifi_manager',
-                      title: 'WLAN',
-                      icon: Icons.wifi,
-                      size: const Size(400, 420),
-                    );
-                  }),
-                  Container(
-                    height: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
                   _menuItem(Icons.refresh, 'Apps aktualisieren', onRefresh),
                   _menuItem(
                     showIcons ? Icons.visibility_off : Icons.visibility,
