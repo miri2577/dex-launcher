@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'models/desktop_state.dart';
 import 'services/system_status_service.dart';
+import 'windows/window_manager.dart';
 import 'desktop/desktop_shell.dart';
 
 void main() async {
@@ -22,20 +23,28 @@ void main() async {
   await desktopState.init();
 
   final systemStatus = SystemStatusService();
-  await systemStatus.initMouseCheck(); // Sofort-Check vor UI
+  await systemStatus.initMouseCheck();
   systemStatus.startPolling();
 
-  runApp(DexLauncherApp(desktopState: desktopState, systemStatus: systemStatus));
+  final windowManager = WindowManager();
+
+  runApp(DexLauncherApp(
+    desktopState: desktopState,
+    systemStatus: systemStatus,
+    windowManager: windowManager,
+  ));
 }
 
 class DexLauncherApp extends StatelessWidget {
   final DesktopState desktopState;
   final SystemStatusService systemStatus;
+  final WindowManager windowManager;
 
   const DexLauncherApp({
     super.key,
     required this.desktopState,
     required this.systemStatus,
+    required this.windowManager,
   });
 
   @override
@@ -44,6 +53,7 @@ class DexLauncherApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: desktopState),
         ChangeNotifierProvider.value(value: systemStatus),
+        ChangeNotifierProvider.value(value: windowManager),
       ],
       child: Shortcuts(
         // Android TV Remote: "Select" Button als Tap registrieren
