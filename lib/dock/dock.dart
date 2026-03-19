@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
+import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
 import '../models/window_info.dart';
 import '../windows/mdi_window.dart';
@@ -67,28 +68,13 @@ class _DockState extends State<Dock> {
                   tooltip: 'Startmenue',
                 ),
                 _divider(),
-                // Built-in Mini-Apps
-                _DockButton(
-                  icon: Icons.folder,
-                  onTap: () => context.read<WindowManager>().openWindow(
-                    appType: 'file_manager',
-                    title: 'Dateimanager',
-                    icon: Icons.folder,
-                    size: const Size(550, 380),
-                  ),
-                  tooltip: 'Dateimanager',
-                ),
-                _DockButton(
-                  icon: Icons.language,
-                  onTap: () => context.read<WindowManager>().openWindow(
-                    appType: 'browser',
-                    title: 'Browser',
-                    icon: Icons.language,
-                    size: const Size(700, 450),
-                  ),
-                  tooltip: 'Browser',
-                ),
-                _divider(),
+                // Gepinnte Built-in Tools
+                ...state.pinnedToolIds.map((toolId) {
+                  final tool = getBuiltinApp(toolId);
+                  if (tool == null) return const SizedBox.shrink();
+                  return _DockToolButton(tool: tool);
+                }),
+                if (state.pinnedToolIds.isNotEmpty) _divider(),
                 // Pinned Apps
                 Expanded(
                   child: Row(
@@ -387,6 +373,71 @@ class _DockRunningItemState extends State<_DockRunningItem> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DockToolButton extends StatefulWidget {
+  final BuiltinApp tool;
+  const _DockToolButton({required this.tool});
+
+  @override
+  State<_DockToolButton> createState() => _DockToolButtonState();
+}
+
+class _DockToolButtonState extends State<_DockToolButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: Tooltip(
+        message: widget.tool.name,
+        waitDuration: const Duration(milliseconds: 500),
+        child: GestureDetector(
+          onTap: () => context.read<WindowManager>().openWindow(
+            appType: widget.tool.id,
+            title: widget.tool.name,
+            icon: widget.tool.icon,
+            size: widget.tool.defaultSize,
+          ),
+          onSecondaryTapUp: (details) {
+            ContextMenu.show(
+              context: context,
+              position: details.globalPosition,
+              items: [
+                ContextMenuItem(
+                  icon: Icons.open_in_new,
+                  label: 'Oeffnen',
+                  onTap: () => context.read<WindowManager>().openWindow(
+                    appType: widget.tool.id,
+                    title: widget.tool.name,
+                    icon: widget.tool.icon,
+                    size: widget.tool.defaultSize,
+                  ),
+                ),
+                ContextMenuItem(
+                  icon: Icons.push_pin,
+                  label: 'Vom Dock entfernen',
+                  onTap: () => context.read<DesktopState>().toggleToolPin(widget.tool.id),
+                ),
+              ],
+            );
+          },
+          child: Container(
+            width: 44,
+            height: 44,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: _hovering ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+            ),
+            child: Icon(widget.tool.icon, color: widget.tool.iconColor, size: 22),
           ),
         ),
       ),

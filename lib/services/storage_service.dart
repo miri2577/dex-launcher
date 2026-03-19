@@ -61,6 +61,14 @@ class StorageService {
   double get iconSize => _prefs.getDouble(_iconSizeKey) ?? 48.0;
   set iconSize(double size) => _prefs.setDouble(_iconSizeKey, size);
 
+  // Pinned Built-in Tools (IDs)
+  List<String> get pinnedTools {
+    return _prefs.getStringList('pinned_tools') ?? ['file_manager', 'browser'];
+  }
+  set pinnedTools(List<String> ids) {
+    _prefs.setStringList('pinned_tools', ids);
+  }
+
   // Custom Wallpaper Image Path
   String? get customWallpaperPath => _prefs.getString('custom_wallpaper_path');
   set customWallpaperPath(String? path) {

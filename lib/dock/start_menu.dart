@@ -169,6 +169,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                     children: [
                       _MiniAppButton(
                         icon: Icons.folder, label: 'Dateien', color: Colors.amber,
+                        toolId: 'file_manager',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -179,6 +180,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.language, label: 'Browser', color: Colors.blueAccent,
+                        toolId: 'browser',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -189,6 +191,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.calculate, label: 'Rechner', color: Colors.tealAccent,
+                        toolId: 'calculator',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -199,6 +202,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.wifi, label: 'WLAN', color: Colors.lightBlueAccent,
+                        toolId: 'wifi_manager',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -209,6 +213,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.bluetooth, label: 'Bluetooth', color: Colors.blue,
+                        toolId: 'bluetooth_manager',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -219,6 +224,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.monitor_heart, label: 'System', color: Colors.greenAccent,
+                        toolId: 'system_monitor',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -229,6 +235,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                       ),
                       _MiniAppButton(
                         icon: Icons.terminal, label: 'Terminal', color: Colors.green,
+                        toolId: 'terminal',
                         onTap: () {
                           widget.onClose();
                           context.read<WindowManager>().openWindow(
@@ -436,12 +443,14 @@ class _MiniAppButton extends StatefulWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final String? toolId;
 
   const _MiniAppButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    this.toolId,
   });
 
   @override
@@ -459,6 +468,26 @@ class _MiniAppButtonState extends State<_MiniAppButton> {
         onExit: (_) => setState(() => _hovering = false),
         child: GestureDetector(
           onTap: widget.onTap,
+          onSecondaryTapUp: widget.toolId != null ? (details) {
+            final state = context.read<DesktopState>();
+            final isPinned = state.isToolPinned(widget.toolId!);
+            ContextMenu.show(
+              context: context,
+              position: details.globalPosition,
+              items: [
+                ContextMenuItem(
+                  icon: Icons.open_in_new,
+                  label: 'Oeffnen',
+                  onTap: widget.onTap,
+                ),
+                ContextMenuItem(
+                  icon: isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                  label: isPinned ? 'Vom Dock entfernen' : 'An Dock anheften',
+                  onTap: () => state.toggleToolPin(widget.toolId!),
+                ),
+              ],
+            );
+          } : null,
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(

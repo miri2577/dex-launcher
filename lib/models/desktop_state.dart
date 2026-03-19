@@ -18,6 +18,7 @@ class DesktopState extends ChangeNotifier {
   String? _customWallpaperPath;
   bool _showDesktopIcons = true;
   double _iconSize = 48.0;
+  List<String> _pinnedToolIds = [];
   Map<String, Offset> _desktopPositions = {};
 
   // Bildschirmgröße für Fenster-Positionierung
@@ -43,6 +44,7 @@ class DesktopState extends ChangeNotifier {
   String? get customWallpaperPath => _customWallpaperPath;
   bool get showDesktopIcons => _showDesktopIcons;
   double get iconSize => _iconSize;
+  List<String> get pinnedToolIds => _pinnedToolIds;
   Map<String, Offset> get desktopPositions => _desktopPositions;
 
   Future<void> init() async {
@@ -50,6 +52,7 @@ class DesktopState extends ChangeNotifier {
     _wallpaperIndex = storage.wallpaperIndex;
     _customWallpaperPath = storage.customWallpaperPath;
     _showDesktopIcons = storage.showDesktopIcons;
+    _pinnedToolIds = storage.pinnedTools;
     _iconSize = storage.iconSize;
     _loadPositions();
     await loadApps();
@@ -272,6 +275,18 @@ class DesktopState extends ChangeNotifier {
   void setIconSize(double size) {
     _iconSize = size;
     storage.iconSize = size;
+    notifyListeners();
+  }
+
+  bool isToolPinned(String toolId) => _pinnedToolIds.contains(toolId);
+
+  void toggleToolPin(String toolId) {
+    if (_pinnedToolIds.contains(toolId)) {
+      _pinnedToolIds.remove(toolId);
+    } else {
+      _pinnedToolIds.add(toolId);
+    }
+    storage.pinnedTools = _pinnedToolIds;
     notifyListeners();
   }
 
