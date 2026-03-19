@@ -23,6 +23,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -75,6 +76,14 @@ class MainActivity : FlutterActivity() {
                 }
                 "getSystemStatus" -> {
                     result.success(getSystemStatus())
+                }
+                "getWallpaperImages" -> {
+                    result.success(getWallpaperImages())
+                }
+                "setVolume" -> {
+                    val percent = call.argument<Int>("percent") ?: 50
+                    setVolume(percent)
+                    result.success(true)
                 }
                 "isFreeformEnabled" -> {
                     result.success(isFreeformEnabled())
@@ -268,6 +277,38 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    private fun getWallpaperImages(): List<String> {
+        val images = mutableListOf<String>()
+        val extensions = setOf("jpg", "jpeg", "png", "webp", "bmp")
+
+        // Suche in Downloads, Pictures, und DCIM
+        val dirs = listOf(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+            // App-eigener Wallpaper-Ordner
+            java.io.File(getExternalFilesDir(null), "wallpapers"),
+        )
+
+        for (dir in dirs) {
+            if (!dir.exists()) continue
+            dir.walkTopDown().maxDepth(2).forEach { file ->
+                if (file.isFile && file.extension.lowercase() in extensions) {
+                    images.add(file.absolutePath)
+                }
+            }
+        }
+
+        return images.sorted()
+    }
+
+    private fun setVolume(percent: Int) {
+        val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
+        val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val vol = (percent * maxVol) / 100
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, vol, 0)
     }
 
     private fun getSystemStatus(): Map<String, Any?> {

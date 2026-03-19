@@ -60,4 +60,14 @@ class StorageService {
   // Icon Size
   double get iconSize => _prefs.getDouble(_iconSizeKey) ?? 48.0;
   set iconSize(double size) => _prefs.setDouble(_iconSizeKey, size);
+
+  // Custom Wallpaper Image Path
+  String? get customWallpaperPath => _prefs.getString('custom_wallpaper_path');
+  set customWallpaperPath(String? path) {
+    if (path == null) {
+      _prefs.remove('custom_wallpaper_path');
+    } else {
+      _prefs.setString('custom_wallpaper_path', path);
+    }
+  }
 }

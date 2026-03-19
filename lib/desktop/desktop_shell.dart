@@ -89,7 +89,10 @@ class _DesktopShellState extends State<DesktopShell> {
                   child: Stack(
                     children: [
                       // Background
-                      DesktopBackground(wallpaperIndex: state.wallpaperIndex),
+                      DesktopBackground(
+                        wallpaperIndex: state.wallpaperIndex,
+                        customImagePath: state.customWallpaperPath,
+                      ),
 
                       // Desktop Icons mit Drag & Drop
                       Positioned.fill(

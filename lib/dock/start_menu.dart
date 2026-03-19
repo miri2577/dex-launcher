@@ -85,7 +85,7 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
         opacity: _slideAnim,
         child: Container(
           width: 480,
-          height: 560,
+          height: 600,
           margin: const EdgeInsets.only(left: 16, bottom: 4),
           decoration: BoxDecoration(
             color: const Color(0xF0202020),
@@ -159,6 +159,61 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                   ],
                 ),
               ),
+              // Zuletzt verwendet
+              if (_searchQuery.isEmpty && _selectedCategory == null)
+                Consumer<DesktopState>(
+                  builder: (context, state, _) {
+                    final recent = state.recentApps.take(5).toList();
+                    if (recent.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                          child: Text(
+                            'Zuletzt verwendet',
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 11),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 62,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: recent.length,
+                            itemBuilder: (context, index) {
+                              final app = recent[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.onAppTap(app);
+                                },
+                                child: Container(
+                                  width: 56,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AppIconWidget(app: app, size: 36),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        app.name,
+                                        style: const TextStyle(color: Colors.white60, fontSize: 9),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
+                      ],
+                    );
+                  },
+                ),
               // Kategorie-Chips
               SizedBox(
                 height: 36,

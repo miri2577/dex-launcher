@@ -15,6 +15,7 @@ class DesktopState extends ChangeNotifier {
   bool _freeformEnabled = false;
   bool _loading = true;
   int _wallpaperIndex = 0;
+  String? _customWallpaperPath;
   bool _showDesktopIcons = true;
   double _iconSize = 48.0;
   Map<String, Offset> _desktopPositions = {};
@@ -39,6 +40,7 @@ class DesktopState extends ChangeNotifier {
   bool get freeformEnabled => _freeformEnabled;
   bool get loading => _loading;
   int get wallpaperIndex => _wallpaperIndex;
+  String? get customWallpaperPath => _customWallpaperPath;
   bool get showDesktopIcons => _showDesktopIcons;
   double get iconSize => _iconSize;
   Map<String, Offset> get desktopPositions => _desktopPositions;
@@ -46,6 +48,7 @@ class DesktopState extends ChangeNotifier {
   Future<void> init() async {
     await storage.init();
     _wallpaperIndex = storage.wallpaperIndex;
+    _customWallpaperPath = storage.customWallpaperPath;
     _showDesktopIcons = storage.showDesktopIcons;
     _iconSize = storage.iconSize;
     _loadPositions();
@@ -238,7 +241,15 @@ class DesktopState extends ChangeNotifier {
 
   void setWallpaper(int index) {
     _wallpaperIndex = index;
+    _customWallpaperPath = null;
     storage.wallpaperIndex = index;
+    storage.customWallpaperPath = null;
+    notifyListeners();
+  }
+
+  void setCustomWallpaper(String path) {
+    _customWallpaperPath = path;
+    storage.customWallpaperPath = path;
     notifyListeners();
   }
 

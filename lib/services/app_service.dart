@@ -38,6 +38,15 @@ class AppService {
     return result.cast<String>();
   }
 
+  Future<List<String>> getWallpaperImages() async {
+    final List<dynamic> result = await _channel.invokeMethod('getWallpaperImages');
+    return result.cast<String>();
+  }
+
+  Future<void> setVolume(int percent) async {
+    await _channel.invokeMethod('setVolume', {'percent': percent});
+  }
+
   Future<bool> isFreeformEnabled() async {
     return await _channel.invokeMethod<bool>('isFreeformEnabled') ?? false;
   }

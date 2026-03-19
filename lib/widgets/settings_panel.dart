@@ -1,13 +1,35 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/desktop_state.dart';
 import '../services/system_status_service.dart';
 import '../desktop/desktop_background.dart';
 
-class SettingsPanel extends StatelessWidget {
+class SettingsPanel extends StatefulWidget {
   final VoidCallback onClose;
 
   const SettingsPanel({super.key, required this.onClose});
+
+  @override
+  State<SettingsPanel> createState() => _SettingsPanelState();
+}
+
+class _SettingsPanelState extends State<SettingsPanel> {
+  List<String>? _wallpaperImages;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallpaperImages();
+  }
+
+  Future<void> _loadWallpaperImages() async {
+    try {
+      final state = context.read<DesktopState>();
+      final images = await state.appService.getWallpaperImages();
+      if (mounted) setState(() => _wallpaperImages = images);
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +67,7 @@ class SettingsPanel extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: onClose,
+                  onPressed: widget.onClose,
                   icon: const Icon(Icons.close, color: Colors.white70, size: 20),
                 ),
               ],
@@ -57,12 +79,36 @@ class SettingsPanel extends StatelessWidget {
               builder: (context, state, _) => ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  // Quick Settings
+                  _SectionTitle('Schnelleinstellungen'),
+                  const SizedBox(height: 8),
+                  Consumer<SystemStatusService>(
+                    builder: (context, service, _) => _QuickSettings(status: service.status),
+                  ),
+
+                  const SizedBox(height: 24),
                   _SectionTitle('Hintergrund'),
                   const SizedBox(height: 8),
+                  // Gradient Wallpapers
                   _WallpaperSelector(
-                    currentIndex: state.wallpaperIndex,
+                    currentIndex: state.customWallpaperPath == null ? state.wallpaperIndex : -1,
                     onSelect: state.setWallpaper,
                   ),
+                  // Eigene Bilder
+                  if (_wallpaperImages != null && _wallpaperImages!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Eigene Bilder',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
+                    ),
+                    const SizedBox(height: 6),
+                    _ImageWallpaperSelector(
+                      images: _wallpaperImages!,
+                      selectedPath: state.customWallpaperPath,
+                      onSelect: state.setCustomWallpaper,
+                    ),
+                  ],
+
                   const SizedBox(height: 24),
                   _SectionTitle('Desktop'),
                   const SizedBox(height: 8),
@@ -84,94 +130,137 @@ class SettingsPanel extends StatelessWidget {
                   const SizedBox(height: 12),
                   Consumer<SystemStatusService>(
                     builder: (context, service, _) => _InfoTile(
-                      icon: service.status.hasExternalMouse
-                          ? Icons.mouse
-                          : Icons.gamepad,
+                      icon: service.status.hasExternalMouse ? Icons.mouse : Icons.gamepad,
                       label: 'Cursor',
-                      value: service.status.hasExternalMouse
-                          ? 'System-Maus'
-                          : 'D-Pad Cursor',
+                      value: service.status.hasExternalMouse ? 'System-Maus' : 'D-Pad Cursor',
                     ),
                   ),
+
                   const SizedBox(height: 24),
-                  _SectionTitle('Fenstermodus'),
+                  _SectionTitle('Tastenkuerzel'),
                   const SizedBox(height: 8),
-                  _ToggleTile(
-                    icon: Icons.picture_in_picture_alt,
-                    label: 'Freeform-Fenster',
-                    value: state.freeformEnabled,
-                    onChanged: (value) async {
-                      if (value && !state.freeformEnabled) {
-                        final success = await state.enableFreeform();
-                        if (!success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Freeform konnte nicht aktiviert werden.\n'
-                                'Bitte per ADB: adb shell settings put global enable_freeform_support 1',
-                              ),
-                              duration: Duration(seconds: 5),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
-                  if (state.freeformEnabled)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, top: 4),
-                      child: Text(
-                        'Apps werden in verschiebbaren Fenstern gestartet',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  if (!state.freeformEnabled)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12, top: 4),
-                      child: Text(
-                        'ADB: adb shell settings put global enable_freeform_support 1',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ),
-                  if (state.runningWindows.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _InfoTile(
-                      icon: Icons.window,
-                      label: 'Offene Fenster',
-                      value: '${state.runningWindows.length}',
-                    ),
-                  ],
+                  _InfoTile(icon: Icons.keyboard, label: 'Alt + Tab', value: 'App wechseln'),
+                  _InfoTile(icon: Icons.keyboard, label: 'Escape', value: 'Panel schliessen'),
+
                   const SizedBox(height: 24),
                   _SectionTitle('Info'),
                   const SizedBox(height: 8),
-                  _InfoTile(
-                    icon: Icons.info_outline,
-                    label: 'DeX Launcher',
-                    value: 'v1.0.0',
-                  ),
-                  _InfoTile(
-                    icon: Icons.apps,
-                    label: 'Installierte Apps',
-                    value: '${state.allApps.length}',
-                  ),
-                  _InfoTile(
-                    icon: Icons.push_pin,
-                    label: 'Gepinnte Apps',
-                    value: '${state.pinnedApps.length}',
-                  ),
+                  _InfoTile(icon: Icons.info_outline, label: 'DeX Launcher', value: 'v1.1.0'),
+                  _InfoTile(icon: Icons.apps, label: 'Installierte Apps', value: '${state.allApps.length}'),
+                  _InfoTile(icon: Icons.push_pin, label: 'Gepinnte Apps', value: '${state.pinnedApps.length}'),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _QuickSettings extends StatelessWidget {
+  final SystemStatus status;
+  const _QuickSettings({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          // Volume Slider
+          Row(
+            children: [
+              Icon(status.volumeIcon, color: Colors.white70, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    trackHeight: 4,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                    activeTrackColor: Colors.blueAccent,
+                    inactiveTrackColor: Colors.white.withValues(alpha: 0.15),
+                    thumbColor: Colors.white,
+                  ),
+                  child: Slider(
+                    value: status.volumePercent.toDouble().clamp(0, 100),
+                    min: 0,
+                    max: 100,
+                    onChanged: (v) {
+                      context.read<DesktopState>().appService.setVolume(v.toInt());
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                child: Text(
+                  '${status.volumePercent}%',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Status Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _QuickTile(
+                icon: status.networkIcon,
+                label: status.ethernetConnected
+                    ? 'Ethernet'
+                    : status.wifiConnected
+                        ? status.wifiName ?? 'WLAN'
+                        : 'Kein Netz',
+                active: status.hasNetwork,
+              ),
+              if (status.hasBattery)
+                _QuickTile(
+                  icon: status.batteryIcon,
+                  label: '${status.batteryLevel}%',
+                  active: true,
+                  color: status.batteryColor,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final Color? color;
+
+  const _QuickTile({
+    required this.icon,
+    required this.label,
+    this.active = false,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: color ?? (active ? Colors.blueAccent : Colors.white38), size: 22),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
@@ -203,7 +292,7 @@ class _WallpaperSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 80,
+      height: 70,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: wallpaperGradients.length,
@@ -213,7 +302,7 @@ class _WallpaperSelector extends StatelessWidget {
             onTap: () => onSelect(index),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 120,
+              width: 110,
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -221,10 +310,61 @@ class _WallpaperSelector extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                   width: isSelected ? 2 : 1,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ImageWallpaperSelector extends StatelessWidget {
+  final List<String> images;
+  final String? selectedPath;
+  final ValueChanged<String> onSelect;
+
+  const _ImageWallpaperSelector({
+    required this.images,
+    this.selectedPath,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 70,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length,
+        itemBuilder: (context, index) {
+          final path = images[index];
+          final isSelected = path == selectedPath;
+          return GestureDetector(
+            onTap: () => onSelect(path),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 110,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.file(
+                File(path),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey.shade900,
+                  child: const Icon(Icons.broken_image, color: Colors.white24),
                 ),
               ),
             ),
