@@ -11,6 +11,7 @@ import '../apps/calculator.dart';
 import '../apps/wifi_manager.dart';
 import '../apps/bluetooth_manager.dart';
 import '../apps/system_monitor.dart';
+import '../apps/terminal.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -239,6 +240,7 @@ class _DesktopShellState extends State<DesktopShell> {
       'wifi_manager' => const WifiManagerApp(),
       'bluetooth_manager' => const BluetoothManagerApp(),
       'system_monitor' => const SystemMonitorApp(),
+      'terminal' => const TerminalApp(),
       _ => Center(
           child: Text(window.appType, style: const TextStyle(color: Colors.white)),
         ),

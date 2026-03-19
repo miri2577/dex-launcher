@@ -97,6 +97,10 @@ class MainActivity : FlutterActivity() {
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
                 }
+                "executeCommand" -> {
+                    val command = call.argument<String>("command") ?: ""
+                    result.success(executeCommand(command))
+                }
                 "getBluetoothDevices" -> {
                     result.success(getBluetoothDevices())
                 }
@@ -317,6 +321,27 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    private fun executeCommand(command: String): Map<String, Any?> {
+        return try {
+            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+            val stdout = process.inputStream.bufferedReader().readText()
+            val stderr = process.errorStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+
+            mapOf(
+                "stdout" to stdout,
+                "stderr" to stderr,
+                "exitCode" to exitCode,
+            )
+        } catch (e: Exception) {
+            mapOf(
+                "stdout" to "",
+                "stderr" to "Error: ${e.message}",
+                "exitCode" to -1,
+            )
+        }
     }
 
     @Suppress("MissingPermission")

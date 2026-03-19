@@ -227,6 +227,16 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                           );
                         },
                       ),
+                      _MiniAppButton(
+                        icon: Icons.terminal, label: 'Terminal', color: Colors.green,
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'terminal', title: 'Terminal',
+                            icon: Icons.terminal, size: const Size(650, 400),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
