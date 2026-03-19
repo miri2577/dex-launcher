@@ -47,6 +47,18 @@ class AppService {
     await _channel.invokeMethod('setVolume', {'percent': percent});
   }
 
+  Future<bool> startOverlay() async {
+    return await _channel.invokeMethod<bool>('startOverlay') ?? false;
+  }
+
+  Future<void> stopOverlay() async {
+    await _channel.invokeMethod('stopOverlay');
+  }
+
+  Future<bool> canDrawOverlays() async {
+    return await _channel.invokeMethod<bool>('canDrawOverlays') ?? false;
+  }
+
   Future<bool> isFreeformEnabled() async {
     return await _channel.invokeMethod<bool>('isFreeformEnabled') ?? false;
   }

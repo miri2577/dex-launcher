@@ -77,6 +77,21 @@ class MainActivity : FlutterActivity() {
                 "getSystemStatus" -> {
                     result.success(getSystemStatus())
                 }
+                "startOverlay" -> {
+                    if (Settings.canDrawOverlays(this@MainActivity)) {
+                        startService(Intent(this@MainActivity, OverlayService::class.java))
+                        result.success(true)
+                    } else {
+                        result.success(false)
+                    }
+                }
+                "stopOverlay" -> {
+                    stopService(Intent(this@MainActivity, OverlayService::class.java))
+                    result.success(true)
+                }
+                "canDrawOverlays" -> {
+                    result.success(Settings.canDrawOverlays(this@MainActivity))
+                }
                 "getWallpaperImages" -> {
                     result.success(getWallpaperImages())
                 }

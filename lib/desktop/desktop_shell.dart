@@ -19,6 +19,7 @@ class DesktopShell extends StatefulWidget {
 class _DesktopShellState extends State<DesktopShell> {
   bool _settingsOpen = false;
   bool _appSwitcherOpen = false;
+  bool _dockVisible = true;
   final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
 
   @override
@@ -57,6 +58,15 @@ class _DesktopShellState extends State<DesktopShell> {
                 // Escape schließt offene Panels
                 LogicalKeySet(LogicalKeyboardKey.escape):
                     const _DismissIntent(),
+                // Super+D / Meta+D → Desktop zeigen (Dock ein/aus)
+                LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyD):
+                    const _ToggleDesktopIntent(),
+                // Super+S → Einstellungen
+                LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS):
+                    const _ToggleSettingsIntent(),
+                // F5 → Apps aktualisieren
+                LogicalKeySet(LogicalKeyboardKey.f5):
+                    const _RefreshIntent(),
               },
               child: Actions(
                 actions: {
@@ -83,6 +93,27 @@ class _DesktopShellState extends State<DesktopShell> {
                       return null;
                     },
                   ),
+                  _ToggleDesktopIntent: CallbackAction<_ToggleDesktopIntent>(
+                    onInvoke: (_) {
+                      setState(() {
+                        _dockVisible = !_dockVisible;
+                        _settingsOpen = false;
+                      });
+                      return null;
+                    },
+                  ),
+                  _ToggleSettingsIntent: CallbackAction<_ToggleSettingsIntent>(
+                    onInvoke: (_) {
+                      setState(() => _settingsOpen = !_settingsOpen);
+                      return null;
+                    },
+                  ),
+                  _RefreshIntent: CallbackAction<_RefreshIntent>(
+                    onInvoke: (_) {
+                      state.loadApps();
+                      return null;
+                    },
+                  ),
                 },
                 child: Focus(
                   autofocus: true,
@@ -96,7 +127,7 @@ class _DesktopShellState extends State<DesktopShell> {
 
                       // Desktop Icons mit Drag & Drop
                       Positioned.fill(
-                        bottom: 72,
+                        bottom: _dockVisible ? 72 : 0,
                         child: GestureDetector(
                           onTap: () {
                             // Tap auf leere Fläche schließt Settings
@@ -112,11 +143,13 @@ class _DesktopShellState extends State<DesktopShell> {
                         ),
                       ),
 
-                      // Dock
-                      Positioned(
+                      // Dock (animiert)
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
                         left: 0,
                         right: 0,
-                        bottom: 0,
+                        bottom: _dockVisible ? 0 : -80,
                         child: Dock(
                           onSettingsOpen: () =>
                               setState(() => _settingsOpen = !_settingsOpen),
@@ -341,4 +374,16 @@ class _AppSwitcherIntent extends Intent {
 
 class _DismissIntent extends Intent {
   const _DismissIntent();
+}
+
+class _ToggleDesktopIntent extends Intent {
+  const _ToggleDesktopIntent();
+}
+
+class _ToggleSettingsIntent extends Intent {
+  const _ToggleSettingsIntent();
+}
+
+class _RefreshIntent extends Intent {
+  const _RefreshIntent();
 }

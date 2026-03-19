@@ -5,6 +5,8 @@
     <!-- Hintergrundbilder lesen -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <!-- Persistente Taskbar über anderen Apps -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!-- Leanback (Android TV) — uses-feature statt uses-library -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
@@ -52,6 +54,10 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".OverlayService"
+            android:exported="false" />
 
         <meta-data
             android:name="flutterEmbedding"

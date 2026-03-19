@@ -55,6 +55,7 @@ class DesktopState extends ChangeNotifier {
     await loadApps();
     await loadRecentApps();
     await checkFreeformSupport();
+    _tryStartOverlay();
   }
 
   void _loadPositions() {
@@ -116,6 +117,15 @@ class DesktopState extends ChangeNotifier {
     } catch (_) {
       // UsageStats-Permission fehlt — graceful fallback
     }
+  }
+
+  Future<void> _tryStartOverlay() async {
+    try {
+      final canDraw = await appService.canDrawOverlays();
+      if (canDraw) {
+        await appService.startOverlay();
+      }
+    } catch (_) {}
   }
 
   Future<void> checkFreeformSupport() async {
