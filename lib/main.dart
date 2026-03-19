@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'models/desktop_state.dart';
+import 'services/system_status_service.dart';
 import 'desktop/desktop_shell.dart';
 
 void main() async {
@@ -20,18 +21,29 @@ void main() async {
   final desktopState = DesktopState();
   await desktopState.init();
 
-  runApp(DexLauncherApp(desktopState: desktopState));
+  final systemStatus = SystemStatusService();
+  systemStatus.startPolling();
+
+  runApp(DexLauncherApp(desktopState: desktopState, systemStatus: systemStatus));
 }
 
 class DexLauncherApp extends StatelessWidget {
   final DesktopState desktopState;
+  final SystemStatusService systemStatus;
 
-  const DexLauncherApp({super.key, required this.desktopState});
+  const DexLauncherApp({
+    super.key,
+    required this.desktopState,
+    required this.systemStatus,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: desktopState,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: desktopState),
+        ChangeNotifierProvider.value(value: systemStatus),
+      ],
       child: Shortcuts(
         // Android TV Remote: "Select" Button als Tap registrieren
         shortcuts: {

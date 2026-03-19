@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
 import '../models/desktop_state.dart';
+import '../services/system_status_service.dart';
 import '../widgets/context_menu.dart';
 import '../widgets/app_icon_widget.dart';
+import '../widgets/system_tray.dart';
 import 'start_menu.dart';
 
 class Dock extends StatefulWidget {
@@ -73,13 +75,19 @@ class _DockState extends State<Dock> {
                   ),
                 ),
                 _divider(),
-                // System Tray
+                // Settings
                 _DockButton(
                   icon: Icons.settings,
                   onTap: widget.onSettingsOpen,
                   tooltip: 'Einstellungen',
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
+                // System Tray
+                Consumer<SystemStatusService>(
+                  builder: (context, service, _) =>
+                      SystemTray(status: service.status),
+                ),
+                _divider(),
                 // Clock
                 const _Clock(),
                 const SizedBox(width: 12),

@@ -3,6 +3,12 @@ package com.dexlauncher.dex_launcher
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
+import android.os.BatteryManager
 import android.os.Build
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -61,6 +67,9 @@ class MainActivity : FlutterActivity() {
                     } else {
                         result.error("INVALID_ARGUMENT", "packageName is required", null)
                     }
+                }
+                "getSystemStatus" -> {
+                    result.success(getSystemStatus())
                 }
                 else -> result.notImplemented()
             }
@@ -162,6 +171,63 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    private fun getSystemStatus(): Map<String, Any?> {
+        // Batterie
+        val batteryIntent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val batteryLevel = batteryIntent?.let { intent ->
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            if (level >= 0 && scale > 0) (level * 100) / scale else -1
+        } ?: -1
+        val isCharging = batteryIntent?.let { intent ->
+            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+        } ?: false
+
+        // WLAN
+        var wifiConnected = false
+        var wifiName: String? = null
+        var wifiStrength = -1
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        if (cm != null) {
+            val network = cm.activeNetwork
+            val caps = cm.getNetworkCapabilities(network)
+            wifiConnected = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+
+            if (wifiConnected) {
+                val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                @Suppress("DEPRECATION")
+                val info = wm?.connectionInfo
+                if (info != null) {
+                    wifiName = info.ssid?.replace("\"", "")
+                    wifiStrength = WifiManager.calculateSignalLevel(info.rssi, 5) // 0-4
+                }
+            }
+        }
+
+        // Ethernet
+        val ethernetConnected = cm?.getNetworkCapabilities(cm.activeNetwork)
+            ?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true
+
+        // Lautstärke
+        val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+        val volume = am?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: 0
+        val maxVolume = am?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 1
+        val volumePercent = (volume * 100) / maxVolume
+        val isMuted = am?.isStreamMute(AudioManager.STREAM_MUSIC) == true
+
+        return mapOf(
+            "batteryLevel" to batteryLevel,
+            "isCharging" to isCharging,
+            "wifiConnected" to wifiConnected,
+            "wifiName" to wifiName,
+            "wifiStrength" to wifiStrength,
+            "ethernetConnected" to ethernetConnected,
+            "volumePercent" to volumePercent,
+            "isMuted" to isMuted
+        )
     }
 
     private fun drawableToBytes(drawable: Drawable): ByteArray {

@@ -13,37 +13,49 @@ class CursorOverlay extends StatefulWidget {
 class _CursorOverlayState extends State<CursorOverlay> {
   Offset _cursorPosition = Offset.zero;
   bool _visible = false;
-  static const _cursorSpeed = 5.0;
+  bool _mouseMode = false; // true = echte Maus, false = D-Pad Cursor
+  static const _cursorSpeed = 8.0;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.none,
-      onHover: (event) {
-        setState(() {
-          _cursorPosition = event.position;
-          _visible = true;
-        });
+    return Listener(
+      onPointerHover: _onMouseMove,
+      onPointerMove: _onMouseMove,
+      onPointerDown: (_) {
+        if (!_visible) setState(() => _visible = true);
       },
-      onExit: (_) => setState(() => _visible = false),
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: _handleKeyEvent,
-        child: Stack(
-          children: [
-            widget.child,
-            if (_visible)
-              Positioned(
-                left: _cursorPosition.dx,
-                top: _cursorPosition.dy,
-                child: const IgnorePointer(
-                  child: _CursorWidget(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.none,
+        onExit: (_) {
+          if (_mouseMode) setState(() => _visible = false);
+        },
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: _handleKeyEvent,
+          child: Stack(
+            children: [
+              widget.child,
+              if (_visible)
+                Positioned(
+                  left: _cursorPosition.dx,
+                  top: _cursorPosition.dy,
+                  child: const IgnorePointer(
+                    child: _CursorWidget(),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _onMouseMove(PointerEvent event) {
+    setState(() {
+      _cursorPosition = event.position;
+      _visible = true;
+      _mouseMode = true;
+    });
   }
 
   void _handleKeyEvent(KeyEvent event) {
@@ -61,14 +73,15 @@ class _CursorOverlayState extends State<CursorOverlay> {
       dx = (dx - _cursorSpeed).clamp(0, screenSize.width);
     } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
       dx = (dx + _cursorSpeed).clamp(0, screenSize.width);
+    } else {
+      return; // Andere Tasten ignorieren
     }
 
-    if (dx != _cursorPosition.dx || dy != _cursorPosition.dy) {
-      setState(() {
-        _cursorPosition = Offset(dx, dy);
-        _visible = true;
-      });
-    }
+    setState(() {
+      _cursorPosition = Offset(dx, dy);
+      _visible = true;
+      _mouseMode = false;
+    });
   }
 }
 
@@ -78,7 +91,7 @@ class _CursorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: const Size(20, 20),
+      size: const Size(24, 24),
       painter: _CursorPainter(),
     );
   }
@@ -89,27 +102,30 @@ class _CursorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final path = Path()
       ..moveTo(0, 0)
-      ..lineTo(0, 16)
-      ..lineTo(4.5, 12.5)
-      ..lineTo(8, 19)
-      ..lineTo(10.5, 18)
-      ..lineTo(7, 11)
-      ..lineTo(12, 11)
+      ..lineTo(0, 18)
+      ..lineTo(5, 14)
+      ..lineTo(9, 22)
+      ..lineTo(12, 20.5)
+      ..lineTo(8, 12.5)
+      ..lineTo(14, 12.5)
       ..close();
 
     // Schatten
     canvas.drawPath(
-      path.shift(const Offset(0.5, 0.5)),
-      Paint()..color = Colors.black54,
+      path.shift(const Offset(1, 1)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.5)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5),
     );
-    // Cursor
+    // Füllung
     canvas.drawPath(path, Paint()..color = Colors.white);
+    // Rand
     canvas.drawPath(
       path,
       Paint()
-        ..color = Colors.black
+        ..color = Colors.black87
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
+        ..strokeWidth = 1.2,
     );
   }
 
