@@ -2,9 +2,11 @@
 
     <!-- Alle installierten Apps abfragen -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <!-- Netzwerk-Status lesen -->
+    <!-- Netzwerk -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Hintergrundbilder lesen -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />

@@ -95,6 +95,17 @@ class MainActivity : FlutterActivity() {
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
                 }
+                "scanWifiNetworks" -> {
+                    result.success(scanWifiNetworks())
+                }
+                "connectWifi" -> {
+                    val ssid = call.argument<String>("ssid") ?: ""
+                    val password = call.argument<String>("password")
+                    result.success(connectWifi(ssid, password))
+                }
+                "getCurrentWifiInfo" -> {
+                    result.success(getCurrentWifiInfo())
+                }
                 "getWallpaperImages" -> {
                     result.success(getWallpaperImages())
                 }
@@ -295,6 +306,111 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun scanWifiNetworks(): List<Map<String, Any?>> {
+        val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            ?: return emptyList()
+
+        wm.startScan()
+        val results = wm.scanResults ?: return emptyList()
+
+        val seen = mutableSetOf<String>()
+        return results
+            .filter { it.SSID.isNotEmpty() && seen.add(it.SSID) }
+            .sortedByDescending { it.level }
+            .map { sr ->
+                mapOf(
+                    "ssid" to sr.SSID,
+                    "level" to WifiManager.calculateSignalLevel(sr.level, 5),
+                    "rssi" to sr.level,
+                    "secure" to (sr.capabilities.contains("WPA") || sr.capabilities.contains("WEP")),
+                    "capabilities" to sr.capabilities,
+                    "frequency" to sr.frequency,
+                )
+            }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun connectWifi(ssid: String, password: String?): Boolean {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+: WifiNetworkSpecifier
+                val specifier = android.net.wifi.WifiNetworkSpecifier.Builder()
+                    .setSsid(ssid)
+
+                if (password != null && password.isNotEmpty()) {
+                    specifier.setWpa2Passphrase(password)
+                }
+
+                val request = android.net.NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .setNetworkSpecifier(specifier.build())
+                    .build()
+
+                val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                cm.requestNetwork(request, object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: android.net.Network) {
+                        cm.bindProcessToNetwork(network)
+                    }
+                })
+                true
+            } else {
+                // Android 9 und darunter
+                val wm = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                val config = android.net.wifi.WifiConfiguration().apply {
+                    SSID = "\"$ssid\""
+                    if (password != null && password.isNotEmpty()) {
+                        preSharedKey = "\"$password\""
+                    } else {
+                        allowedKeyManagement.set(android.net.wifi.WifiConfiguration.KeyMgmt.NONE)
+                    }
+                }
+                val netId = wm.addNetwork(config)
+                wm.disconnect()
+                wm.enableNetwork(netId, true)
+                wm.reconnect()
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun getCurrentWifiInfo(): Map<String, Any?> {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val network = cm?.activeNetwork
+        val caps = cm?.getNetworkCapabilities(network)
+        val wifiConnected = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+
+        var ssid: String? = null
+        var rssi = 0
+        var ip: String? = null
+        var linkSpeed = 0
+
+        if (wifiConnected) {
+            val transportInfo = caps?.transportInfo
+            if (transportInfo is android.net.wifi.WifiInfo) {
+                ssid = transportInfo.ssid?.replace("\"", "")
+                if (ssid == "<unknown ssid>") ssid = null
+                rssi = transportInfo.rssi
+                linkSpeed = transportInfo.linkSpeed
+                val ipInt = transportInfo.ipAddress
+                if (ipInt != 0) {
+                    ip = "${ipInt and 0xff}.${ipInt shr 8 and 0xff}.${ipInt shr 16 and 0xff}.${ipInt shr 24 and 0xff}"
+                }
+            }
+        }
+
+        return mapOf(
+            "connected" to wifiConnected,
+            "ssid" to ssid,
+            "rssi" to rssi,
+            "signalLevel" to if (rssi != 0) WifiManager.calculateSignalLevel(rssi, 5) else 0,
+            "ip" to ip,
+            "linkSpeed" to linkSpeed,
+        )
     }
 
     private fun getWallpaperImages(): List<String> {

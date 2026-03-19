@@ -7,6 +7,8 @@ import '../windows/window_manager.dart';
 import '../windows/window_chrome.dart';
 import '../apps/file_manager.dart';
 import '../apps/web_browser.dart';
+import '../apps/calculator.dart';
+import '../apps/wifi_manager.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -231,6 +233,8 @@ class _DesktopShellState extends State<DesktopShell> {
       'browser' => WebBrowserApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
+      'calculator' => const CalculatorApp(),
+      'wifi_manager' => const WifiManagerApp(),
       _ => Center(
           child: Text(window.appType, style: const TextStyle(color: Colors.white)),
         ),
@@ -353,6 +357,24 @@ class _DesktopContextMenu extends StatelessWidget {
                       title: 'Browser',
                       icon: Icons.language,
                       size: const Size(700, 450),
+                    );
+                  }),
+                  _menuItem(Icons.calculate, 'Rechner', () {
+                    onDismiss();
+                    windowManager.openWindow(
+                      appType: 'calculator',
+                      title: 'Rechner',
+                      icon: Icons.calculate,
+                      size: const Size(280, 380),
+                    );
+                  }),
+                  _menuItem(Icons.wifi, 'WLAN-Einstellungen', () {
+                    onDismiss();
+                    windowManager.openWindow(
+                      appType: 'wifi_manager',
+                      title: 'WLAN',
+                      icon: Icons.wifi,
+                      size: const Size(400, 420),
                     );
                   }),
                   Container(
