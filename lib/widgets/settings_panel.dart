@@ -291,27 +291,30 @@ class _WallpaperSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: wallpaperGradients.length,
-        itemBuilder: (context, index) {
-          final isSelected = index == currentIndex;
-          return GestureDetector(
-            onTap: () => onSelect(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 110,
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: wallpaperGradients[index],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 16 / 9,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+      ),
+      itemCount: wallpaperGradients.length,
+      itemBuilder: (context, index) {
+        final isSelected = index == currentIndex;
+        return GestureDetector(
+          onTap: () => onSelect(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: wallpaperGradients[index],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
                   color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
                   width: isSelected ? 2 : 1,
                 ),
@@ -319,8 +322,7 @@ class _WallpaperSelector extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
 
@@ -337,31 +339,34 @@ class _ImageWallpaperSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          final path = images[index];
-          final isSelected = path == selectedPath;
-          return GestureDetector(
-            onTap: () => onSelect(path),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 110,
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
-                  width: isSelected ? 2 : 1,
-                ),
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: 16 / 9,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+      ),
+      itemCount: images.length,
+      itemBuilder: (context, index) {
+        final path = images[index];
+        final isSelected = path == selectedPath;
+        return GestureDetector(
+          onTap: () => onSelect(path),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
+                width: isSelected ? 2 : 1,
               ),
-              clipBehavior: Clip.antiAlias,
-              child: Image.file(
-                File(path),
-                fit: BoxFit.cover,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.file(
+              File(path),
+              fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   color: Colors.grey.shade900,
                   child: const Icon(Icons.broken_image, color: Colors.white24),
@@ -370,8 +375,7 @@ class _ImageWallpaperSelector extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
 

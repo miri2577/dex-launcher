@@ -84,9 +84,9 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
       child: FadeTransition(
         opacity: _slideAnim,
         child: Container(
-          width: 480,
-          height: 600,
-          margin: const EdgeInsets.only(left: 16, bottom: 4),
+          width: 420,
+          height: MediaQuery.of(context).size.height * 0.82,
+          margin: const EdgeInsets.only(left: 12, bottom: 4),
           decoration: BoxDecoration(
             color: const Color(0xF0202020),
             borderRadius: BorderRadius.circular(16),
