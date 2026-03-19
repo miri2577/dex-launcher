@@ -19,6 +19,9 @@ class DesktopState extends ChangeNotifier {
   bool _showDesktopIcons = true;
   double _iconSize = 48.0;
   List<String> _pinnedToolIds = [];
+  List<String> _activeWidgets = [];
+  String _themeMode = 'dark';
+  Color _accentColor = const Color(0xFF448AFF);
   Map<String, Offset> _desktopPositions = {};
 
   // Bildschirmgröße für Fenster-Positionierung
@@ -45,6 +48,9 @@ class DesktopState extends ChangeNotifier {
   bool get showDesktopIcons => _showDesktopIcons;
   double get iconSize => _iconSize;
   List<String> get pinnedToolIds => _pinnedToolIds;
+  List<String> get activeWidgets => _activeWidgets;
+  String get themeMode => _themeMode;
+  Color get accentColor => _accentColor;
   Map<String, Offset> get desktopPositions => _desktopPositions;
 
   Future<void> init() async {
@@ -53,6 +59,9 @@ class DesktopState extends ChangeNotifier {
     _customWallpaperPath = storage.customWallpaperPath;
     _showDesktopIcons = storage.showDesktopIcons;
     _pinnedToolIds = storage.pinnedTools;
+    _activeWidgets = storage.activeWidgets;
+    _themeMode = storage.themeMode;
+    _accentColor = Color(storage.accentColorValue);
     _iconSize = storage.iconSize;
     _loadPositions();
     await loadApps();
@@ -279,6 +288,30 @@ class DesktopState extends ChangeNotifier {
   }
 
   bool isToolPinned(String toolId) => _pinnedToolIds.contains(toolId);
+
+  bool isWidgetActive(String id) => _activeWidgets.contains(id);
+
+  void toggleWidget(String id) {
+    if (_activeWidgets.contains(id)) {
+      _activeWidgets.remove(id);
+    } else {
+      _activeWidgets.add(id);
+    }
+    storage.activeWidgets = _activeWidgets;
+    notifyListeners();
+  }
+
+  void setThemeMode(String mode) {
+    _themeMode = mode;
+    storage.themeMode = mode;
+    notifyListeners();
+  }
+
+  void setAccentColor(Color color) {
+    _accentColor = color;
+    storage.accentColorValue = color.toARGB32();
+    notifyListeners();
+  }
 
   void toggleToolPin(String toolId) {
     if (_pinnedToolIds.contains(toolId)) {

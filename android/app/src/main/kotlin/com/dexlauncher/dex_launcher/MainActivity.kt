@@ -97,6 +97,25 @@ class MainActivity : FlutterActivity() {
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
                 }
+                "installApk" -> {
+                    val path = call.argument<String>("path") ?: ""
+                    try {
+                        val file = java.io.File(path)
+                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                            this@MainActivity,
+                            "${packageName}.fileprovider",
+                            file
+                        )
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "application/vnd.android.package-archive")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
+                }
                 "exitApp" -> {
                     finishAndRemoveTask()
                     result.success(true)

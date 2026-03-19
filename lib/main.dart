@@ -61,15 +61,17 @@ class DexLauncherApp extends StatelessWidget {
           LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),
           LogicalKeySet(LogicalKeyboardKey.gameButtonA): const ActivateIntent(),
         },
-        child: MaterialApp(
-          title: 'DeX Launcher',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            brightness: Brightness.dark,
-            colorSchemeSeed: const Color(0xFF1F4068),
-            useMaterial3: true,
+        child: Consumer<DesktopState>(
+          builder: (context, ds, child) => MaterialApp(
+            title: 'DeX Launcher',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              brightness: Brightness.dark,
+              colorSchemeSeed: ds.accentColor,
+              useMaterial3: true,
+            ),
+            home: const DesktopShell(),
           ),
-          home: const DesktopShell(),
         ),
       ),
     );

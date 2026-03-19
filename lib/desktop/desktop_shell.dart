@@ -19,6 +19,7 @@ import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/app_switcher.dart';
+import '../widgets/desktop_widgets.dart';
 import 'desktop_background.dart';
 import 'desktop_icons.dart';
 
@@ -154,6 +155,33 @@ class _DesktopShellState extends State<DesktopShell> {
                           child: const DesktopIcons(),
                         ),
                       ),
+
+                      // Desktop-Widgets (optional, oben rechts)
+                      if (state.activeWidgets.isNotEmpty)
+                        Positioned(
+                          right: 16,
+                          top: 16,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (state.isWidgetActive('clock'))
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 8),
+                                  child: ClockWidget(),
+                                ),
+                              if (state.isWidgetActive('calendar'))
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 8),
+                                  child: CalendarWidget(),
+                                ),
+                              if (state.isWidgetActive('system'))
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 8),
+                                  child: SystemWidget(),
+                                ),
+                            ],
+                          ),
+                        ),
 
                       // In-App Fenster (MDI)
                       Consumer<WindowManager>(

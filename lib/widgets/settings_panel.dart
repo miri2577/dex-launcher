@@ -137,6 +137,38 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   ),
 
                   const SizedBox(height: 24),
+                  _SectionTitle('Desktop-Widgets'),
+                  const SizedBox(height: 8),
+                  _ToggleTile(
+                    icon: Icons.access_time,
+                    label: 'Uhr',
+                    value: state.isWidgetActive('clock'),
+                    onChanged: (_) => state.toggleWidget('clock'),
+                  ),
+                  const SizedBox(height: 6),
+                  _ToggleTile(
+                    icon: Icons.calendar_month,
+                    label: 'Kalender',
+                    value: state.isWidgetActive('calendar'),
+                    onChanged: (_) => state.toggleWidget('calendar'),
+                  ),
+                  const SizedBox(height: 6),
+                  _ToggleTile(
+                    icon: Icons.monitor_heart,
+                    label: 'System-Status',
+                    value: state.isWidgetActive('system'),
+                    onChanged: (_) => state.toggleWidget('system'),
+                  ),
+
+                  const SizedBox(height: 24),
+                  _SectionTitle('Erscheinungsbild'),
+                  const SizedBox(height: 8),
+                  _AccentColorPicker(
+                    currentColor: state.accentColor,
+                    onSelect: state.setAccentColor,
+                  ),
+
+                  const SizedBox(height: 24),
                   _SectionTitle('Tastenkuerzel'),
                   const SizedBox(height: 8),
                   _InfoTile(icon: Icons.keyboard, label: 'Alt + Tab', value: 'App wechseln'),
@@ -494,6 +526,49 @@ class _InfoTile extends StatelessWidget {
           Text(value, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13)),
         ],
       ),
+    );
+  }
+}
+
+class _AccentColorPicker extends StatelessWidget {
+  final Color currentColor;
+  final ValueChanged<Color> onSelect;
+
+  const _AccentColorPicker({required this.currentColor, required this.onSelect});
+
+  static const _colors = [
+    Color(0xFF448AFF), Color(0xFF2196F3), Color(0xFF00BCD4),
+    Color(0xFF009688), Color(0xFF4CAF50), Color(0xFF8BC34A),
+    Color(0xFFFF9800), Color(0xFFFF5722), Color(0xFFF44336),
+    Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF607D8B),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: _colors.map((color) {
+        final isSelected = color.toARGB32() == currentColor.toARGB32();
+        return GestureDetector(
+          onTap: () => onSelect(color),
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isSelected ? Colors.white : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: isSelected
+                ? const Icon(Icons.check, color: Colors.white, size: 14)
+                : null,
+          ),
+        );
+      }).toList(),
     );
   }
 }

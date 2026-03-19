@@ -69,6 +69,17 @@ class StorageService {
     _prefs.setStringList('pinned_tools', ids);
   }
 
+  // Desktop Widgets (welche aktiv sind)
+  List<String> get activeWidgets => _prefs.getStringList('active_widgets') ?? [];
+  set activeWidgets(List<String> ids) => _prefs.setStringList('active_widgets', ids);
+
+  // Theme
+  String get themeMode => _prefs.getString('theme_mode') ?? 'dark';
+  set themeMode(String mode) => _prefs.setString('theme_mode', mode);
+
+  int get accentColorValue => _prefs.getInt('accent_color') ?? 0xFF448AFF;
+  set accentColorValue(int value) => _prefs.setInt('accent_color', value);
+
   // Custom Wallpaper Image Path
   String? get customWallpaperPath => _prefs.getString('custom_wallpaper_path');
   set customWallpaperPath(String? path) {

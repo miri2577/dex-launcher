@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FileManagerApp extends StatefulWidget {
@@ -67,6 +68,19 @@ class _FileManagerAppState extends State<FileManagerApp> {
         _loading = false;
       });
     }
+  }
+
+  static const _channel = MethodChannel('com.dexlauncher/apps');
+
+  void _openFile(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    if (ext == 'apk') {
+      _channel.invokeMethod('installApk', {'path': path});
+    } else if ({'mp4', 'mkv', 'avi', 'mov', 'webm'}.contains(ext)) {
+      _channel.invokeMethod('playVideo', {'path': path});
+    }
+    // Bilder und Textdateien könnten über den WindowManager geöffnet werden
+    // Das wird in einer späteren Version über Callbacks gelöst
   }
 
   void _navigateUp() {
@@ -184,6 +198,8 @@ class _FileManagerAppState extends State<FileManagerApp> {
                                 onTap: () {
                                   if (isDir) {
                                     _loadDirectory(entry.path);
+                                  } else {
+                                    _openFile(entry.path);
                                   }
                                 },
                               );
