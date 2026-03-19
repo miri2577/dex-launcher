@@ -47,6 +47,37 @@ class _WindowChromeState extends State<WindowChrome> {
     widget.manager.updatePosition(widget.window.id, _position);
   }
 
+  void _onDragEnd() {
+    final screen = MediaQuery.of(context).size;
+    const snapThreshold = 15.0;
+    const dockHeight = 72.0;
+
+    // Snap links
+    if (_position.dx < snapThreshold) {
+      setState(() {
+        _position = Offset.zero;
+        _size = Size(screen.width / 2, screen.height - dockHeight);
+      });
+    }
+    // Snap rechts
+    else if (_position.dx + _size.width > screen.width - snapThreshold) {
+      setState(() {
+        _position = Offset(screen.width / 2, 0);
+        _size = Size(screen.width / 2, screen.height - dockHeight);
+      });
+    }
+    // Snap oben = maximieren
+    else if (_position.dy < snapThreshold) {
+      setState(() {
+        _position = Offset.zero;
+        _size = Size(screen.width, screen.height - dockHeight);
+      });
+    }
+
+    widget.manager.updatePosition(widget.window.id, _position);
+    widget.manager.updateSize(widget.window.id, _size);
+  }
+
   void _onResize(Offset delta, {bool left = false, bool top = false, bool right = false, bool bottom = false}) {
     setState(() {
       var newLeft = _position.dx;
@@ -128,6 +159,7 @@ class _WindowChromeState extends State<WindowChrome> {
                           icon: widget.window.icon,
                           isFocused: isFocused,
                           onDragUpdate: _onDragTitle,
+                          onDragEnd: _onDragEnd,
                           onMinimize: () => widget.manager.minimizeWindow(widget.window.id),
                           onClose: () => widget.manager.closeWindow(widget.window.id),
                         ),
@@ -240,6 +272,7 @@ class _TitleBar extends StatelessWidget {
   final IconData icon;
   final bool isFocused;
   final void Function(Offset delta) onDragUpdate;
+  final VoidCallback onDragEnd;
   final VoidCallback onMinimize;
   final VoidCallback onClose;
 
@@ -248,6 +281,7 @@ class _TitleBar extends StatelessWidget {
     required this.icon,
     required this.isFocused,
     required this.onDragUpdate,
+    required this.onDragEnd,
     required this.onMinimize,
     required this.onClose,
   });
@@ -256,6 +290,7 @@ class _TitleBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onPanUpdate: (details) => onDragUpdate(details.delta),
+      onPanEnd: (_) => onDragEnd(),
       child: Container(
         height: 32,
         color: isFocused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),

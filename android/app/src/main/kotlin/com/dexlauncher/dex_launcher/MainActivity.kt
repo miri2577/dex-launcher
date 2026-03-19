@@ -97,6 +97,41 @@ class MainActivity : FlutterActivity() {
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
                 }
+                "exitApp" -> {
+                    finishAndRemoveTask()
+                    result.success(true)
+                }
+                "goToSleep" -> {
+                    // Bildschirm ausschalten
+                    executeCommand("input keyevent KEYCODE_SLEEP")
+                    result.success(true)
+                }
+                "playVideo" -> {
+                    val path = call.argument<String>("path") ?: ""
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(
+                            androidx.core.content.FileProvider.getUriForFile(
+                                this@MainActivity,
+                                "${packageName}.fileprovider",
+                                java.io.File(path)
+                            ),
+                            "video/*"
+                        )
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    try {
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        // Fallback: direct file URI
+                        val fallback = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(Uri.parse("file://$path"), "video/*")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        try { startActivity(fallback); result.success(true) }
+                        catch (_: Exception) { result.success(false) }
+                    }
+                }
                 "executeCommand" -> {
                     val command = call.argument<String>("command") ?: ""
                     result.success(executeCommand(command))

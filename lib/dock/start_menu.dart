@@ -244,6 +244,39 @@ class _StartMenuState extends State<StartMenu> with SingleTickerProviderStateMix
                           );
                         },
                       ),
+                      _MiniAppButton(
+                        icon: Icons.edit_note, label: 'Editor', color: Colors.white,
+                        toolId: 'text_editor',
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'text_editor', title: 'Editor',
+                            icon: Icons.edit_note, size: const Size(550, 400),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.image, label: 'Bilder', color: Colors.white,
+                        toolId: 'image_viewer',
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'image_viewer', title: 'Bilder',
+                            icon: Icons.image, size: const Size(600, 450),
+                          );
+                        },
+                      ),
+                      _MiniAppButton(
+                        icon: Icons.movie, label: 'Video', color: Colors.white,
+                        toolId: 'video_player',
+                        onTap: () {
+                          widget.onClose();
+                          context.read<WindowManager>().openWindow(
+                            appType: 'video_player', title: 'Video',
+                            icon: Icons.movie, size: const Size(500, 400),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

@@ -12,6 +12,9 @@ import '../apps/wifi_manager.dart';
 import '../apps/bluetooth_manager.dart';
 import '../apps/system_monitor.dart';
 import '../apps/terminal.dart';
+import '../apps/text_editor.dart';
+import '../apps/image_viewer.dart';
+import '../apps/video_player.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -30,8 +33,8 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _settingsOpen = false;
   bool _appSwitcherOpen = false;
   bool _dockVisible = true;
-  bool _forceCloseStartMenu = false;
   final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
+  final _dockKey = GlobalKey<DockState>();
 
   @override
   Widget build(BuildContext context) {
@@ -141,14 +144,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         bottom: _dockVisible ? 72 : 0,
                         child: GestureDetector(
                           onTap: () {
-                            setState(() {
-                              _settingsOpen = false;
-                              _forceCloseStartMenu = true;
-                            });
-                            // Reset nach einem Frame
-                            Future.microtask(() {
-                              if (mounted) setState(() => _forceCloseStartMenu = false);
-                            });
+                            setState(() => _settingsOpen = false);
+                            _dockKey.currentState?.closeStartMenu();
                           },
                           onSecondaryTapUp: (details) {
                             _showDesktopContextMenu(details.globalPosition, state);
@@ -183,9 +180,9 @@ class _DesktopShellState extends State<DesktopShell> {
                         right: 0,
                         bottom: _dockVisible ? 0 : -80,
                         child: Dock(
+                          key: _dockKey,
                           onSettingsOpen: () =>
                               setState(() => _settingsOpen = !_settingsOpen),
-                          forceCloseStartMenu: _forceCloseStartMenu,
                         ),
                       ),
 
@@ -247,6 +244,15 @@ class _DesktopShellState extends State<DesktopShell> {
       'bluetooth_manager' => const BluetoothManagerApp(),
       'system_monitor' => const SystemMonitorApp(),
       'terminal' => const TerminalApp(),
+      'text_editor' => TextEditorApp(
+          onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
+        ),
+      'image_viewer' => ImageViewerApp(
+          onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
+        ),
+      'video_player' => VideoPlayerApp(
+          onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
+        ),
       _ => Center(
           child: Text(window.appType, style: const TextStyle(color: Colors.white)),
         ),

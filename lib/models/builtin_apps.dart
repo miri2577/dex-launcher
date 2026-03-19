@@ -25,6 +25,9 @@ const builtinApps = [
   BuiltinApp(id: 'bluetooth_manager', name: 'Bluetooth', icon: Icons.bluetooth, defaultSize: Size(400, 400)),
   BuiltinApp(id: 'system_monitor', name: 'Systemmonitor', icon: Icons.monitor_heart, defaultSize: Size(450, 350)),
   BuiltinApp(id: 'terminal', name: 'Terminal', icon: Icons.terminal, defaultSize: Size(650, 400)),
+  BuiltinApp(id: 'text_editor', name: 'Editor', icon: Icons.edit_note, defaultSize: Size(550, 400)),
+  BuiltinApp(id: 'image_viewer', name: 'Bilder', icon: Icons.image, defaultSize: Size(600, 450)),
+  BuiltinApp(id: 'video_player', name: 'Video', icon: Icons.movie, defaultSize: Size(500, 400)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {

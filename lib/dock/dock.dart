@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
 import '../models/builtin_apps.dart';
@@ -14,23 +15,18 @@ import 'start_menu.dart';
 
 class Dock extends StatefulWidget {
   final VoidCallback onSettingsOpen;
-  final bool forceCloseStartMenu;
 
-  const Dock({super.key, required this.onSettingsOpen, this.forceCloseStartMenu = false});
+  const Dock({super.key, required this.onSettingsOpen});
 
   @override
-  State<Dock> createState() => _DockState();
+  State<Dock> createState() => DockState();
 }
 
-class _DockState extends State<Dock> {
+class DockState extends State<Dock> {
   bool _startMenuOpen = false;
 
-  @override
-  void didUpdateWidget(covariant Dock oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.forceCloseStartMenu && _startMenuOpen) {
-      setState(() => _startMenuOpen = false);
-    }
+  void closeStartMenu() {
+    if (_startMenuOpen) setState(() => _startMenuOpen = false);
   }
 
   @override
@@ -69,12 +65,10 @@ class _DockState extends State<Dock> {
             child: Row(
               children: [
                 const SizedBox(width: 4),
-                // Start Button
-                _DockButton(
-                  icon: _startMenuOpen ? Icons.close : Icons.apps_rounded,
+                // Start Button (Rechtsklick = Power-Menü)
+                _PowerStartButton(
                   isActive: _startMenuOpen,
                   onTap: () => setState(() => _startMenuOpen = !_startMenuOpen),
-                  tooltip: 'Startmenue',
                 ),
                 _divider(),
                 // Gepinnte Built-in Tools
@@ -381,6 +375,69 @@ class _DockRunningItemState extends State<_DockRunningItem> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PowerStartButton extends StatefulWidget {
+  final bool isActive;
+  final VoidCallback onTap;
+  const _PowerStartButton({required this.isActive, required this.onTap});
+
+  @override
+  State<_PowerStartButton> createState() => _PowerStartButtonState();
+}
+
+class _PowerStartButtonState extends State<_PowerStartButton> {
+  bool _hovering = false;
+  static const _channel = MethodChannel('com.dexlauncher/apps');
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        onSecondaryTapUp: (details) {
+          ContextMenu.show(
+            context: context,
+            position: details.globalPosition,
+            items: [
+              ContextMenuItem(
+                icon: Icons.bedtime,
+                label: 'Standby',
+                onTap: () => _channel.invokeMethod('goToSleep'),
+              ),
+              ContextMenuItem(
+                icon: Icons.exit_to_app,
+                label: 'Launcher beenden',
+                onTap: () => _channel.invokeMethod('exitApp'),
+              ),
+            ],
+          );
+        },
+        child: Tooltip(
+          message: 'Startmenue (Rechtsklick: Power)',
+          waitDuration: const Duration(milliseconds: 500),
+          child: Container(
+            width: 44,
+            height: 44,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: widget.isActive || _hovering
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.transparent,
+            ),
+            child: Icon(
+              widget.isActive ? Icons.close : Icons.apps_rounded,
+              color: Colors.white,
+              size: 22,
             ),
           ),
         ),
