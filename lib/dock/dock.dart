@@ -241,17 +241,22 @@ class _DockAppItemState extends State<_DockAppItem> {
             final box = context.findRenderObject() as RenderBox;
             _showContextMenu(box.localToGlobal(const Offset(20, -50)));
           },
-          child: AnimatedContainer(
+          child: AnimatedScale(
+            scale: _hovering ? 1.2 : 1.0,
             duration: const Duration(milliseconds: 150),
-            width: 44,
-            height: 44,
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: _hovering ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
+            curve: Curves.easeOut,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 44,
+              height: 44,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: _hovering ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+              ),
+              padding: const EdgeInsets.all(6),
+              child: AppIconWidget(app: widget.app, size: 32),
             ),
-            padding: const EdgeInsets.all(6),
-            child: AppIconWidget(app: widget.app, size: 32),
           ),
         ),
       ),

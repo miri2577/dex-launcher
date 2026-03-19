@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle -->
+    <path
+        android:fillColor="#1F4068"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    <!-- Monitor/Desktop shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,36h44v28h-44z"
+        android:strokeWidth="0"/>
+    <!-- Screen content - gradient hint -->
+    <path
+        android:fillColor="#2C5364"
+        android:pathData="M34,38h40v22h-40z"/>
+    <!-- Taskbar -->
+    <path
+        android:fillColor="#1A1A2E"
+        android:pathData="M34,56h40v4h-40z"/>
+    <!-- Taskbar dots -->
+    <path
+        android:fillColor="#3A7BD5"
+        android:pathData="M38,58m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0"/>
+    <path
+        android:fillColor="#14B8A6"
+        android:pathData="M42,58m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0"/>
+    <path
+        android:fillColor="#D97706"
+        android:pathData="M46,58m-1.2,0a1.2,1.2 0,1 1,2.4 0a1.2,1.2 0,1 1,-2.4 0"/>
+    <!-- Monitor stand -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,64h12v2h-12z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,66h20v2h-20z"/>
+    <!-- Window squares on screen -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:pathData="M36,40h10v8h-10z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.2"
+        android:pathData="M48,40h12v12h-12z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.25"
+        android:pathData="M36,50h10v4h-10z"/>
+</vector>

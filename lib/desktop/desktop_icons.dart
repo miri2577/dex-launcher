@@ -75,6 +75,7 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
   late Offset _position;
   bool _selected = false;
   bool _dragging = false;
+  bool _hovering = false;
 
   @override
   void initState() {
@@ -166,13 +167,23 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
           _dragging = false;
           widget.onPositionChanged(_position);
         },
-        child: AnimatedContainer(
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: AnimatedScale(
+            scale: _hovering ? 1.08 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            child: AnimatedContainer(
           duration: const Duration(milliseconds: 100),
           width: widget.iconSize + 32,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: _selected ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
+            color: _selected
+                ? Colors.white.withValues(alpha: 0.15)
+                : _hovering
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.transparent,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -195,6 +206,8 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
               ),
             ],
           ),
+        ),
+      ),
         ),
       ),
     );
