@@ -194,12 +194,23 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun isFreeformEnabled(): Boolean {
-        return try {
-            val value = Settings.Global.getInt(contentResolver, "enable_freeform_support", 0)
-            value == 1
+        // Prüfe ob das Setting aktiviert ist UND das Gerät Freeform unterstützt
+        val settingEnabled = try {
+            Settings.Global.getInt(contentResolver, "enable_freeform_support", 0) == 1
         } catch (e: Exception) {
             false
         }
+
+        if (!settingEnabled) return false
+
+        // Prüfe ob das Gerät die Feature-Flag hat
+        val hasFeature = packageManager.hasSystemFeature("android.software.freeform_window_management")
+
+        // Auf manchen Geräten fehlt die Feature-Flag aber es geht trotzdem.
+        // Google TV (Leanback) blockiert Freeform aktiv.
+        val isGoogleTV = packageManager.hasSystemFeature("android.software.leanback")
+
+        return hasFeature || !isGoogleTV
     }
 
     private fun enableFreeform(): Boolean {

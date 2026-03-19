@@ -22,6 +22,7 @@ void main() async {
   await desktopState.init();
 
   final systemStatus = SystemStatusService();
+  await systemStatus.initMouseCheck(); // Sofort-Check vor UI
   systemStatus.startPolling();
 
   runApp(DexLauncherApp(desktopState: desktopState, systemStatus: systemStatus));

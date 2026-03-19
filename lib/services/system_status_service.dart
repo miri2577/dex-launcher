@@ -66,6 +66,17 @@ class SystemStatusService extends ChangeNotifier {
 
   SystemStatus get status => _status;
 
+  /// Sofort-Check für Maus (vor dem ersten Poll)
+  Future<void> initMouseCheck() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('hasExternalMouse');
+      if (result == true && !_status.hasExternalMouse) {
+        _status = SystemStatus(hasExternalMouse: true);
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
   void startPolling() {
     _fetchStatus();
     _timer = Timer.periodic(const Duration(seconds: 15), (_) => _fetchStatus());

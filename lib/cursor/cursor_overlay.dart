@@ -3,22 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/system_status_service.dart';
 
-/// Cursor-Overlay das intelligent entscheidet:
-/// - Externe Maus erkannt → System-Cursor nutzen, Custom-Cursor aus
-/// - Keine Maus → Custom-Cursor per D-Pad steuern
-class CursorOverlay extends StatefulWidget {
+/// Cursor-Overlay:
+/// - Externe Maus erkannt → nichts tun, System-Cursor nutzen
+/// - Keine Maus → Custom-Cursor per D-Pad
+class CursorOverlay extends StatelessWidget {
   final Widget child;
 
   const CursorOverlay({super.key, required this.child});
-
-  @override
-  State<CursorOverlay> createState() => _CursorOverlayState();
-}
-
-class _CursorOverlayState extends State<CursorOverlay> {
-  Offset _cursorPosition = Offset.zero;
-  bool _customCursorVisible = false;
-  static const _cursorSpeed = 8.0;
 
   @override
   Widget build(BuildContext context) {
@@ -26,81 +17,80 @@ class _CursorOverlayState extends State<CursorOverlay> {
       (s) => s.status.hasExternalMouse,
     );
 
-    // Externe Maus vorhanden → System-Cursor nutzen, kein Custom-Cursor
     if (hasExternalMouse) {
-      return KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: (_) {}, // D-Pad ignorieren wenn Maus da
-        child: widget.child,
-      );
+      return child;
     }
 
-    // Keine externe Maus → Custom-Cursor per D-Pad
-    return Listener(
-      onPointerHover: _onMouseMove,
-      onPointerMove: _onMouseMove,
-      onPointerDown: (_) {
-        if (!_customCursorVisible) setState(() => _customCursorVisible = true);
-      },
-      child: MouseRegion(
-        cursor: SystemMouseCursors.none,
-        onExit: (_) => setState(() => _customCursorVisible = false),
-        child: KeyboardListener(
-          focusNode: FocusNode(),
-          onKeyEvent: _handleKeyEvent,
-          child: Stack(
-            children: [
-              widget.child,
-              if (_customCursorVisible)
-                Positioned(
-                  left: _cursorPosition.dx,
-                  top: _cursorPosition.dy,
-                  child: const IgnorePointer(
-                    child: _CursorWidget(),
-                  ),
-                ),
-            ],
-          ),
+    return _DpadCursor(child: child);
+  }
+}
+
+class _DpadCursor extends StatefulWidget {
+  final Widget child;
+  const _DpadCursor({required this.child});
+
+  @override
+  State<_DpadCursor> createState() => _DpadCursorState();
+}
+
+class _DpadCursorState extends State<_DpadCursor> {
+  double _dx = 0;
+  double _dy = 0;
+  bool _visible = false;
+  static const _speed = 8.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.none,
+      child: KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: _handleKey,
+        child: Stack(
+          children: [
+            widget.child,
+            if (_visible)
+              Positioned(
+                left: _dx,
+                top: _dy,
+                child: const IgnorePointer(child: _CursorPaint()),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  void _onMouseMove(PointerEvent event) {
-    setState(() {
-      _cursorPosition = event.position;
-      _customCursorVisible = true;
-    });
-  }
-
-  void _handleKeyEvent(KeyEvent event) {
+  void _handleKey(KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return;
 
-    final screenSize = MediaQuery.of(context).size;
-    var dx = _cursorPosition.dx;
-    var dy = _cursorPosition.dy;
+    final size = MediaQuery.of(context).size;
+    var dx = _dx;
+    var dy = _dy;
 
-    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      dy = (dy - _cursorSpeed).clamp(0, screenSize.height);
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      dy = (dy + _cursorSpeed).clamp(0, screenSize.height);
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      dx = (dx - _cursorSpeed).clamp(0, screenSize.width);
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      dx = (dx + _cursorSpeed).clamp(0, screenSize.width);
-    } else {
-      return;
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.arrowUp:
+        dy = (dy - _speed).clamp(0, size.height);
+      case LogicalKeyboardKey.arrowDown:
+        dy = (dy + _speed).clamp(0, size.height);
+      case LogicalKeyboardKey.arrowLeft:
+        dx = (dx - _speed).clamp(0, size.width);
+      case LogicalKeyboardKey.arrowRight:
+        dx = (dx + _speed).clamp(0, size.width);
+      default:
+        return;
     }
 
     setState(() {
-      _cursorPosition = Offset(dx, dy);
-      _customCursorVisible = true;
+      _dx = dx;
+      _dy = dy;
+      _visible = true;
     });
   }
 }
 
-class _CursorWidget extends StatelessWidget {
-  const _CursorWidget();
+class _CursorPaint extends StatelessWidget {
+  const _CursorPaint();
 
   @override
   Widget build(BuildContext context) {
@@ -124,16 +114,13 @@ class _CursorPainter extends CustomPainter {
       ..lineTo(14, 12.5)
       ..close();
 
-    // Schatten
     canvas.drawPath(
       path.shift(const Offset(1, 1)),
       Paint()
         ..color = Colors.black.withValues(alpha: 0.5)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5),
     );
-    // Füllung
     canvas.drawPath(path, Paint()..color = Colors.white);
-    // Rand
     canvas.drawPath(
       path,
       Paint()
