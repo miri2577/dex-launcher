@@ -544,6 +544,17 @@ class _DesktopContextMenu extends StatelessWidget {
                   ),
                   _menuItem(Icons.refresh, 'Apps aktualisieren', onRefresh),
                   _sep(),
+                  _menuItem(Icons.minimize, 'Alle Fenster minimieren', () {
+                    onDismiss();
+                    for (final w in windowManager.windows) {
+                      windowManager.minimizeWindow(w.id);
+                    }
+                  }),
+                  _menuItem(Icons.close, 'Alle Fenster schliessen', () {
+                    onDismiss();
+                    windowManager.closeAll();
+                  }),
+                  _sep(),
                   _menuItem(Icons.settings, 'Einstellungen', onSettings),
                 ],
               ),

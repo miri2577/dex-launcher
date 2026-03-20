@@ -50,8 +50,9 @@ class _AboutAppState extends State<AboutApp> {
 
           _InfoLine('Beschreibung', 'Samsung DeX-inspirierte Desktop-Umgebung fuer Android TV'),
           _InfoLine('Framework', 'Flutter / Dart'),
-          _InfoLine('Mini-Apps', '23 eingebaute Anwendungen'),
+          _InfoLine('Mini-Apps', '25 eingebaute Anwendungen'),
           _InfoLine('Spiele', '4 native + 9 Browser-Spiele'),
+          _InfoLine('Design', 'Linux Mint Cinnamon (Mint-Y-Dark)'),
           _InfoLine('Repository', 'github.com/miri2577/dex-launcher'),
           _InfoLine('Lizenz', 'MIT'),
 
