@@ -21,6 +21,7 @@ import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/app_switcher.dart';
 import '../widgets/desktop_widgets.dart';
+import '../widgets/top_bar.dart';
 import 'desktop_background.dart';
 import 'desktop_icons.dart';
 
@@ -154,9 +155,16 @@ class _DesktopShellState extends State<DesktopShell> {
                         customImagePath: state.customWallpaperPath,
                       ),
 
-                      // Desktop Icons mit Drag & Drop
+                      // Top Bar
+                      const Positioned(
+                        left: 0, right: 0, top: 0,
+                        child: TopBar(),
+                      ),
+
+                      // Desktop Icons (zwischen Top-Bar und Dock)
                       Positioned.fill(
-                        bottom: _dockVisible ? 72 : 0,
+                        top: 28,
+                        bottom: _dockVisible ? 56 : 0,
                         child: GestureDetector(
                           onTap: () {
                             setState(() => _settingsOpen = false);
@@ -170,11 +178,11 @@ class _DesktopShellState extends State<DesktopShell> {
                         ),
                       ),
 
-                      // Desktop-Widgets (optional, oben rechts)
+                      // Desktop-Widgets (optional, oben rechts unter Top-Bar)
                       if (state.activeWidgets.isNotEmpty)
                         Positioned(
                           right: 16,
-                          top: 16,
+                          top: 36,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
@@ -214,13 +222,13 @@ class _DesktopShellState extends State<DesktopShell> {
                         },
                       ),
 
-                      // Dock (animiert)
+                      // Dock
                       AnimatedPositioned(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.easeInOut,
                         left: 0,
                         right: 0,
-                        bottom: _dockVisible ? 0 : -80,
+                        bottom: _dockVisible ? 0 : -60,
                         child: Dock(
                           key: _dockKey,
                           onSettingsOpen: () =>
@@ -232,8 +240,8 @@ class _DesktopShellState extends State<DesktopShell> {
                       if (_settingsOpen)
                         Positioned(
                           right: 0,
-                          top: 0,
-                          bottom: 72,
+                          top: 28,
+                          bottom: 56,
                           child: SettingsPanel(
                             onClose: () => setState(() => _settingsOpen = false),
                           ),
