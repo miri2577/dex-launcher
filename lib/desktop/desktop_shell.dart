@@ -28,6 +28,7 @@ import '../apps/usb_manager.dart';
 import '../apps/speed_test.dart';
 import '../apps/vpn_manager.dart';
 import '../apps/notification_center.dart';
+import '../apps/games.dart';
 import '../widgets/screensaver.dart';
 import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
@@ -363,6 +364,12 @@ class _DesktopShellState extends State<DesktopShell> {
       'speed_test' => const SpeedTestApp(),
       'vpn_manager' => const VpnManagerApp(),
       'notifications' => const NotificationCenterApp(),
+      'games' => const GamesHubApp(),
+      'snake' => const SnakeGame(),
+      'tetris' => const TetrisGame(),
+      'minesweeper' => const MinesweeperGame(),
+      'game_2048' => const Game2048(),
+      'doom' => const DoomGame(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),

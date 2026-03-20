@@ -40,6 +40,7 @@ const builtinApps = [
   BuiltinApp(id: 'speed_test', name: 'Speed Test', icon: Icons.speed, defaultSize: Size(350, 380)),
   BuiltinApp(id: 'vpn_manager', name: 'VPN', icon: Icons.vpn_lock, defaultSize: Size(400, 380)),
   BuiltinApp(id: 'notifications', name: 'Benachrichtigungen', icon: Icons.notifications, defaultSize: Size(420, 400)),
+  BuiltinApp(id: 'games', name: 'Spiele', icon: Icons.sports_esports, defaultSize: Size(400, 350)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {
