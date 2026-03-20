@@ -161,6 +161,12 @@ class _DesktopShellState extends State<DesktopShell> {
                 // F5 → Apps aktualisieren
                 LogicalKeySet(LogicalKeyboardKey.f5):
                     const _RefreshIntent(),
+                // Alt+F4 → Fokussiertes Fenster schließen
+                LogicalKeySet(LogicalKeyboardKey.alt, LogicalKeyboardKey.f4):
+                    const _CloseWindowIntent(),
+                // Ctrl+W → Fokussiertes Fenster schließen
+                LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyW):
+                    const _CloseWindowIntent(),
                 // Ctrl+1/2/3 → Desktop wechseln
                 LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
                     const _SwitchDesktopIntent(0),
@@ -218,6 +224,14 @@ class _DesktopShellState extends State<DesktopShell> {
                   _SwitchDesktopIntent: CallbackAction<_SwitchDesktopIntent>(
                     onInvoke: (intent) {
                       context.read<WindowManager>().switchDesktop(intent.desktop);
+                      return null;
+                    },
+                  ),
+                  _CloseWindowIntent: CallbackAction<_CloseWindowIntent>(
+                    onInvoke: (_) {
+                      final wm = context.read<WindowManager>();
+                      final focused = wm.focusedWindow;
+                      if (focused != null) wm.closeWindow(focused.id);
                       return null;
                     },
                   ),
@@ -613,4 +627,8 @@ class _RefreshIntent extends Intent {
 class _SwitchDesktopIntent extends Intent {
   final int desktop;
   const _SwitchDesktopIntent(this.desktop);
+}
+
+class _CloseWindowIntent extends Intent {
+  const _CloseWindowIntent();
 }

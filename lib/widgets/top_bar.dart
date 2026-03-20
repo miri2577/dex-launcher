@@ -163,12 +163,19 @@ class _TopBarState extends State<TopBar> {
               builder: (context) {
                 final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
                 final months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-                return Tooltip(
-                  message: '${_now.day}. ${months[_now.month - 1]} ${_now.year}',
-                  child: Text(
-                    '${weekdays[_now.weekday - 1]}  ${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
-                  ),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500, height: 1),
+                    ),
+                    Text(
+                      '${weekdays[_now.weekday - 1]} ${_now.day}. ${months[_now.month - 1]}',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 8, height: 1.2),
+                    ),
+                  ],
                 );
               },
             ),
