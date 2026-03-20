@@ -117,11 +117,19 @@ class _TopBarState extends State<TopBar> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Volume
-                  Icon(s.volumeIcon, color: Colors.white54, size: 13),
-                  const SizedBox(width: 2),
-                  Text('${s.volumePercent}%',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                  // Volume (klickbar → Quick Settings)
+                  GestureDetector(
+                    onTap: () => context.read<WindowManager>().openWindow(
+                      appType: 'quick_settings', title: 'Schnelleinstellungen',
+                      icon: Icons.tune, size: const Size(350, 350),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(s.volumeIcon, color: Colors.white54, size: 13),
+                      const SizedBox(width: 2),
+                      Text('${s.volumePercent}%',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                    ]),
+                  ),
                   const SizedBox(width: 8),
                   // Bluetooth
                   GestureDetector(
@@ -145,15 +153,25 @@ class _TopBarState extends State<TopBar> {
 
           const SizedBox(width: 12),
 
-          // Uhr
-          Builder(
-            builder: (context) {
-              final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-              return Text(
-                '${weekdays[_now.weekday - 1]}  ${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
-                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
-              );
-            },
+          // Uhr (klickbar → Benachrichtigungen)
+          GestureDetector(
+            onTap: () => context.read<WindowManager>().openWindow(
+              appType: 'notifications', title: 'Benachrichtigungen',
+              icon: Icons.notifications, size: const Size(420, 400),
+            ),
+            child: Builder(
+              builder: (context) {
+                final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                final months = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+                return Tooltip(
+                  message: '${_now.day}. ${months[_now.month - 1]} ${_now.year}',
+                  child: Text(
+                    '${weekdays[_now.weekday - 1]}  ${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
