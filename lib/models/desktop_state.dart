@@ -99,13 +99,7 @@ class DesktopState extends ChangeNotifier {
         }
       }
 
-      // Erster Start: erste 6 pinnen, erste 20 auf Desktop
-      if (savedPinned.isEmpty) {
-        for (var i = 0; i < apps.length && i < 6; i++) {
-          apps[i].isPinned = true;
-        }
-        _savePins();
-      }
+      // Erster Start: alle Apps auf Desktop legen
       if (savedDesktop.isEmpty) {
         for (var i = 0; i < apps.length && i < 20; i++) {
           apps[i].isOnDesktop = true;

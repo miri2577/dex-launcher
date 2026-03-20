@@ -82,18 +82,19 @@ class DockState extends State<Dock> {
                 Expanded(
                   child: Row(
                     children: [
-                      // Pinned
-                      Flexible(
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: state.pinnedApps.length,
-                          itemBuilder: (context, index) {
-                            final app = state.pinnedApps[index];
-                            return _DockAppItem(app: app);
-                          },
+                      // Gepinnte Android-Apps (nur wenn der User welche angepinnt hat)
+                      if (state.pinnedApps.isNotEmpty)
+                        Flexible(
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            shrinkWrap: true,
+                            itemCount: state.pinnedApps.length,
+                            itemBuilder: (context, index) {
+                              final app = state.pinnedApps[index];
+                              return _DockAppItem(app: app);
+                            },
+                          ),
                         ),
-                      ),
                       // Offene MDI-Fenster
                       Consumer<WindowManager>(
                         builder: (context, wm, _) {
