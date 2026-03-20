@@ -369,7 +369,10 @@ class _DesktopShellState extends State<DesktopShell> {
       'tetris' => const TetrisGame(),
       'minesweeper' => const MinesweeperGame(),
       'game_2048' => const Game2048(),
-      'doom' => const DoomGame(),
+      'browser_game' => BrowserGameApp(
+          url: window.initialData?['url'] as String? ?? 'https://dos.zone/',
+          title: window.title,
+        ),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),

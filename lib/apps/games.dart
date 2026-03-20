@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../windows/window_manager.dart';
 
 /// Games Hub — Übersicht aller Spiele
@@ -20,7 +21,19 @@ class GamesHubApp extends StatelessWidget {
           _GameTile('Tetris', Icons.grid_view, 'tetris', const Size(320, 480)),
           _GameTile('Minesweeper', Icons.flag, 'minesweeper', const Size(380, 420)),
           _GameTile('2048', Icons.looks_4, 'game_2048', const Size(340, 400)),
-          _GameTile('DOOM (Browser)', Icons.local_fire_department, 'doom', const Size(700, 500)),
+          const Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 4),
+            child: Text('DOS Klassiker (Browser)', style: TextStyle(color: Colors.white38, fontSize: 10))),
+          _BrowserGameTile('DOOM', Icons.local_fire_department, 'https://dos.zone/doom-dec-1993/', const Size(750, 520)),
+          _BrowserGameTile('Duke Nukem 3D', Icons.person, 'https://dos.zone/duke-nukem-3d-jan-29-1996/', const Size(750, 520)),
+          _BrowserGameTile('Commander Keen 4', Icons.rocket_launch, 'https://dos.zone/commander-keen-4-secret-of-the-oracle-dec-15-1991/', const Size(700, 480)),
+          _BrowserGameTile('Prince of Persia', Icons.shield, 'https://dos.zone/prince-of-persia-1990/', const Size(700, 480)),
+          _BrowserGameTile('Wolfenstein 3D', Icons.military_tech, 'https://dos.zone/wolfenstein-3d-may-05-1992/', const Size(750, 520)),
+          _BrowserGameTile('Pac-Man', Icons.circle, 'https://dos.zone/pac-man-1983/', const Size(650, 480)),
+          const Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 4),
+            child: Text('Web Spiele', style: TextStyle(color: Colors.white38, fontSize: 10))),
+          _BrowserGameTile('Wordle', Icons.abc, 'https://www.nytimes.com/games/wordle/index.html', const Size(500, 550)),
+          _BrowserGameTile('Chess', Icons.grid_on, 'https://www.chess.com/play/computer', const Size(650, 550)),
+          _BrowserGameTile('2048 Online', Icons.looks_4, 'https://play2048.co/', const Size(420, 550)),
         ],
       ),
     );
@@ -35,6 +48,49 @@ class _GameTile extends StatefulWidget {
   const _GameTile(this.name, this.icon, this.appType, this.size);
   @override
   State<_GameTile> createState() => _GameTileState();
+}
+
+class _BrowserGameTile extends StatefulWidget {
+  final String name;
+  final IconData icon;
+  final String url;
+  final Size size;
+  const _BrowserGameTile(this.name, this.icon, this.url, this.size);
+  @override
+  State<_BrowserGameTile> createState() => _BrowserGameTileState();
+}
+
+class _BrowserGameTileState extends State<_BrowserGameTile> {
+  bool _h = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: () => context.read<WindowManager>().openWindow(
+          appType: 'browser_game', title: widget.name,
+          icon: widget.icon, size: widget.size,
+          initialData: {'url': widget.url},
+        ),
+        child: Container(
+          height: 48, margin: const EdgeInsets.symmetric(vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: _h ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.03),
+          ),
+          child: Row(children: [
+            Icon(widget.icon, color: Colors.white, size: 22),
+            const SizedBox(width: 12),
+            Text(widget.name, style: const TextStyle(color: Colors.white, fontSize: 14)),
+            const Spacer(),
+            Icon(Icons.language, color: Colors.white.withValues(alpha: 0.2), size: 16),
+          ]),
+        ),
+      ),
+    );
+  }
 }
 
 class _GameTileState extends State<_GameTile> {
@@ -613,44 +669,44 @@ class _TetrisGameState extends State<TetrisGame> {
 }
 
 // ============================================================
-// DOOM (js-dos im WebView)
+// Browser-Spiel im Kiosk-Modus (WebView fullscreen, keine Toolbar)
 // ============================================================
-class DoomGame extends StatelessWidget {
-  const DoomGame({super.key});
+class BrowserGameApp extends StatefulWidget {
+  final String url;
+  final String title;
+  const BrowserGameApp({super.key, required this.url, required this.title});
+  @override
+  State<BrowserGameApp> createState() => _BrowserGameAppState();
+}
+
+class _BrowserGameAppState extends State<BrowserGameApp> {
+  late final WebViewController _controller;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageStarted: (_) { if (mounted) setState(() => _loading = true); },
+        onPageFinished: (_) { if (mounted) setState(() => _loading = false); },
+      ))
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // js-dos.com ermöglicht DOS-Spiele im Browser
     return Container(
-      color: const Color(0xFF0C0C0C),
-      child: Column(children: [
-        Container(height: 28, color: const Color(0xFF1A1A1A),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: const Row(children: [
-            Icon(Icons.local_fire_department, color: Colors.redAccent, size: 14),
-            SizedBox(width: 8),
-            Text('DOOM — Laed im Browser', style: TextStyle(color: Colors.white70, fontSize: 11)),
-          ])),
-        const Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.local_fire_department, color: Colors.redAccent, size: 64),
-                SizedBox(height: 16),
-                Text('DOOM', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
-                SizedBox(height: 8),
-                Text('Oeffne den Browser und navigiere zu:', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                SizedBox(height: 4),
-                SelectableText('https://dos.zone/doom-dec-1993/', style: TextStyle(color: Colors.blueAccent, fontSize: 13)),
-                SizedBox(height: 16),
-                Text('Oder suche auf dos.zone nach weiteren DOS-Klassikern:', style: TextStyle(color: Colors.white38, fontSize: 11)),
-                SizedBox(height: 4),
-                SelectableText('https://dos.zone/', style: TextStyle(color: Colors.blueAccent, fontSize: 12)),
-              ],
-            ),
-          ),
-        ),
-      ]),
+      color: Colors.black,
+      child: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_loading)
+            const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white38)),
+        ],
+      ),
     );
   }
 }
