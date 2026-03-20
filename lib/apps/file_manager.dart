@@ -1,93 +1,229 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
+import '../windows/window_manager.dart';
 
 class FileManagerApp extends StatefulWidget {
-  const FileManagerApp({super.key});
+  final String? initialPath;
+  const FileManagerApp({super.key, this.initialPath});
 
   @override
   State<FileManagerApp> createState() => _FileManagerAppState();
 }
 
 class _FileManagerAppState extends State<FileManagerApp> {
+  static const _channel = MethodChannel('com.dexlauncher/apps');
+
   String _currentPath = '/storage/emulated/0';
   List<FileSystemEntity> _entries = [];
   bool _loading = true;
   bool _showHidden = false;
   String? _error;
 
+  // Clipboard für Kopieren/Verschieben
+  String? _clipboardPath;
+  bool _clipboardIsCut = false;
+
+  // Selektion
+  final Set<String> _selected = {};
+  bool get _hasSelection => _selected.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
+    if (widget.initialPath != null) _currentPath = widget.initialPath!;
     _loadDirectory();
   }
 
   Future<void> _loadDirectory([String? path]) async {
     final targetPath = path ?? _currentPath;
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+    setState(() { _loading = true; _error = null; _selected.clear(); });
 
     try {
       final dir = Directory(targetPath);
       if (!await dir.exists()) {
-        // Fallback
         final extDir = await getExternalStorageDirectory();
-        if (extDir != null) {
-          _currentPath = extDir.path;
-          _loadDirectory();
-          return;
-        }
+        if (extDir != null) { _currentPath = extDir.path; _loadDirectory(); return; }
       }
 
       final entries = await dir.list().toList();
       entries.sort((a, b) {
-        // Ordner zuerst, dann alphabetisch
         final aIsDir = a is Directory;
         final bIsDir = b is Directory;
         if (aIsDir != bIsDir) return aIsDir ? -1 : 1;
         return a.path.split('/').last.toLowerCase().compareTo(
-              b.path.split('/').last.toLowerCase(),
-            );
+              b.path.split('/').last.toLowerCase());
       });
 
       setState(() {
         _currentPath = targetPath;
         _entries = entries.where((e) {
           if (_showHidden) return true;
-          final name = e.path.split('/').last;
-          return !name.startsWith('.');
+          return !e.path.split('/').last.startsWith('.');
         }).toList();
         _loading = false;
       });
     } catch (e) {
-      setState(() {
-        _error = 'Zugriff verweigert: $targetPath';
-        _loading = false;
-      });
+      setState(() { _error = 'Zugriff verweigert'; _loading = false; });
     }
-  }
-
-  static const _channel = MethodChannel('com.dexlauncher/apps');
-
-  void _openFile(String path) {
-    final ext = path.split('.').last.toLowerCase();
-    if (ext == 'apk') {
-      _channel.invokeMethod('installApk', {'path': path});
-    } else if ({'mp4', 'mkv', 'avi', 'mov', 'webm'}.contains(ext)) {
-      _channel.invokeMethod('playVideo', {'path': path});
-    }
-    // Bilder und Textdateien könnten über den WindowManager geöffnet werden
-    // Das wird in einer späteren Version über Callbacks gelöst
   }
 
   void _navigateUp() {
     final parent = Directory(_currentPath).parent.path;
-    if (parent != _currentPath) {
-      _loadDirectory(parent);
+    if (parent != _currentPath) _loadDirectory(parent);
+  }
+
+  // Datei-Operationen
+  Future<void> _deleteSelected() async {
+    for (final path in _selected) {
+      try {
+        final entity = FileSystemEntity.typeSync(path) == FileSystemEntityType.directory
+            ? Directory(path)
+            : File(path);
+        await entity.delete(recursive: true);
+      } catch (_) {}
     }
+    _selected.clear();
+    _loadDirectory();
+  }
+
+  Future<void> _renameEntry(String oldPath) async {
+    final name = oldPath.split('/').last;
+    final controller = TextEditingController(text: name);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF252525),
+        title: const Text('Umbenennen', style: TextStyle(color: Colors.white, fontSize: 14)),
+        content: TextField(
+          controller: controller, autofocus: true,
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          decoration: InputDecoration(
+            filled: true, fillColor: Colors.black26,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
+          ),
+          onSubmitted: (v) => Navigator.of(ctx).pop(v),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Abbrechen')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(controller.text), child: const Text('OK')),
+        ],
+      ),
+    );
+    if (newName != null && newName.isNotEmpty && newName != name) {
+      try {
+        final dir = Directory(_currentPath).path;
+        await File(oldPath).rename('$dir/$newName');
+      } catch (_) {}
+      _loadDirectory();
+    }
+  }
+
+  Future<void> _createFolder() async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF252525),
+        title: const Text('Neuer Ordner', style: TextStyle(color: Colors.white, fontSize: 14)),
+        content: TextField(
+          controller: controller, autofocus: true,
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          decoration: InputDecoration(
+            hintText: 'Name', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+            filled: true, fillColor: Colors.black26,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
+          ),
+          onSubmitted: (v) => Navigator.of(ctx).pop(v),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Abbrechen')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(controller.text), child: const Text('Erstellen')),
+        ],
+      ),
+    );
+    if (name != null && name.isNotEmpty) {
+      try { await Directory('$_currentPath/$name').create(); } catch (_) {}
+      _loadDirectory();
+    }
+  }
+
+  void _copyToClipboard(String path, {bool cut = false}) {
+    setState(() { _clipboardPath = path; _clipboardIsCut = cut; });
+  }
+
+  Future<void> _paste() async {
+    if (_clipboardPath == null) return;
+    final source = _clipboardPath!;
+    final name = source.split('/').last;
+    final dest = '$_currentPath/$name';
+
+    try {
+      if (_clipboardIsCut) {
+        await File(source).rename(dest);
+        _clipboardPath = null;
+      } else {
+        await File(source).copy(dest);
+      }
+    } catch (_) {}
+    _loadDirectory();
+  }
+
+  void _openFile(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    final wm = context.read<WindowManager>();
+
+    if (ext == 'apk') {
+      _channel.invokeMethod('installApk', {'path': path});
+    } else if ({'mp4', 'mkv', 'avi', 'mov', 'webm', 'ts', 'm4v'}.contains(ext)) {
+      _channel.invokeMethod('playVideo', {'path': path});
+    } else if ({'jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'}.contains(ext)) {
+      wm.openWindow(
+        appType: 'image_viewer', title: path.split('/').last,
+        icon: Icons.image, size: const Size(600, 450),
+        initialData: {'path': path},
+      );
+    } else if ({'txt', 'log', 'md', 'json', 'xml', 'yaml', 'yml', 'sh', 'dart', 'kt', 'java', 'py', 'js', 'css', 'html', 'csv', 'cfg', 'conf', 'ini', 'properties'}.contains(ext)) {
+      wm.openWindow(
+        appType: 'text_editor', title: path.split('/').last,
+        icon: Icons.edit_note, size: const Size(550, 400),
+        initialData: {'path': path},
+      );
+    }
+  }
+
+  void _showFileContextMenu(Offset position, FileSystemEntity entry) {
+    final name = entry.path.split('/').last;
+    final isDir = entry is Directory;
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    final items = <Widget>[
+      if (!isDir) _ctxItem(Icons.open_in_new, 'Oeffnen', () { overlayEntry.remove(); _openFile(entry.path); }),
+      _ctxItem(Icons.copy, 'Kopieren', () { overlayEntry.remove(); _copyToClipboard(entry.path); }),
+      _ctxItem(Icons.content_cut, 'Ausschneiden', () { overlayEntry.remove(); _copyToClipboard(entry.path, cut: true); }),
+      _ctxItem(Icons.edit, 'Umbenennen', () { overlayEntry.remove(); _renameEntry(entry.path); }),
+      _ctxItem(Icons.delete, 'Loeschen', () {
+        overlayEntry.remove();
+        _selected.add(entry.path);
+        _deleteSelected();
+      }, danger: true),
+    ];
+
+    overlayEntry = OverlayEntry(
+      builder: (_) => _ContextOverlay(
+        position: position,
+        items: items,
+        onDismiss: () => overlayEntry.remove(),
+      ),
+    );
+    overlay.insert(overlayEntry);
+  }
+
+  Widget _ctxItem(IconData icon, String label, VoidCallback onTap, {bool danger = false}) {
+    return _CtxMenuItem(icon: icon, label: label, onTap: onTap, danger: danger);
   }
 
   String _formatSize(int bytes) {
@@ -112,6 +248,10 @@ class _FileManagerAppState extends State<FileManagerApp> {
     };
   }
 
+  String? _getFileSize(FileSystemEntity entry) {
+    try { return _formatSize(entry.statSync().size); } catch (_) { return null; }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -125,26 +265,19 @@ class _FileManagerAppState extends State<FileManagerApp> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                _ToolButton(
-                  icon: Icons.arrow_upward,
-                  tooltip: 'Ordner hoch',
-                  onTap: _navigateUp,
-                ),
-                _ToolButton(
-                  icon: Icons.refresh,
-                  tooltip: 'Aktualisieren',
-                  onTap: () => _loadDirectory(),
-                ),
+                _ToolButton(icon: Icons.arrow_upward, tooltip: 'Hoch', onTap: _navigateUp),
+                _ToolButton(icon: Icons.refresh, tooltip: 'Aktualisieren', onTap: () => _loadDirectory()),
                 _ToolButton(
                   icon: _showHidden ? Icons.visibility : Icons.visibility_off,
                   tooltip: _showHidden ? 'Versteckte ausblenden' : 'Versteckte anzeigen',
-                  onTap: () {
-                    _showHidden = !_showHidden;
-                    _loadDirectory();
-                  },
+                  onTap: () { _showHidden = !_showHidden; _loadDirectory(); },
                 ),
+                _ToolButton(icon: Icons.create_new_folder, tooltip: 'Neuer Ordner', onTap: _createFolder),
+                if (_clipboardPath != null)
+                  _ToolButton(icon: Icons.paste, tooltip: 'Einfuegen', onTap: _paste),
+                if (_hasSelection)
+                  _ToolButton(icon: Icons.delete, tooltip: 'Loeschen', onTap: _deleteSelected),
                 const SizedBox(width: 8),
-                // Pfad-Anzeige
                 Expanded(
                   child: Container(
                     height: 26,
@@ -154,13 +287,8 @@ class _FileManagerAppState extends State<FileManagerApp> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      _currentPath,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                      ),
+                    child: Text(_currentPath,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontFamily: 'monospace'),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -173,35 +301,25 @@ class _FileManagerAppState extends State<FileManagerApp> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
                 : _error != null
-                    ? Center(
-                        child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)),
-                      )
+                    ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 12)))
                     : _entries.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Ordner ist leer',
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12),
-                            ),
-                          )
+                        ? Center(child: Text('Ordner ist leer', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12)))
                         : ListView.builder(
                             itemCount: _entries.length,
                             itemBuilder: (context, index) {
                               final entry = _entries[index];
                               final name = entry.path.split('/').last;
                               final isDir = entry is Directory;
-
                               return _FileRow(
                                 name: name,
                                 icon: isDir ? Icons.folder : _iconForFile(name),
                                 iconColor: isDir ? Colors.amber : Colors.white54,
                                 subtitle: isDir ? null : _getFileSize(entry),
                                 onTap: () {
-                                  if (isDir) {
-                                    _loadDirectory(entry.path);
-                                  } else {
-                                    _openFile(entry.path);
-                                  }
+                                  if (isDir) { _loadDirectory(entry.path); }
+                                  else { _openFile(entry.path); }
                                 },
+                                onSecondaryTap: (pos) => _showFileContextMenu(pos, entry),
                               );
                             },
                           ),
@@ -213,10 +331,14 @@ class _FileManagerAppState extends State<FileManagerApp> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                Text(
-                  '${_entries.length} Elemente',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10),
-                ),
+                Text('${_entries.length} Elemente', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                if (_clipboardPath != null) ...[
+                  const Spacer(),
+                  Text(
+                    '${_clipboardIsCut ? "Ausgeschnitten" : "Kopiert"}: ${_clipboardPath!.split('/').last}',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10),
+                  ),
+                ],
               ],
             ),
           ),
@@ -224,14 +346,83 @@ class _FileManagerAppState extends State<FileManagerApp> {
       ),
     );
   }
+}
 
-  String? _getFileSize(FileSystemEntity entry) {
-    try {
-      final stat = entry.statSync();
-      return _formatSize(stat.size);
-    } catch (_) {
-      return null;
-    }
+// Kontext-Menü Overlay
+class _ContextOverlay extends StatelessWidget {
+  final Offset position;
+  final List<Widget> items;
+  final VoidCallback onDismiss;
+  const _ContextOverlay({required this.position, required this.items, required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    final screen = MediaQuery.of(context).size;
+    var dx = position.dx;
+    var dy = position.dy;
+    if (dx + 180 > screen.width) dx = screen.width - 188;
+    if (dy + items.length * 36 > screen.height) dy = screen.height - items.length * 36 - 8;
+
+    return Stack(
+      children: [
+        Positioned.fill(child: GestureDetector(onTap: onDismiss, onSecondaryTap: onDismiss, child: Container(color: Colors.transparent))),
+        Positioned(
+          left: dx, top: dy,
+          child: Container(
+            width: 180,
+            decoration: BoxDecoration(
+              color: const Color(0xF0282828),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 16)],
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(mainAxisSize: MainAxisSize.min, children: items),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CtxMenuItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool danger;
+  const _CtxMenuItem({required this.icon, required this.label, required this.onTap, this.danger = false});
+
+  @override
+  State<_CtxMenuItem> createState() => _CtxMenuItemState();
+}
+
+class _CtxMenuItemState extends State<_CtxMenuItem> {
+  bool _h = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          height: 32,
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            color: _h ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Icon(widget.icon, color: widget.danger ? Colors.redAccent : Colors.white70, size: 15),
+              const SizedBox(width: 8),
+              Text(widget.label, style: TextStyle(color: widget.danger ? Colors.redAccent : Colors.white, fontSize: 12)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -239,36 +430,29 @@ class _ToolButton extends StatefulWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
-
-  const _ToolButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
+  const _ToolButton({required this.icon, required this.tooltip, required this.onTap});
 
   @override
   State<_ToolButton> createState() => _ToolButtonState();
 }
 
 class _ToolButtonState extends State<_ToolButton> {
-  bool _hovering = false;
-
+  bool _h = false;
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: widget.tooltip,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovering = true),
-        onExit: (_) => setState(() => _hovering = false),
+        onEnter: (_) => setState(() => _h = true),
+        onExit: (_) => setState(() => _h = false),
         child: GestureDetector(
           onTap: widget.onTap,
           child: Container(
-            width: 30,
-            height: 30,
+            width: 30, height: 30,
             margin: const EdgeInsets.only(right: 2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
-              color: _hovering ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+              color: _h ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
             ),
             child: Icon(widget.icon, color: Colors.white70, size: 16),
           ),
@@ -284,13 +468,11 @@ class _FileRow extends StatefulWidget {
   final Color iconColor;
   final String? subtitle;
   final VoidCallback onTap;
+  final void Function(Offset)? onSecondaryTap;
 
   const _FileRow({
-    required this.name,
-    required this.icon,
-    required this.iconColor,
-    this.subtitle,
-    required this.onTap,
+    required this.name, required this.icon, required this.iconColor,
+    this.subtitle, required this.onTap, this.onSecondaryTap,
   });
 
   @override
@@ -298,35 +480,29 @@ class _FileRow extends StatefulWidget {
 }
 
 class _FileRowState extends State<_FileRow> {
-  bool _hovering = false;
-
+  bool _h = false;
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
       child: GestureDetector(
         onTap: widget.onTap,
+        onSecondaryTapUp: widget.onSecondaryTap != null
+            ? (d) => widget.onSecondaryTap!(d.globalPosition) : null,
+        onLongPressStart: widget.onSecondaryTap != null
+            ? (d) => widget.onSecondaryTap!(d.globalPosition) : null,
         child: Container(
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          color: _hovering ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
+          color: _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
           child: Row(
             children: [
               Icon(widget.icon, color: widget.iconColor, size: 18),
               const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  widget.name,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              Expanded(child: Text(widget.name, style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis)),
               if (widget.subtitle != null)
-                Text(
-                  widget.subtitle!,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10),
-                ),
+                Text(widget.subtitle!, style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10)),
             ],
           ),
         ),

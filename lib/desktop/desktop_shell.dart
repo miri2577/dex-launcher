@@ -263,7 +263,7 @@ class _DesktopShellState extends State<DesktopShell> {
 
   Widget _buildWindowContent(MDIWindow window, WindowManager wm) {
     return switch (window.appType) {
-      'file_manager' => const FileManagerApp(),
+      'file_manager' => FileManagerApp(initialPath: window.initialData?['path'] as String?),
       'browser' => WebBrowserApp(
           initialUrl: window.initialData?['url'] as String?,
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
@@ -274,9 +274,11 @@ class _DesktopShellState extends State<DesktopShell> {
       'system_monitor' => const SystemMonitorApp(),
       'terminal' => const TerminalApp(),
       'text_editor' => TextEditorApp(
+          filePath: window.initialData?['path'] as String?,
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
       'image_viewer' => ImageViewerApp(
+          initialPath: window.initialData?['path'] as String?,
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
       'video_player' => VideoPlayerApp(
