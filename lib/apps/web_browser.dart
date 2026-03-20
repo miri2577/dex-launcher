@@ -84,7 +84,8 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
   }
 
   WebViewController _createController(String url) {
-    final ctrl = WebViewController()
+    late final WebViewController ctrl;
+    ctrl = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setUserAgent(_desktopMode
           ? 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -92,28 +93,40 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (url) {
           if (!mounted) return;
+          // Find the tab that owns this controller
+          final tabIndex = _tabs.indexWhere((t) => t.controller == ctrl);
           setState(() {
-            _loading = true;
-            _currentUrl = url;
-            _urlController.text = url;
-            if (_activeTab < _tabs.length) _tabs[_activeTab].url = url;
+            if (tabIndex >= 0) _tabs[tabIndex].url = url;
+            // Only update URL bar if this is the active tab
+            if (tabIndex == _activeTab) {
+              _loading = true;
+              _currentUrl = url;
+              _urlController.text = url;
+            }
           });
         },
         onPageFinished: (url) async {
           if (!mounted) return;
-          setState(() => _loading = false);
-          _canGoBack = await _controller.canGoBack();
-          _canGoForward = await _controller.canGoForward();
-          final title = await _controller.getTitle();
+          // Find the tab that owns this controller
+          final tabIndex = _tabs.indexWhere((t) => t.controller == ctrl);
+          final isActiveTab = tabIndex == _activeTab;
+          if (isActiveTab) {
+            setState(() => _loading = false);
+          }
+          _canGoBack = await ctrl.canGoBack();
+          _canGoForward = await ctrl.canGoForward();
+          final title = await ctrl.getTitle();
           if (title != null && title.isNotEmpty) {
-            _pageTitle = title;
-            if (_activeTab < _tabs.length) _tabs[_activeTab].title = title;
-            widget.onTitleChanged?.call(title);
+            if (tabIndex >= 0) _tabs[tabIndex].title = title;
+            if (isActiveTab) {
+              _pageTitle = title;
+              widget.onTitleChanged?.call(title);
+            }
           }
           // Zoom anwenden
-          _applyZoom();
+          if (isActiveTab) _applyZoom();
           // Soft-Keyboard unterdrücken bei Hardware-Tastatur
-          _controller.runJavaScript('''
+          ctrl.runJavaScript('''
             document.addEventListener('focusin', function(e) {
               if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
                 e.target.setAttribute('inputmode', 'none');

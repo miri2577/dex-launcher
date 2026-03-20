@@ -89,7 +89,7 @@ class _TopBarState extends State<TopBar> {
                 children: [
                   Icon(focused.icon, color: Colors.white54, size: 12),
                   const SizedBox(width: 4),
-                  Text(focused.title,
+                  Text('${focused.title}${wm.windows.length > 1 ? ' (+${wm.windows.length - 1})' : ''}',
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11),
                     overflow: TextOverflow.ellipsis,
                   ),

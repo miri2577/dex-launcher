@@ -2,29 +2,31 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 const List<List<Color>> wallpaperGradients = [
-  // 0: Deep Ocean
+  // 0: Mint
+  [Color(0xFF0D2818), Color(0xFF1A4731), Color(0xFF2D6B48)],
+  // 1: Deep Ocean
   [Color(0xFF0D1B2A), Color(0xFF1B2838), Color(0xFF162447), Color(0xFF1F4068)],
-  // 1: Aurora
+  // 2: Aurora
   [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-  // 2: Sunset
+  // 3: Sunset
   [Color(0xFF2C1654), Color(0xFF6B2FA0), Color(0xFFE94560)],
-  // 3: Forest
+  // 4: Forest
   [Color(0xFF0B3D0B), Color(0xFF145A32), Color(0xFF1E8449)],
-  // 4: Midnight
+  // 5: Midnight
   [Color(0xFF0C0C1E), Color(0xFF1A1A3E), Color(0xFF2D2D6B)],
-  // 5: Ember
+  // 6: Ember
   [Color(0xFF1A0000), Color(0xFF4A0E0E), Color(0xFF8B1A1A)],
-  // 6: Arctic
+  // 7: Arctic
   [Color(0xFF0A1628), Color(0xFF1B3A5C), Color(0xFF3A7BD5)],
-  // 7: Charcoal
+  // 8: Charcoal
   [Color(0xFF1A1A1A), Color(0xFF2D2D2D), Color(0xFF383838)],
-  // 8: Nebula
+  // 9: Nebula
   [Color(0xFF1A0533), Color(0xFF3D1266), Color(0xFF6B21A8), Color(0xFF9333EA)],
-  // 9: Teal Dream
+  // 10: Teal Dream
   [Color(0xFF042F2E), Color(0xFF0D4F4F), Color(0xFF0F766E), Color(0xFF14B8A6)],
-  // 10: Golden Hour
+  // 11: Golden Hour
   [Color(0xFF1C1208), Color(0xFF78350F), Color(0xFFB45309), Color(0xFFD97706)],
-  // 11: Slate
+  // 12: Slate
   [Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF334155)],
 ];
 

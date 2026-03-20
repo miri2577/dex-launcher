@@ -55,10 +55,38 @@ class _TerminalAppState extends State<TerminalApp> {
 
     // Eingebaute Befehle
     if (command == 'clear') {
+      setState(() { _lines.clear(); _running = false; });
+      return;
+    }
+    if (command == 'pwd') {
+      setState(() { _addLine(_cwd, _LineType.output); _running = false; });
+      _scrollToBottom();
+      return;
+    }
+    if (command == 'whoami') {
+      setState(() { _addLine('shell (Android TV)', _LineType.output); _running = false; });
+      _scrollToBottom();
+      return;
+    }
+    if (command == 'help') {
       setState(() {
-        _lines.clear();
+        _addLine('Eingebaute Befehle:', _LineType.info);
+        _addLine('  clear     - Bildschirm leeren', _LineType.output);
+        _addLine('  cd <dir>  - Verzeichnis wechseln', _LineType.output);
+        _addLine('  pwd       - Aktuelles Verzeichnis', _LineType.output);
+        _addLine('  help      - Diese Hilfe', _LineType.output);
+        _addLine('  exit      - Terminal schliessen', _LineType.output);
+        _addLine('', _LineType.output);
+        _addLine('Nuetzliche Befehle:', _LineType.info);
+        _addLine('  ls -la              - Dateien auflisten', _LineType.output);
+        _addLine('  df -h               - Speicherplatz', _LineType.output);
+        _addLine('  pm list packages -3 - Installierte Apps', _LineType.output);
+        _addLine('  ip addr             - Netzwerk-Info', _LineType.output);
+        _addLine('  getprop             - System-Properties', _LineType.output);
+        _addLine('  settings list global - Globale Settings', _LineType.output);
         _running = false;
       });
+      _scrollToBottom();
       return;
     }
 
@@ -201,7 +229,7 @@ class _TerminalAppState extends State<TerminalApp> {
             child: Row(
               children: [
                 Text(
-                  '\$ ',
+                  '${_cwd.split('/').last}\$ ',
                   style: TextStyle(
                     fontFamily: 'monospace',
                     fontSize: 12,

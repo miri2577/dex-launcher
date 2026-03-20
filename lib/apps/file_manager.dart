@@ -422,13 +422,21 @@ class _FileManagerAppState extends State<FileManagerApp> {
             child: Row(
               children: [
                 Text('${_entries.length} Elemente', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
-                if (_clipboardPath != null) ...[
-                  const Spacer(),
+                if (_hasSelection) ...[
+                  const SizedBox(width: 8),
+                  Text('${_selected.length} ausgewaehlt', style: TextStyle(color: const Color(0xFF86BE43).withValues(alpha: 0.6), fontSize: 10)),
+                ],
+                const Spacer(),
+                if (_clipboardPath != null)
                   Text(
-                    '${_clipboardIsCut ? "Ausgeschnitten" : "Kopiert"}: ${_clipboardPath!.split('/').last}',
+                    '${_clipboardIsCut ? "Ausschneiden" : "Kopieren"}: ${_clipboardPath!.split('/').last}',
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10),
                   ),
-                ],
+                if (_multiSelect)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Text('MULTI', style: TextStyle(color: const Color(0xFF86BE43).withValues(alpha: 0.5), fontSize: 9, fontWeight: FontWeight.w600)),
+                  ),
               ],
             ),
           ),
