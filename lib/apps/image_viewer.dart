@@ -43,9 +43,10 @@ class _ImageViewerAppState extends State<ImageViewerApp> {
     }
 
     files.sort();
+    if (!mounted) return;
     setState(() {
       _images = files;
-      if (widget.initialPath != null) {
+      if (files.isNotEmpty && widget.initialPath != null) {
         _currentIndex = files.indexOf(widget.initialPath!).clamp(0, files.length - 1);
       }
       _updateTitle();

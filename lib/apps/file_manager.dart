@@ -37,15 +37,17 @@ class _FileManagerAppState extends State<FileManagerApp> {
     _loadDirectory();
   }
 
-  Future<void> _loadDirectory([String? path]) async {
+  Future<void> _loadDirectory([String? path, bool isRetry = false]) async {
     final targetPath = path ?? _currentPath;
     setState(() { _loading = true; _error = null; _selected.clear(); });
 
     try {
       final dir = Directory(targetPath);
       if (!await dir.exists()) {
-        final extDir = await getExternalStorageDirectory();
-        if (extDir != null) { _currentPath = extDir.path; _loadDirectory(); return; }
+        if (!isRetry) {
+          final extDir = await getExternalStorageDirectory();
+          if (extDir != null) { _currentPath = extDir.path; _loadDirectory(null, true); return; }
+        }
       }
 
       final entries = await dir.list().toList();

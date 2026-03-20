@@ -57,6 +57,8 @@ class _ContextMenuOverlay extends StatelessWidget {
     var dy = position.dy;
     if (dx + menuWidth > screenSize.width) dx = screenSize.width - menuWidth - 8;
     if (dy + menuHeight > screenSize.height) dy = screenSize.height - menuHeight - 8;
+    dx = dx.clamp(8, screenSize.width - menuWidth - 8);
+    dy = dy.clamp(8, screenSize.height - menuHeight - 8);
 
     return Stack(
       children: [

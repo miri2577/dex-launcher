@@ -31,6 +31,7 @@ class _SystemMonitorAppState extends State<SystemMonitorApp> {
   Future<void> _loadInfo() async {
     try {
       final result = await _channel.invokeMethod('getSystemInfo');
+      if (!mounted) return;
       setState(() => _info = Map<String, dynamic>.from(result as Map));
     } catch (_) {}
   }

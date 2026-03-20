@@ -22,7 +22,7 @@ class DesktopIcons extends StatelessWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             // Berechne Grid-Positionen spaltenweise von oben-links
-            final maxRows = (constraints.maxHeight / itemHeight).floor();
+            final maxRows = (constraints.maxHeight / itemHeight).floor().clamp(1, double.maxFinite.toInt());
 
             return Stack(
               children: List.generate(apps.length, (index) {

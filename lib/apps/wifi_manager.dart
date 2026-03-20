@@ -25,6 +25,7 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
   Future<void> _loadCurrentWifi() async {
     try {
       final result = await _channel.invokeMethod('getCurrentWifiInfo');
+      if (!mounted) return;
       setState(() => _currentWifi = Map<String, dynamic>.from(result as Map));
     } catch (_) {}
   }
@@ -34,11 +35,13 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
     try {
       final result = await _channel.invokeMethod('scanWifiNetworks');
       final List<dynamic> list = result as List<dynamic>;
+      if (!mounted) return;
       setState(() {
         _networks = list.map((n) => Map<String, dynamic>.from(n as Map)).toList();
         _scanning = false;
       });
     } catch (_) {
+      if (!mounted) return;
       setState(() => _scanning = false);
     }
   }

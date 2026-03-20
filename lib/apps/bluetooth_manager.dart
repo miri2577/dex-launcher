@@ -31,6 +31,7 @@ class _BluetoothManagerAppState extends State<BluetoothManagerApp> {
         _devices = list.map((d) => Map<String, dynamic>.from(d as Map)).toList();
       }
     } catch (_) {}
+    if (!mounted) return;
     setState(() => _loading = false);
   }
 

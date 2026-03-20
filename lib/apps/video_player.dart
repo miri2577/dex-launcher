@@ -45,6 +45,7 @@ class _VideoPlayerAppState extends State<VideoPlayerApp> {
     }
 
     files.sort((a, b) => b.compareTo(a)); // Neueste zuerst
+    if (!mounted) return;
     setState(() => _videos = files);
   }
 

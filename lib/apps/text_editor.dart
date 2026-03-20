@@ -34,6 +34,7 @@ class _TextEditorAppState extends State<TextEditorApp> {
   Future<void> _loadFile(String path) async {
     try {
       final content = await File(path).readAsString();
+      if (!mounted) return;
       _controller.text = content;
       setState(() {
         _filePath = path;
@@ -41,6 +42,7 @@ class _TextEditorAppState extends State<TextEditorApp> {
       });
       widget.onTitleChanged?.call(path.split('/').last);
     } catch (e) {
+      if (!mounted) return;
       setState(() => _modified = false);
     }
   }
@@ -51,6 +53,7 @@ class _TextEditorAppState extends State<TextEditorApp> {
     }
     try {
       await File(_filePath!).writeAsString(_controller.text);
+      if (!mounted) return;
       setState(() => _modified = false);
       widget.onTitleChanged?.call(_filePath!.split('/').last);
     } catch (_) {}
