@@ -1,11 +1,34 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/system_status_service.dart';
 import '../windows/window_manager.dart';
 
 /// Schmale obere Leiste wie in Linux/macOS
-class TopBar extends StatelessWidget {
+class TopBar extends StatefulWidget {
   const TopBar({super.key});
+
+  @override
+  State<TopBar> createState() => _TopBarState();
+}
+
+class _TopBarState extends State<TopBar> {
+  late Timer _clockTimer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _clockTimer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +145,11 @@ class TopBar extends StatelessWidget {
           const SizedBox(width: 12),
 
           // Uhr
-          StreamBuilder(
-            stream: Stream.periodic(const Duration(seconds: 1)),
-            builder: (context, _) {
-              final now = DateTime.now();
+          Builder(
+            builder: (context) {
               final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
               return Text(
-                '${weekdays[now.weekday - 1]}  ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+                '${weekdays[_now.weekday - 1]}  ${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
                 style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w400),
               );
             },

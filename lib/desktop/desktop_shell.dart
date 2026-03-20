@@ -21,6 +21,7 @@ import '../apps/task_manager.dart';
 import '../apps/network_scanner.dart';
 import '../apps/music_player.dart';
 import '../apps/weather_widget.dart';
+import '../apps/developer_options.dart';
 import '../widgets/screensaver.dart';
 import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
@@ -45,7 +46,6 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _dockVisible = true;
   bool _screensaverActive = false;
   bool _autoStartDone = false;
-  DateTime _lastActivity = DateTime.now();
   Timer? _screensaverTimer;
   final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
   final _dockKey = GlobalKey<DockState>();
@@ -105,7 +105,6 @@ class _DesktopShellState extends State<DesktopShell> {
           if (_screensaverActive) {
             return Screensaver(onDismiss: () => setState(() {
               _screensaverActive = false;
-              _lastActivity = DateTime.now();
             }));
           }
 
@@ -351,6 +350,7 @@ class _DesktopShellState extends State<DesktopShell> {
       'network_scanner' => const NetworkScannerApp(),
       'music_player' => const MusicPlayerApp(),
       'weather' => const WeatherApp(),
+      'developer' => const DeveloperOptionsApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),

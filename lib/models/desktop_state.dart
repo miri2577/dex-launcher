@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'app_info.dart';
-import 'window_info.dart';
 import '../services/app_service.dart';
 import '../services/storage_service.dart';
 
@@ -11,7 +10,6 @@ class DesktopState extends ChangeNotifier {
 
   List<AppInfo> _allApps = [];
   List<String> _recentPackages = [];
-  final List<WindowInfo> _runningWindows = [];
   bool _freeformEnabled = false;
   bool _loading = true;
   int _wallpaperIndex = 0;
@@ -42,7 +40,6 @@ class DesktopState extends ChangeNotifier {
         .map((pkg) => appMap[pkg]!)
         .toList();
   }
-  List<WindowInfo> get runningWindows => _runningWindows;
   bool get freeformEnabled => _freeformEnabled;
   bool get loading => _loading;
   int get wallpaperIndex => _wallpaperIndex;
@@ -188,13 +185,6 @@ class DesktopState extends ChangeNotifier {
     final left = 80 + offset;
     final top = 40 + offset;
 
-    final bounds = Rect.fromLTWH(
-      left.toDouble(),
-      top.toDouble(),
-      w.toDouble(),
-      h.toDouble(),
-    );
-
     final success = await appService.launchAppFreeform(
       app.packageName,
       left: left,
@@ -204,34 +194,6 @@ class DesktopState extends ChangeNotifier {
     );
 
     if (success) {
-      // Bestehendes Fenster aktualisieren oder neues erstellen
-      final existingIndex = _runningWindows.indexWhere(
-        (w) => w.packageName == app.packageName,
-      );
-      if (existingIndex >= 0) {
-        _runningWindows[existingIndex].isMinimized = false;
-      } else {
-        _runningWindows.add(WindowInfo(
-          packageName: app.packageName,
-          appName: app.name,
-          bounds: bounds,
-        ));
-      }
-      notifyListeners();
-    }
-  }
-
-  void closeWindow(String packageName) {
-    _runningWindows.removeWhere((w) => w.packageName == packageName);
-    notifyListeners();
-  }
-
-  void toggleMinimizeWindow(String packageName) {
-    final window = _runningWindows.where(
-      (w) => w.packageName == packageName,
-    ).firstOrNull;
-    if (window != null) {
-      window.isMinimized = !window.isMinimized;
       notifyListeners();
     }
   }

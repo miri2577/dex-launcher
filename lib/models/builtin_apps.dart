@@ -33,6 +33,7 @@ const builtinApps = [
   BuiltinApp(id: 'network_scanner', name: 'Netzwerk-Scanner', icon: Icons.lan, defaultSize: Size(420, 350)),
   BuiltinApp(id: 'music_player', name: 'Musik', icon: Icons.music_note, defaultSize: Size(450, 380)),
   BuiltinApp(id: 'weather', name: 'Wetter', icon: Icons.cloud, defaultSize: Size(320, 340)),
+  BuiltinApp(id: 'developer', name: 'Entwickleroptionen', icon: Icons.developer_mode, defaultSize: Size(550, 450)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {
