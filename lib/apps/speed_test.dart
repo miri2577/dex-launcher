@@ -64,11 +64,11 @@ class _SpeedTestAppState extends State<SpeedTestApp> {
               width: 80, height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _testing ? Colors.white.withValues(alpha: 0.05) : Colors.blueAccent.withValues(alpha: 0.3),
-                border: Border.all(color: _testing ? Colors.white12 : Colors.blueAccent.withValues(alpha: 0.5), width: 2),
+                color: _testing ? Colors.white.withValues(alpha: 0.05) : const Color(0xFF86BE43).withValues(alpha: 0.3),
+                border: Border.all(color: _testing ? Colors.white12 : const Color(0xFF86BE43).withValues(alpha: 0.5), width: 2),
               ),
               child: _testing
-                  ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blueAccent))
+                  ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: const Color(0xFF86BE43)))
                   : const Icon(Icons.speed, color: Colors.white, size: 32),
             ),
           ),

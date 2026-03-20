@@ -243,7 +243,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                       decoration: BoxDecoration(
                         color: active ? const Color(0xFF252525) : Colors.transparent,
                         border: Border(bottom: BorderSide(
-                          color: active ? Colors.blueAccent : Colors.transparent, width: 2)),
+                          color: active ? const Color(0xFF86BE43) : Colors.transparent, width: 2)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -352,7 +352,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
             ),
 
           if (_loading)
-            const LinearProgressIndicator(minHeight: 2, color: Colors.blueAccent, backgroundColor: Colors.transparent),
+            const LinearProgressIndicator(minHeight: 2, color: const Color(0xFF86BE43), backgroundColor: Colors.transparent),
 
           // Bookmarks Bar
           if (_showBookmarks && _bookmarks.isNotEmpty)

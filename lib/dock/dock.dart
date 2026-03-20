@@ -305,24 +305,46 @@ class _DockMDIItemState extends State<_DockMDIItem> {
             );
           },
           child: Container(
-            width: 40, height: 40,
+            height: 40,
+            constraints: const BoxConstraints(minWidth: 40, maxWidth: 160),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: _h ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+              color: widget.window.isFocused
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : _h
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : Colors.transparent,
             ),
-            child: Stack(
-              alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Opacity(opacity: min ? 0.4 : 1.0,
-                  child: Icon(widget.window.icon, color: Colors.white, size: 20)),
-                Positioned(bottom: 3, child: Container(
-                  width: 6, height: 2,
-                  decoration: BoxDecoration(
-                    color: widget.window.isFocused ? C.accent : Colors.white38,
-                    borderRadius: BorderRadius.circular(1),
+                  child: Icon(widget.window.icon, color: Colors.white, size: 18)),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    widget.window.title.length > 12
+                        ? '${widget.window.title.substring(0, 12)}...'
+                        : widget.window.title,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: min ? 0.5 : 0.9),
+                      fontSize: 12,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                )),
+                ),
+                // Focus indicator dot
+                const SizedBox(width: 4),
+                Container(
+                  width: 6, height: 6,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.window.isFocused ? C.accent : Colors.white38,
+                  ),
+                ),
               ],
             ),
           ),

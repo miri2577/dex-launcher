@@ -44,7 +44,7 @@ class QuickSettingsApp extends StatelessWidget {
                   child: SliderTheme(
                     data: SliderThemeData(
                       trackHeight: 4, thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      activeTrackColor: Colors.blueAccent,
+                      activeTrackColor: const Color(0xFF86BE43),
                       inactiveTrackColor: Colors.white.withValues(alpha: 0.12), thumbColor: Colors.white,
                     ),
                     child: Slider(
@@ -117,11 +117,11 @@ class _QSTileState extends State<_QSTile> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: widget.active
-                ? (_h ? Colors.blueAccent.withValues(alpha: 0.25) : Colors.blueAccent.withValues(alpha: 0.15))
+                ? (_h ? const Color(0xFF86BE43).withValues(alpha: 0.25) : const Color(0xFF86BE43).withValues(alpha: 0.15))
                 : (_h ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.04)),
           ),
           child: Row(children: [
-            Icon(widget.icon, color: widget.active ? Colors.blueAccent : Colors.white54, size: 20),
+            Icon(widget.icon, color: widget.active ? const Color(0xFF86BE43) : Colors.white54, size: 20),
             const SizedBox(width: 10),
             Expanded(child: Text(widget.label, style: TextStyle(
               color: widget.active ? Colors.white : Colors.white70, fontSize: 12))),

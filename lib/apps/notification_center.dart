@@ -102,11 +102,11 @@ class _NotificationCenterAppState extends State<NotificationCenterApp> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
-                          color: n.type == 'info' ? Colors.blueAccent.withValues(alpha: 0.06) : Colors.transparent,
+                          color: n.type == 'info' ? const Color(0xFF86BE43).withValues(alpha: 0.06) : Colors.transparent,
                         ),
                         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Icon(n.type == 'info' ? Icons.info_outline : Icons.notifications_none,
-                            color: n.type == 'info' ? Colors.blueAccent.withValues(alpha: 0.5) : Colors.white38, size: 14),
+                            color: n.type == 'info' ? const Color(0xFF86BE43).withValues(alpha: 0.5) : Colors.white38, size: 14),
                           const SizedBox(width: 8),
                           Expanded(child: Text(n.text, style: TextStyle(
                             color: n.type == 'info' ? Colors.white54 : Colors.white, fontSize: 11))),

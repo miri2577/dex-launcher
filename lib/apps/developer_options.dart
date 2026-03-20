@@ -148,7 +148,7 @@ class _DeveloperOptionsAppState extends State<DeveloperOptionsApp> {
                       onTap: _runCommand,
                       child: Container(
                         height: 28, width: 28,
-                        decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(4)),
+                        decoration: BoxDecoration(color: const Color(0xFF86BE43).withValues(alpha: 0.3), borderRadius: BorderRadius.circular(4)),
                         child: const Icon(Icons.play_arrow, color: Colors.white, size: 16),
                       ),
                     ),
@@ -317,7 +317,7 @@ class _ToggleRow extends StatelessWidget {
             width: 36, height: 20,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: isOn ? Colors.blueAccent.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
+              color: isOn ? const Color(0xFF86BE43).withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.1),
             ),
             alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
             padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -372,7 +372,7 @@ class _ActionBtnState extends State<_ActionBtn> {
             Text(widget.label, style: const TextStyle(color: Colors.white, fontSize: 11)),
             if (_running) ...[
               const Spacer(),
-              const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blueAccent)),
+              const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: const Color(0xFF86BE43))),
             ],
           ]),
         ),

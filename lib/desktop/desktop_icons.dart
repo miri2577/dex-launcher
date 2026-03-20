@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/app_info.dart';
+import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
 import '../widgets/app_icon_widget.dart';
 import '../widgets/context_menu.dart';
+import '../windows/window_manager.dart';
 
 class DesktopIcons extends StatelessWidget {
   const DesktopIcons({super.key});
@@ -19,33 +21,73 @@ class DesktopIcons extends StatelessWidget {
         final itemWidth = iconSize + 32;
         final itemHeight = iconSize + 40;
 
+        // Number of system icons that occupy slots before app icons
+        const systemIconCount = 2;
+
         return LayoutBuilder(
           builder: (context, constraints) {
-            // Berechne Grid-Positionen spaltenweise von oben-links
-            final maxRows = (constraints.maxHeight / itemHeight).floor().clamp(1, double.maxFinite.toInt());
+            // Berechne Grid-Positionen zeilenweise von oben-links (wie Windows/Cinnamon)
+            final maxCols = (constraints.maxWidth / itemWidth).floor().clamp(1, double.maxFinite.toInt());
+
+            Offset gridPosition(int index) {
+              final row = index ~/ maxCols;
+              final col = index % maxCols;
+              return Offset(16.0 + col * itemWidth, 16.0 + row * itemHeight);
+            }
 
             return Stack(
-              children: List.generate(apps.length, (index) {
-                final app = apps[index];
-                final savedPos = state.desktopPositions[app.packageName];
-
-                // Default-Position: spaltenweise von links oben
-                final col = index ~/ maxRows;
-                final row = index % maxRows;
-                final defaultX = 16.0 + col * itemWidth;
-                final defaultY = 16.0 + row * itemHeight;
-
-                final position = savedPos ?? Offset(defaultX, defaultY);
-
-                return _DraggableDesktopIcon(
-                  app: app,
-                  position: position,
+              children: [
+                // --- System Icon: Computer ---
+                _SystemDesktopIcon(
+                  position: state.desktopPositions['__system_computer'] ?? gridPosition(0),
                   iconSize: iconSize,
-                  onPositionChanged: (pos) {
-                    state.updateDesktopPosition(app.packageName, pos);
+                  icon: Icons.computer,
+                  label: 'Computer',
+                  onTap: () {
+                    final fm = getBuiltinApp('file_manager');
+                    if (fm != null) {
+                      context.read<WindowManager>().openWindow(
+                        appType: fm.id,
+                        title: fm.name,
+                        icon: fm.icon,
+                        size: fm.defaultSize,
+                        initialData: {'path': '/storage/emulated/0'},
+                      );
+                    }
                   },
-                );
-              }),
+                  onPositionChanged: (pos) {
+                    state.updateDesktopPosition('__system_computer', pos);
+                  },
+                ),
+                // --- System Icon: Papierkorb ---
+                _SystemDesktopIcon(
+                  position: state.desktopPositions['__system_trash'] ?? gridPosition(1),
+                  iconSize: iconSize,
+                  icon: Icons.delete_outline,
+                  label: 'Papierkorb',
+                  onTap: () {},
+                  onPositionChanged: (pos) {
+                    state.updateDesktopPosition('__system_trash', pos);
+                  },
+                ),
+                // --- App Icons ---
+                ...List.generate(apps.length, (index) {
+                  final app = apps[index];
+                  final savedPos = state.desktopPositions[app.packageName];
+
+                  // Offset by systemIconCount so apps start after system icons
+                  final position = savedPos ?? gridPosition(index + systemIconCount);
+
+                  return _DraggableDesktopIcon(
+                    app: app,
+                    position: position,
+                    iconSize: iconSize,
+                    onPositionChanged: (pos) {
+                      state.updateDesktopPosition(app.packageName, pos);
+                    },
+                  );
+                }),
+              ],
             );
           },
         );
@@ -208,6 +250,116 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
           ),
         ),
       ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- System Desktop Icon (Computer, Papierkorb, etc.) ---
+class _SystemDesktopIcon extends StatefulWidget {
+  final Offset position;
+  final double iconSize;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final ValueChanged<Offset> onPositionChanged;
+
+  const _SystemDesktopIcon({
+    required this.position,
+    required this.iconSize,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.onPositionChanged,
+  });
+
+  @override
+  State<_SystemDesktopIcon> createState() => _SystemDesktopIconState();
+}
+
+class _SystemDesktopIconState extends State<_SystemDesktopIcon> {
+  late Offset _position;
+  bool _selected = false;
+  bool _dragging = false;
+  bool _hovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _position = widget.position;
+  }
+
+  @override
+  void didUpdateWidget(covariant _SystemDesktopIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_dragging) {
+      _position = widget.position;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: _position.dx,
+      top: _position.dy,
+      child: GestureDetector(
+        onTap: () => setState(() => _selected = !_selected),
+        onDoubleTap: widget.onTap,
+        onPanStart: (_) => _dragging = true,
+        onPanUpdate: (details) {
+          setState(() {
+            _position = Offset(
+              (_position.dx + details.delta.dx).clamp(0, double.infinity),
+              (_position.dy + details.delta.dy).clamp(0, double.infinity),
+            );
+          });
+        },
+        onPanEnd: (_) {
+          _dragging = false;
+          widget.onPositionChanged(_position);
+        },
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: AnimatedScale(
+            scale: _hovering ? 1.08 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 100),
+              width: widget.iconSize + 32,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: _selected
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : _hovering
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.transparent,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(widget.icon, color: Colors.white, size: widget.iconSize),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      shadows: [
+                        Shadow(color: Colors.black, blurRadius: 6),
+                        Shadow(color: Colors.black, blurRadius: 3),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

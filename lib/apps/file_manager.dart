@@ -583,7 +583,7 @@ class _FileRowState extends State<_FileRow> {
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: widget.selected
-              ? Colors.blueAccent.withValues(alpha: 0.15)
+              ? const Color(0xFF86BE43).withValues(alpha: 0.15)
               : _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
           child: Row(
             children: [

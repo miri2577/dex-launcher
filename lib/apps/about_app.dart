@@ -64,16 +64,16 @@ class _AboutAppState extends State<AboutApp> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent.withValues(alpha: 0.2),
+                  color: const Color(0xFF86BE43).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   if (_checking)
-                    const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blueAccent))
+                    const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 1.5, color: const Color(0xFF86BE43)))
                   else
-                    const Icon(Icons.update, color: Colors.blueAccent, size: 14),
+                    const Icon(Icons.update, color: const Color(0xFF86BE43), size: 14),
                   const SizedBox(width: 6),
-                  const Text('Update pruefen', style: TextStyle(color: Colors.blueAccent, fontSize: 11)),
+                  const Text('Update pruefen', style: TextStyle(color: const Color(0xFF86BE43), fontSize: 11)),
                 ]),
               ),
             ),

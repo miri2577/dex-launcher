@@ -127,7 +127,7 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
                 if (_scanning)
                   const SizedBox(
                     width: 14, height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blueAccent),
+                    child: CircularProgressIndicator(strokeWidth: 1.5, color: const Color(0xFF86BE43)),
                   )
                 else
                   GestureDetector(
@@ -144,15 +144,15 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
               margin: const EdgeInsets.all(8),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blueAccent.withValues(alpha: 0.15),
+                color: const Color(0xFF86BE43).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+                border: Border.all(color: const Color(0xFF86BE43).withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
                   Icon(
                     _signalIcon(_currentWifi!['signalLevel'] as int? ?? 0),
-                    color: Colors.blueAccent,
+                    color: const Color(0xFF86BE43),
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -258,13 +258,13 @@ class _NetworkRowState extends State<_NetworkRow> {
           ),
           child: Row(
             children: [
-              Icon(widget.signalIcon, color: widget.isConnected ? Colors.blueAccent : Colors.white54, size: 18),
+              Icon(widget.signalIcon, color: widget.isConnected ? const Color(0xFF86BE43) : Colors.white54, size: 18),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   widget.ssid,
                   style: TextStyle(
-                    color: widget.isConnected ? Colors.blueAccent : Colors.white,
+                    color: widget.isConnected ? const Color(0xFF86BE43) : Colors.white,
                     fontSize: 12,
                   ),
                 ),

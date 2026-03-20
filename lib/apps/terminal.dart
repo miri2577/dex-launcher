@@ -183,10 +183,10 @@ class _TerminalAppState extends State<TerminalApp> {
                       fontSize: 12,
                       height: 1.4,
                       color: switch (line.type) {
-                        _LineType.command => Colors.greenAccent,
+                        _LineType.command => const Color(0xFF86BE43),
                         _LineType.output => const Color(0xFFCCCCCC),
                         _LineType.error => Colors.redAccent,
-                        _LineType.info => Colors.blueAccent.withValues(alpha: 0.7),
+                        _LineType.info => const Color(0xB386BE43),
                       },
                     ),
                   );
@@ -205,7 +205,7 @@ class _TerminalAppState extends State<TerminalApp> {
                   style: TextStyle(
                     fontFamily: 'monospace',
                     fontSize: 12,
-                    color: Colors.greenAccent.withValues(alpha: 0.7),
+                    color: const Color(0xFF86BE43).withValues(alpha: 0.7),
                   ),
                 ),
                 Expanded(
@@ -237,7 +237,7 @@ class _TerminalAppState extends State<TerminalApp> {
                 if (_running)
                   const SizedBox(
                     width: 14, height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.greenAccent),
+                    child: CircularProgressIndicator(strokeWidth: 1.5, color: const Color(0xFF86BE43)),
                   ),
               ],
             ),

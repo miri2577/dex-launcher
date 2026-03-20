@@ -57,7 +57,7 @@ class _BluetoothManagerAppState extends State<BluetoothManagerApp> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                Icon(Icons.bluetooth, color: _enabled ? Colors.blueAccent : Colors.white38, size: 16),
+                Icon(Icons.bluetooth, color: _enabled ? const Color(0xFF86BE43) : Colors.white38, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   _enabled ? 'Bluetooth aktiv' : 'Bluetooth deaktiviert',
@@ -174,7 +174,7 @@ class _DeviceRowState extends State<_DeviceRow> {
         ),
         child: Row(
           children: [
-            Icon(widget.icon, color: Colors.blueAccent, size: 20),
+            Icon(widget.icon, color: const Color(0xFF86BE43), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -192,10 +192,10 @@ class _DeviceRowState extends State<_DeviceRow> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.blueAccent.withValues(alpha: 0.15),
+                color: const Color(0xFF86BE43).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text('Gepaart', style: TextStyle(color: Colors.blueAccent, fontSize: 9)),
+              child: const Text('Gepaart', style: TextStyle(color: const Color(0xFF86BE43), fontSize: 9)),
             ),
           ],
         ),

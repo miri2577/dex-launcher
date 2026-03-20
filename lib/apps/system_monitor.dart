@@ -71,7 +71,7 @@ class _SystemMonitorAppState extends State<SystemMonitorApp> {
             _UsageBar(
               used: usedMem,
               total: maxMem,
-              color: Colors.blueAccent,
+              color: const Color(0xFF86BE43),
               label: '${_formatMB(usedMem)} / ${_formatMB(maxMem)}',
             ),
           ]),
