@@ -132,6 +132,46 @@ class DockState extends State<Dock> {
                       SystemTray(status: service.status),
                 ),
                 _divider(),
+                // Desktop-Switcher
+                Consumer<WindowManager>(
+                  builder: (context, wm, _) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(WindowManager.maxDesktops, (i) {
+                      final active = wm.currentDesktop == i;
+                      final hasWindows = wm.allWindows.any((w) => w.desktop == i);
+                      return GestureDetector(
+                        onTap: () => wm.switchDesktop(i),
+                        child: Container(
+                          width: 20, height: 20,
+                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            color: active
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.transparent,
+                            border: Border.all(
+                              color: active
+                                  ? Colors.white.withValues(alpha: 0.4)
+                                  : hasWindows
+                                      ? Colors.white.withValues(alpha: 0.15)
+                                      : Colors.white.withValues(alpha: 0.06),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${i + 1}',
+                            style: TextStyle(
+                              color: active ? Colors.white : Colors.white38,
+                              fontSize: 9,
+                              fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                _divider(),
                 // Clock
                 const _Clock(),
                 const SizedBox(width: 12),

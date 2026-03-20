@@ -15,6 +15,7 @@ import '../apps/terminal.dart';
 import '../apps/text_editor.dart';
 import '../apps/image_viewer.dart';
 import '../apps/video_player.dart';
+import '../apps/clipboard_manager.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -82,6 +83,13 @@ class _DesktopShellState extends State<DesktopShell> {
                 // F5 → Apps aktualisieren
                 LogicalKeySet(LogicalKeyboardKey.f5):
                     const _RefreshIntent(),
+                // Ctrl+1/2/3 → Desktop wechseln
+                LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
+                    const _SwitchDesktopIntent(0),
+                LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit2):
+                    const _SwitchDesktopIntent(1),
+                LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit3):
+                    const _SwitchDesktopIntent(2),
               },
               child: Actions(
                 actions: {
@@ -126,6 +134,12 @@ class _DesktopShellState extends State<DesktopShell> {
                   _RefreshIntent: CallbackAction<_RefreshIntent>(
                     onInvoke: (_) {
                       state.loadApps();
+                      return null;
+                    },
+                  ),
+                  _SwitchDesktopIntent: CallbackAction<_SwitchDesktopIntent>(
+                    onInvoke: (intent) {
+                      context.read<WindowManager>().switchDesktop(intent.desktop);
                       return null;
                     },
                   ),
@@ -281,6 +295,7 @@ class _DesktopShellState extends State<DesktopShell> {
           initialPath: window.initialData?['path'] as String?,
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
+      'clipboard' => const ClipboardManagerApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
@@ -472,4 +487,9 @@ class _ToggleSettingsIntent extends Intent {
 
 class _RefreshIntent extends Intent {
   const _RefreshIntent();
+}
+
+class _SwitchDesktopIntent extends Intent {
+  final int desktop;
+  const _SwitchDesktopIntent(this.desktop);
 }

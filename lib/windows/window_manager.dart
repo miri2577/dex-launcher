@@ -4,15 +4,30 @@ import 'mdi_window.dart';
 class WindowManager extends ChangeNotifier {
   final List<MDIWindow> _windows = [];
   int _nextZ = 1;
+  int _currentDesktop = 0;
+  static const int maxDesktops = 3;
 
-  List<MDIWindow> get windows => List.unmodifiable(_windows);
+  int get currentDesktop => _currentDesktop;
+  List<MDIWindow> get allWindows => List.unmodifiable(_windows);
+  List<MDIWindow> get windows => _windows.where((w) => w.desktop == _currentDesktop).toList();
   List<MDIWindow> get sortedWindows =>
-      List<MDIWindow>.from(_windows)..sort((a, b) => a.zOrder.compareTo(b.zOrder));
+      (List<MDIWindow>.from(windows)..sort((a, b) => a.zOrder.compareTo(b.zOrder)));
 
-  bool get hasWindows => _windows.isNotEmpty;
+  bool get hasWindows => windows.isNotEmpty;
 
   MDIWindow? get focusedWindow =>
-      _windows.where((w) => w.isFocused && !w.isMinimized).firstOrNull;
+      windows.where((w) => w.isFocused && !w.isMinimized).firstOrNull;
+
+  void switchDesktop(int index) {
+    if (index < 0 || index >= maxDesktops || index == _currentDesktop) return;
+    // Unfocus alle auf aktuellem Desktop
+    for (final w in windows) { w.isFocused = false; }
+    _currentDesktop = index;
+    // Focus oberstes Fenster auf neuem Desktop
+    final visible = sortedWindows.where((w) => !w.isMinimized);
+    if (visible.isNotEmpty) visible.last.isFocused = true;
+    notifyListeners();
+  }
 
   MDIWindow openWindow({
     required String appType,
@@ -34,6 +49,7 @@ class WindowManager extends ChangeNotifier {
       isFocused: true,
       icon: icon,
       initialData: initialData,
+      desktop: _currentDesktop,
     );
 
     // Alle anderen Fenster unfocusen

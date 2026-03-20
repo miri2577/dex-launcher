@@ -28,6 +28,7 @@ const builtinApps = [
   BuiltinApp(id: 'text_editor', name: 'Editor', icon: Icons.edit_note, defaultSize: Size(550, 400)),
   BuiltinApp(id: 'image_viewer', name: 'Bilder', icon: Icons.image, defaultSize: Size(600, 450)),
   BuiltinApp(id: 'video_player', name: 'Video', icon: Icons.movie, defaultSize: Size(500, 400)),
+  BuiltinApp(id: 'clipboard', name: 'Clipboard', icon: Icons.content_paste, defaultSize: Size(350, 400)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {
