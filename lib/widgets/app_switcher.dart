@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/app_info.dart';
 import 'app_icon_widget.dart';
@@ -113,7 +114,7 @@ class AppSwitcherState2 extends State<AppSwitcher> with SingleTickerProviderStat
                               ? Colors.white.withValues(alpha: 0.15)
                               : Colors.transparent,
                           border: isSelected
-                              ? Border.all(color: Colors.blueAccent.withValues(alpha: 0.6), width: 2)
+                              ? Border.all(color: C.accent.withValues(alpha: 0.6), width: 2)
                               : null,
                         ),
                         child: Column(

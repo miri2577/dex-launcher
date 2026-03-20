@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../theme/cinnamon_theme.dart';
 import '../models/app_info.dart';
 import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
@@ -69,7 +70,7 @@ class _StartMenuState extends State<StartMenu> {
       height: screenH * 0.82,
       margin: const EdgeInsets.only(left: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: const Color(0xF02B2B2B),
+        color: C.menuBg,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 20)],
@@ -116,7 +117,7 @@ class _StartMenuState extends State<StartMenu> {
                       // Kategorien-Sidebar
                       Container(
                         width: 140,
-                        color: const Color(0xFF232323),
+                        color: C.sidebarBg,
                         child: Column(
                           children: [
                             Expanded(child: ListView(
@@ -178,7 +179,7 @@ class _StartMenuState extends State<StartMenu> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: active ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
-          border: active ? Border(left: BorderSide(color: Colors.greenAccent.withValues(alpha: 0.7), width: 2)) : null,
+          border: active ? const Border(left: BorderSide(color: C.accentBorder, width: 2)) : null,
         ),
         child: Row(children: [
           Icon(icon, color: active ? Colors.white : Colors.white54, size: 14),

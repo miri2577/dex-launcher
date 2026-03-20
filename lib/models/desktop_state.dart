@@ -20,7 +20,7 @@ class DesktopState extends ChangeNotifier {
   List<String> _pinnedToolIds = [];
   List<String> _activeWidgets = [];
   String _themeMode = 'dark';
-  Color _accentColor = const Color(0xFF448AFF);
+  Color _accentColor = const Color(0xFF86BE43); // Mint Green default
   int _screensaverTimeout = 0;
   List<String> _autoStartTools = [];
   Map<String, Offset> _desktopPositions = {};

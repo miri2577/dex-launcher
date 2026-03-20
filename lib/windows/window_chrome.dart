@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'mdi_window.dart';
 import 'window_manager.dart';
@@ -142,7 +143,7 @@ class _WindowChromeState extends State<WindowChrome> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: _maximized ? null : BorderRadius.circular(8),
                 border: Border.all(
-                  color: focused ? Colors.blueAccent.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.08),
+                  color: focused ? C.accent.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.08),
                   width: focused ? 1.5 : 1,
                 ),
                 boxShadow: _maximized ? null : [BoxShadow(

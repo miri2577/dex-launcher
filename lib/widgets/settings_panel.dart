@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -298,7 +299,7 @@ class _QuickSettings extends StatelessWidget {
                     trackHeight: 4,
                     thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
                     overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                    activeTrackColor: Colors.blueAccent,
+                    activeTrackColor: C.accent,
                     inactiveTrackColor: Colors.white.withValues(alpha: 0.15),
                     thumbColor: Colors.white,
                   ),
@@ -368,7 +369,7 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color ?? (active ? Colors.blueAccent : Colors.white38), size: 22),
+        Icon(icon, color: color ?? (active ? C.accent : Colors.white38), size: 22),
         const SizedBox(height: 4),
         Text(
           label,
@@ -576,7 +577,7 @@ class _SliderTile extends StatelessWidget {
             value: value,
             min: min,
             max: max,
-            activeColor: Colors.blueAccent,
+            activeColor: C.accent,
             onChanged: onChanged,
           ),
         ],
@@ -620,10 +621,11 @@ class _AccentColorPicker extends StatelessWidget {
   const _AccentColorPicker({required this.currentColor, required this.onSelect});
 
   static const _colors = [
-    Color(0xFF448AFF), Color(0xFF2196F3), Color(0xFF00BCD4),
-    Color(0xFF009688), Color(0xFF4CAF50), Color(0xFF8BC34A),
-    Color(0xFFFF9800), Color(0xFFFF5722), Color(0xFFF44336),
-    Color(0xFFE91E63), Color(0xFF9C27B0), Color(0xFF607D8B),
+    Color(0xFF86BE43), // Mint Green (default)
+    Color(0xFF4CAF50), Color(0xFF009688), Color(0xFF00BCD4),
+    Color(0xFF2196F3), Color(0xFF448AFF), Color(0xFF9C27B0),
+    Color(0xFFE91E63), Color(0xFFF44336), Color(0xFFFF5722),
+    Color(0xFFFF9800), Color(0xFF607D8B),
   ];
 
   @override

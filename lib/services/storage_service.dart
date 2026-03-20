@@ -77,7 +77,7 @@ class StorageService {
   String get themeMode => _prefs.getString('theme_mode') ?? 'dark';
   set themeMode(String mode) => _prefs.setString('theme_mode', mode);
 
-  int get accentColorValue => _prefs.getInt('accent_color') ?? 0xFF448AFF;
+  int get accentColorValue => _prefs.getInt('accent_color') ?? 0xFF86BE43;
   set accentColorValue(int value) => _prefs.setInt('accent_color', value);
 
   // Auto-Start Tools (IDs die beim Start geöffnet werden)

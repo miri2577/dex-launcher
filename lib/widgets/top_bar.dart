@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/cinnamon_theme.dart';
 import '../services/system_status_service.dart';
 import '../windows/window_manager.dart';
 
@@ -34,7 +35,7 @@ class _TopBarState extends State<TopBar> {
   Widget build(BuildContext context) {
     return Container(
       height: 28,
-      color: Colors.black.withValues(alpha: 0.7),
+      color: C.panelBg,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [

@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -159,7 +160,7 @@ class CalendarWidget extends StatelessWidget {
                     child: Container(
                       width: 20, height: 20,
                       decoration: isToday ? BoxDecoration(
-                        color: Colors.blueAccent.withValues(alpha: 0.5),
+                        color: C.accent.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(10),
                       ) : null,
                       alignment: Alignment.center,

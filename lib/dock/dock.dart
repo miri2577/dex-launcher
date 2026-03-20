@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../theme/cinnamon_theme.dart';
 import '../models/app_info.dart';
 import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
@@ -318,7 +319,7 @@ class _DockMDIItemState extends State<_DockMDIItem> {
                 Positioned(bottom: 3, child: Container(
                   width: 6, height: 2,
                   decoration: BoxDecoration(
-                    color: widget.window.isFocused ? Colors.blueAccent : Colors.white38,
+                    color: widget.window.isFocused ? C.accent : Colors.white38,
                     borderRadius: BorderRadius.circular(1),
                   ),
                 )),
