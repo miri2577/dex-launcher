@@ -45,6 +45,13 @@ class MainActivity : FlutterActivity() {
             // Fallback per Shell
             try { Runtime.getRuntime().exec(arrayOf("sh", "-c", "settings put secure show_ime_with_hard_keyboard 0")) } catch (_: Exception) {}
         }
+
+        // Runtime permission for reading images (needed for wallpaper picker)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES), 100)
+        } else {
+            requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

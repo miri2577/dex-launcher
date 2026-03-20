@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'mdi_window.dart';
 
 class WindowManager extends ChangeNotifier {
@@ -70,6 +72,7 @@ class WindowManager extends ChangeNotifier {
       top.isFocused = true;
     }
     notifyListeners();
+    saveLayout();
   }
 
   void focusWindow(String id) {
@@ -94,6 +97,7 @@ class WindowManager extends ChangeNotifier {
         visible.last.isFocused = true;
       }
       notifyListeners();
+      saveLayout();
     }
   }
 
@@ -120,6 +124,36 @@ class WindowManager extends ChangeNotifier {
     if (window != null) {
       window.title = title;
       notifyListeners();
+    }
+  }
+
+  Future<void> saveLayout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = _windows.map((w) => {
+      'appType': w.appType,
+      'title': w.title,
+      'x': w.position.dx,
+      'y': w.position.dy,
+      'width': w.size.width,
+      'height': w.size.height,
+      'desktop': w.desktop,
+    }).toList();
+    prefs.setString('window_layout', jsonEncode(data));
+  }
+
+  Future<void> restoreLayout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString('window_layout');
+    if (json == null) return;
+    final list = jsonDecode(json) as List;
+    for (final item in list) {
+      final m = Map<String, dynamic>.from(item as Map);
+      openWindow(
+        appType: m['appType'] as String,
+        title: m['title'] as String,
+        position: Offset((m['x'] as num).toDouble(), (m['y'] as num).toDouble()),
+        size: Size((m['width'] as num).toDouble(), (m['height'] as num).toDouble()),
+      );
     }
   }
 

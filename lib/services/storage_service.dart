@@ -95,6 +95,10 @@ class StorageService {
     else { _prefs.setString('saved_window_layout', json); }
   }
 
+  // Setup Wizard
+  bool get setupComplete => _prefs.getBool('setup_complete') ?? false;
+  set setupComplete(bool v) => _prefs.setBool('setup_complete', v);
+
   // Custom Wallpaper Image Path
   String? get customWallpaperPath => _prefs.getString('custom_wallpaper_path');
   set customWallpaperPath(String? path) {

@@ -28,6 +28,11 @@ void main() async {
 
   final windowManager = WindowManager();
 
+  // Restore window layout only if no auto-start tools are configured
+  if (desktopState.autoStartTools.isEmpty) {
+    await windowManager.restoreLayout();
+  }
+
   runApp(DexLauncherApp(
     desktopState: desktopState,
     systemStatus: systemStatus,

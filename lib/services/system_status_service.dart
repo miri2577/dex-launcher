@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -74,7 +75,7 @@ class SystemStatusService extends ChangeNotifier {
         _status = SystemStatus(hasExternalMouse: true);
         notifyListeners();
       }
-    } catch (_) {}
+    } catch (e) { debugPrint('SystemStatusService error: $e'); }
   }
 
   void startPolling() {
@@ -103,7 +104,8 @@ class SystemStatusService extends ChangeNotifier {
         hasExternalMouse: result['hasExternalMouse'] as bool? ?? false,
       );
       notifyListeners();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('SystemStatusService error: $e');
       // Platform channel nicht verfügbar (z.B. im Emulator)
     }
   }

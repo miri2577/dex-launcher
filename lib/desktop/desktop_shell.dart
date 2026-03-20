@@ -30,6 +30,8 @@ import '../apps/vpn_manager.dart';
 import '../apps/notification_center.dart';
 import '../apps/games.dart';
 import '../widgets/screensaver.dart';
+import '../widgets/splash_screen.dart';
+import '../widgets/setup_wizard.dart';
 import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
@@ -48,6 +50,8 @@ class DesktopShell extends StatefulWidget {
 }
 
 class _DesktopShellState extends State<DesktopShell> {
+  bool _showSplash = true;
+  bool _showWizard = false;
   bool _settingsOpen = false;
   bool _appSwitcherOpen = false;
   bool _dockVisible = true;
@@ -65,9 +69,32 @@ class _DesktopShellState extends State<DesktopShell> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showSplash) {
+      return SplashScreen(
+        onDone: () {
+          if (mounted) setState(() => _showSplash = false);
+        },
+      );
+    }
+
     return Scaffold(
       body: Consumer<DesktopState>(
         builder: (context, state, _) {
+          // Show wizard after splash if first run
+          if (!state.loading && !state.storage.setupComplete && !_showWizard && !_autoStartDone) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() => _showWizard = true);
+            });
+          }
+
+          if (_showWizard) {
+            return SetupWizard(
+              onComplete: () {
+                if (mounted) setState(() => _showWizard = false);
+              },
+            );
+          }
+
           if (state.loading) {
             return Container(
               color: const Color(0xFF0D1B2A),

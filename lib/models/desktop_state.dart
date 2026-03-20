@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'app_info.dart';
 import '../services/app_service.dart';
@@ -113,7 +114,8 @@ class DesktopState extends ChangeNotifier {
       _allApps = apps;
       _loading = false;
       notifyListeners();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('DesktopState error: $e');
       _loading = false;
       notifyListeners();
     }
@@ -123,7 +125,8 @@ class DesktopState extends ChangeNotifier {
     try {
       _recentPackages = await appService.getRecentApps(limit: 10);
       notifyListeners();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('DesktopState error: $e');
       // UsageStats-Permission fehlt — graceful fallback
     }
   }
@@ -134,14 +137,14 @@ class DesktopState extends ChangeNotifier {
       if (canDraw) {
         await appService.startOverlay();
       }
-    } catch (_) {}
+    } catch (e) { debugPrint('DesktopState error: $e'); }
   }
 
   Future<void> checkFreeformSupport() async {
     try {
       _freeformEnabled = await appService.isFreeformEnabled();
       notifyListeners();
-    } catch (_) {}
+    } catch (e) { debugPrint('DesktopState error: $e'); }
   }
 
   Future<bool> enableFreeform() async {
@@ -152,7 +155,8 @@ class DesktopState extends ChangeNotifier {
         notifyListeners();
       }
       return success;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('DesktopState error: $e');
       return false;
     }
   }
