@@ -16,6 +16,10 @@ import '../apps/text_editor.dart';
 import '../apps/image_viewer.dart';
 import '../apps/video_player.dart';
 import '../apps/clipboard_manager.dart';
+import '../apps/task_manager.dart';
+import '../apps/network_scanner.dart';
+import '../apps/music_player.dart';
+import '../apps/weather_widget.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -304,6 +308,10 @@ class _DesktopShellState extends State<DesktopShell> {
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
       'clipboard' => const ClipboardManagerApp(),
+      'task_manager' => const TaskManagerApp(),
+      'network_scanner' => const NetworkScannerApp(),
+      'music_player' => const MusicPlayerApp(),
+      'weather' => const WeatherApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),

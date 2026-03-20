@@ -29,6 +29,10 @@ const builtinApps = [
   BuiltinApp(id: 'image_viewer', name: 'Bilder', icon: Icons.image, defaultSize: Size(600, 450)),
   BuiltinApp(id: 'video_player', name: 'Video', icon: Icons.movie, defaultSize: Size(500, 400)),
   BuiltinApp(id: 'clipboard', name: 'Clipboard', icon: Icons.content_paste, defaultSize: Size(350, 400)),
+  BuiltinApp(id: 'task_manager', name: 'Task Manager', icon: Icons.memory, defaultSize: Size(500, 380)),
+  BuiltinApp(id: 'network_scanner', name: 'Netzwerk-Scanner', icon: Icons.lan, defaultSize: Size(420, 350)),
+  BuiltinApp(id: 'music_player', name: 'Musik', icon: Icons.music_note, defaultSize: Size(450, 380)),
+  BuiltinApp(id: 'weather', name: 'Wetter', icon: Icons.cloud, defaultSize: Size(320, 340)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {

@@ -12,6 +12,7 @@ import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.app.ActivityManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.os.BatteryManager
@@ -96,6 +97,27 @@ class MainActivity : FlutterActivity() {
                     // obwohl appops SYSTEM_ALERT_WINDOW allow gesetzt ist.
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
+                }
+                "getRunningApps" -> {
+                    result.success(getRunningApps())
+                }
+                "killApp" -> {
+                    val pkg = call.argument<String>("packageName") ?: ""
+                    val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    @Suppress("DEPRECATION")
+                    am.killBackgroundProcesses(pkg)
+                    result.success(true)
+                }
+                "takeScreenshot" -> {
+                    // Screenshot per Tastenkombination simulieren
+                    executeCommand("input keyevent KEYCODE_SYSRQ")
+                    result.success(true)
+                }
+                "scanNetwork" -> {
+                    result.success(scanNetwork())
+                }
+                "getAudioFiles" -> {
+                    result.success(getAudioFiles())
                 }
                 "installApk" -> {
                     val path = call.argument<String>("path") ?: ""
@@ -375,6 +397,66 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getRunningApps(): List<Map<String, Any?>> {
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val memInfo = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(memInfo)
+
+        return am.getRunningAppProcesses()?.map { process ->
+            val memArr = am.getProcessMemoryInfo(intArrayOf(process.pid))
+            val memMB = if (memArr.isNotEmpty()) memArr[0].totalPss / 1024 else 0
+            mapOf(
+                "name" to process.processName,
+                "pid" to process.pid,
+                "memoryMB" to memMB,
+                "importance" to process.importance,
+            )
+        }?.sortedByDescending { it["memoryMB"] as Int }?.take(30) ?: emptyList()
+    }
+
+    private fun scanNetwork(): List<Map<String, String>> {
+        val results = mutableListOf<Map<String, String>>()
+        try {
+            // ARP-Tabelle auslesen
+            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", "cat /proc/net/arp"))
+            val output = process.inputStream.bufferedReader().readText()
+            for (line in output.lines().drop(1)) { // Header überspringen
+                val parts = line.trim().split("\\s+".toRegex())
+                if (parts.size >= 4 && parts[2] != "0x0") {
+                    results.add(mapOf(
+                        "ip" to parts[0],
+                        "mac" to parts[3],
+                        "device" to (parts.getOrNull(5) ?: ""),
+                    ))
+                }
+            }
+        } catch (_: Exception) {}
+        return results
+    }
+
+    private fun getAudioFiles(): List<Map<String, Any?>> {
+        val files = mutableListOf<Map<String, Any?>>()
+        val extensions = setOf("mp3", "flac", "wav", "ogg", "aac", "m4a", "wma")
+        val dirs = listOf(
+            java.io.File("/storage/emulated/0/Music"),
+            java.io.File("/storage/emulated/0/Download"),
+        )
+        for (dir in dirs) {
+            if (!dir.exists()) continue
+            dir.walkTopDown().maxDepth(3).forEach { file ->
+                if (file.isFile && file.extension.lowercase() in extensions) {
+                    files.add(mapOf(
+                        "path" to file.absolutePath,
+                        "name" to file.nameWithoutExtension,
+                        "size" to file.length(),
+                    ))
+                }
+            }
+        }
+        return files.sortedBy { (it["name"] as String).lowercase() }
     }
 
     private fun executeCommand(command: String): Map<String, Any?> {

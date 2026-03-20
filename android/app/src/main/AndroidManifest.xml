@@ -2,6 +2,8 @@
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Task Manager -->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <!-- Alle installierten Apps abfragen -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <!-- Netzwerk -->
