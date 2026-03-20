@@ -53,7 +53,7 @@ class DesktopShell extends StatefulWidget {
 class _DesktopShellState extends State<DesktopShell> {
   bool _showSplash = true;
   bool _showWizard = false;
-  bool _settingsOpen = false;
+  // Settings ist jetzt ein MDI-Fenster
   bool _appSwitcherOpen = false;
   bool _dockVisible = true;
   bool _screensaverActive = false;
@@ -187,8 +187,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         if (_appSwitcherOpen) {
                           _appSwitcherKey.currentState?.confirmSelection();
                           _appSwitcherOpen = false;
-                        } else if (_settingsOpen) {
-                          _settingsOpen = false;
+                        } else {
+                          // Escape schließt nichts mehr
                         }
                       });
                       return null;
@@ -196,16 +196,16 @@ class _DesktopShellState extends State<DesktopShell> {
                   ),
                   _ToggleDesktopIntent: CallbackAction<_ToggleDesktopIntent>(
                     onInvoke: (_) {
-                      setState(() {
-                        _dockVisible = !_dockVisible;
-                        _settingsOpen = false;
-                      });
+                      setState(() => _dockVisible = !_dockVisible);
                       return null;
                     },
                   ),
                   _ToggleSettingsIntent: CallbackAction<_ToggleSettingsIntent>(
                     onInvoke: (_) {
-                      setState(() => _settingsOpen = !_settingsOpen);
+                      context.read<WindowManager>().openWindow(
+                        appType: 'settings', title: 'Einstellungen',
+                        icon: Icons.settings, size: const Size(420, 480),
+                      );
                       return null;
                     },
                   ),
@@ -244,7 +244,6 @@ class _DesktopShellState extends State<DesktopShell> {
                         bottom: _dockVisible ? 56 : 0,
                         child: GestureDetector(
                           onTap: () {
-                            setState(() => _settingsOpen = false);
                             _dockKey.currentState?.closeStartMenu();
                           },
                           onSecondaryTapUp: (details) {
@@ -308,21 +307,14 @@ class _DesktopShellState extends State<DesktopShell> {
                         bottom: _dockVisible ? 0 : -60,
                         child: Dock(
                           key: _dockKey,
-                          onSettingsOpen: () =>
-                              setState(() => _settingsOpen = !_settingsOpen),
+                          onSettingsOpen: () {
+                            context.read<WindowManager>().openWindow(
+                              appType: 'settings', title: 'Einstellungen',
+                              icon: Icons.settings, size: const Size(420, 480),
+                            );
+                          },
                         ),
                       ),
-
-                      // Settings Panel
-                      if (_settingsOpen)
-                        Positioned(
-                          right: 0,
-                          top: 28,
-                          bottom: 56,
-                          child: SettingsPanel(
-                            onClose: () => setState(() => _settingsOpen = false),
-                          ),
-                        ),
 
                       // App Switcher (Alt+Tab)
                       if (_appSwitcherOpen)
@@ -402,6 +394,7 @@ class _DesktopShellState extends State<DesktopShell> {
           title: window.title,
         ),
       'about' => const AboutApp(),
+      'settings' => const SettingsPanel(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
@@ -413,16 +406,21 @@ class _DesktopShellState extends State<DesktopShell> {
 
   void _showDesktopContextMenu(Offset position, DesktopState state) {
     final overlay = Overlay.of(context);
+    final wm = context.read<WindowManager>();
     late OverlayEntry entry;
 
     entry = OverlayEntry(
       builder: (ctx) {
         return _DesktopContextMenu(
           position: position,
+          windowManager: wm,
           onDismiss: () => entry.remove(),
           onSettings: () {
             entry.remove();
-            setState(() => _settingsOpen = true);
+            context.read<WindowManager>().openWindow(
+              appType: 'settings', title: 'Einstellungen',
+              icon: Icons.settings, size: const Size(420, 480),
+            );
           },
           onRefresh: () {
             entry.remove();
@@ -442,6 +440,7 @@ class _DesktopShellState extends State<DesktopShell> {
 
 class _DesktopContextMenu extends StatelessWidget {
   final Offset position;
+  final WindowManager windowManager;
   final VoidCallback onDismiss;
   final VoidCallback onSettings;
   final VoidCallback onRefresh;
@@ -450,6 +449,7 @@ class _DesktopContextMenu extends StatelessWidget {
 
   const _DesktopContextMenu({
     required this.position,
+    required this.windowManager,
     required this.onDismiss,
     required this.onSettings,
     required this.onRefresh,
@@ -507,17 +507,29 @@ class _DesktopContextMenu extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _menuItem(Icons.refresh, 'Apps aktualisieren', onRefresh),
+                  _menuItem(Icons.terminal, 'Terminal hier oeffnen', () {
+                    onDismiss();
+                    windowManager.openWindow(
+                      appType: 'terminal', title: 'Terminal',
+                      icon: Icons.terminal, size: const Size(650, 400),
+                    );
+                  }),
+                  _menuItem(Icons.folder, 'Dateimanager', () {
+                    onDismiss();
+                    windowManager.openWindow(
+                      appType: 'file_manager', title: 'Dateimanager',
+                      icon: Icons.folder, size: const Size(550, 380),
+                    );
+                  }),
+                  _sep(),
+                  _menuItem(Icons.image, 'Hintergrund aendern', onSettings),
                   _menuItem(
                     showIcons ? Icons.visibility_off : Icons.visibility,
                     showIcons ? 'Icons ausblenden' : 'Icons anzeigen',
                     onToggleIcons,
                   ),
-                  Container(
-                    height: 1,
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
+                  _menuItem(Icons.refresh, 'Apps aktualisieren', onRefresh),
+                  _sep(),
                   _menuItem(Icons.settings, 'Einstellungen', onSettings),
                 ],
               ),
@@ -527,6 +539,9 @@ class _DesktopContextMenu extends StatelessWidget {
       ],
     );
   }
+
+  Widget _sep() => Container(height: 1, margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+    color: Colors.white.withValues(alpha: 0.08));
 
   Widget _menuItem(IconData icon, String label, VoidCallback onTap) {
     return _HoverMenuItem(icon: icon, label: label, onTap: onTap);

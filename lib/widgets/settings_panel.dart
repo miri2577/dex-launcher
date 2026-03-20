@@ -7,9 +7,7 @@ import '../services/system_status_service.dart';
 import '../desktop/desktop_background.dart';
 
 class SettingsPanel extends StatefulWidget {
-  final VoidCallback onClose;
-
-  const SettingsPanel({super.key, required this.onClose});
+  const SettingsPanel({super.key});
 
   @override
   State<SettingsPanel> createState() => _SettingsPanelState();
@@ -35,45 +33,9 @@ class _SettingsPanelState extends State<SettingsPanel> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380,
-      margin: const EdgeInsets.all(40),
-      decoration: BoxDecoration(
-        color: const Color(0xF0202020),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.6),
-            blurRadius: 40,
-          ),
-        ],
-      ),
+      color: C.windowBg,
       child: Column(
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.settings, color: Colors.white, size: 22),
-                const SizedBox(width: 12),
-                const Text(
-                  'Einstellungen',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: widget.onClose,
-                  icon: const Icon(Icons.close, color: Colors.white70, size: 20),
-                ),
-              ],
-            ),
-          ),
           // Content
           Expanded(
             child: Consumer<DesktopState>(

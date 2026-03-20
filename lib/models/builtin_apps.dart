@@ -41,6 +41,7 @@ const builtinApps = [
   BuiltinApp(id: 'vpn_manager', name: 'VPN', icon: Icons.vpn_lock, defaultSize: Size(400, 380)),
   BuiltinApp(id: 'notifications', name: 'Benachrichtigungen', icon: Icons.notifications, defaultSize: Size(420, 400)),
   BuiltinApp(id: 'games', name: 'Spiele', icon: Icons.sports_esports, defaultSize: Size(400, 350)),
+  BuiltinApp(id: 'settings', name: 'Einstellungen', icon: Icons.settings, defaultSize: Size(420, 480)),
   BuiltinApp(id: 'about', name: 'Ueber', icon: Icons.info_outline, defaultSize: Size(420, 380)),
 ];
 
