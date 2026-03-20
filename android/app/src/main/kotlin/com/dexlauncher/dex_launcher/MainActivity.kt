@@ -165,6 +165,30 @@ class MainActivity : FlutterActivity() {
                 "getAudioFiles" -> {
                     result.success(getAudioFiles())
                 }
+                "downloadFile" -> {
+                    val url = call.argument<String>("url") ?: ""
+                    val savePath = call.argument<String>("savePath") ?: ""
+                    Thread {
+                        try {
+                            val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+                            connection.connectTimeout = 15000
+                            connection.readTimeout = 30000
+                            connection.instanceFollowRedirects = true
+                            val input = connection.inputStream
+                            val file = java.io.File(savePath)
+                            file.parentFile?.mkdirs()
+                            val output = java.io.FileOutputStream(file)
+                            input.copyTo(output)
+                            output.close()
+                            input.close()
+                            connection.disconnect()
+                            runOnUiThread { result.success(mapOf("success" to true, "path" to savePath, "size" to file.length())) }
+                        } catch (e: Exception) {
+                            runOnUiThread { result.success(mapOf("success" to false, "error" to (e.message ?: "Download fehlgeschlagen"))) }
+                        }
+                    }.start()
+                    return@setMethodCallHandler // result wird im Thread gesendet
+                }
                 "installApk" -> {
                     val path = call.argument<String>("path") ?: ""
                     try {

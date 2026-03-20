@@ -257,20 +257,51 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
 
   Future<void> _downloadFile(String url) async {
     try {
-      final filename = url.split('/').last.split('?').first;
+      var filename = url.split('/').last.split('?').first;
+      if (filename.isEmpty || !filename.contains('.')) {
+        filename = 'download_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      }
       final savePath = '/storage/emulated/0/Download/$filename';
-      // Download per Shell (wget/curl)
-      await _channel.invokeMethod('executeCommand', {
-        'command': 'curl -L -o "$savePath" "$url" 2>&1 && echo "OK: $savePath" || echo "FEHLER"'
-      });
+
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Download gestartet...', style: TextStyle(fontSize: 12)),
+          duration: Duration(seconds: 1),
+          backgroundColor: Color(0xFF2D2D2D),
+        ));
+      }
+
+      final result = await _channel.invokeMethod('downloadFile', {
+        'url': url,
+        'savePath': savePath,
+      });
+
+      if (!mounted) return;
+      final m = Map<String, dynamic>.from(result as Map);
+      if (m['success'] == true) {
+        final size = m['size'] as int? ?? 0;
+        final sizeStr = size > 1048576 ? '${(size / 1048576).toStringAsFixed(1)} MB' : '${(size / 1024).toStringAsFixed(0)} KB';
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Gespeichert: $filename', style: const TextStyle(fontSize: 12)),
+          content: Text('Gespeichert: $filename ($sizeStr)', style: const TextStyle(fontSize: 12)),
           duration: const Duration(seconds: 3),
           backgroundColor: const Color(0xFF2D2D2D),
         ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Fehler: ${m['error'] ?? 'Unbekannt'}', style: const TextStyle(fontSize: 12)),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red.shade900,
+        ));
       }
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Download fehlgeschlagen: $e', style: const TextStyle(fontSize: 12)),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red.shade900,
+        ));
+      }
+    }
   }
 
   void _navigate() {
