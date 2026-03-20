@@ -52,6 +52,20 @@ class MainActivity : FlutterActivity() {
         } else {
             requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 100)
         }
+
+        // Soft keyboard aggressiv unterdrücken
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            // Keyboard bei jedem Focus-Wechsel verstecken
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
+            imm?.hideSoftInputFromWindow(window.decorView.windowToken, 0)
+            // Setting nochmal setzen (kann von System zurückgesetzt werden)
+            try { Settings.Secure.putInt(contentResolver, "show_ime_with_hard_keyboard", 0) } catch (_: Exception) {}
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

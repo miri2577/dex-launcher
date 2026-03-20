@@ -94,13 +94,10 @@ class _SettingsPanelState extends State<SettingsPanel> {
                     currentIndex: state.customWallpaperPath == null ? state.wallpaperIndex : -1,
                     onSelect: state.setWallpaper,
                   ),
+                  const SizedBox(height: 8),
                   // Eigene Bilder
                   if (_wallpaperImages != null && _wallpaperImages!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'Eigene Bilder',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
-                    ),
+                    Text('Eigene Bilder', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
                     const SizedBox(height: 6),
                     _ImageWallpaperSelector(
                       images: _wallpaperImages!,
@@ -108,6 +105,59 @@ class _SettingsPanelState extends State<SettingsPanel> {
                       onSelect: state.setCustomWallpaper,
                     ),
                   ],
+                  const SizedBox(height: 8),
+                  // Bild-Pfad manuell eingeben
+                  GestureDetector(
+                    onTap: () async {
+                      final controller = TextEditingController(
+                        text: state.customWallpaperPath ?? '/storage/emulated/0/Pictures/',
+                      );
+                      final path = await showDialog<String>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: const Color(0xFF252525),
+                          title: const Text('Bild-Pfad eingeben', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          content: TextField(
+                            controller: controller, autofocus: true,
+                            keyboardType: TextInputType.none,
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace'),
+                            decoration: InputDecoration(
+                              hintText: '/storage/emulated/0/Pictures/bild.jpg',
+                              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2)),
+                              filled: true, fillColor: Colors.black26,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide.none),
+                            ),
+                            onSubmitted: (v) => Navigator.of(ctx).pop(v),
+                          ),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Abbrechen')),
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(controller.text), child: const Text('Setzen')),
+                          ],
+                        ),
+                      );
+                      if (path != null && path.isNotEmpty) {
+                        state.setCustomWallpaper(path);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.image_search, color: Colors.white54, size: 16),
+                        const SizedBox(width: 8),
+                        const Text('Bild-Pfad eingeben...', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                        const Spacer(),
+                        if (state.customWallpaperPath != null)
+                          GestureDetector(
+                            onTap: () => state.setWallpaper(state.wallpaperIndex), // Reset
+                            child: Icon(Icons.close, color: Colors.white.withValues(alpha: 0.3), size: 14),
+                          ),
+                      ]),
+                    ),
+                  ),
 
                   const SizedBox(height: 24),
                   _SectionTitle('Desktop'),

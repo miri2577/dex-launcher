@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'mdi_window.dart';
 import 'window_manager.dart';
 
-/// Fenster-Rahmen mit Titelleiste, Drag, Resize-Handles
 class WindowChrome extends StatefulWidget {
   final MDIWindow window;
   final WindowManager manager;
   final Widget child;
 
-  const WindowChrome({
-    super.key,
-    required this.window,
-    required this.manager,
-    required this.child,
-  });
+  const WindowChrome({super.key, required this.window, required this.manager, required this.child});
 
   @override
   State<WindowChrome> createState() => _WindowChromeState();
@@ -22,6 +16,9 @@ class WindowChrome extends StatefulWidget {
 class _WindowChromeState extends State<WindowChrome> {
   late Offset _position;
   late Size _size;
+  bool _maximized = false;
+  Offset? _preMaxPos;
+  Size? _preMaxSize;
 
   @override
   void initState() {
@@ -38,6 +35,7 @@ class _WindowChromeState extends State<WindowChrome> {
   }
 
   void _onDragTitle(Offset delta) {
+    if (_maximized) _restore(); // Aus Maximize rauslösen beim Drag
     setState(() {
       _position = Offset(
         (_position.dx + delta.dx).clamp(0, double.infinity),
@@ -49,314 +47,241 @@ class _WindowChromeState extends State<WindowChrome> {
 
   void _onDragEnd() {
     final screen = MediaQuery.of(context).size;
-    const snapThreshold = 15.0;
-    const dockHeight = 72.0;
+    const snap = 15.0;
+    const topBar = 28.0;
+    const dockH = 56.0;
 
-    // Snap links
-    if (_position.dx < snapThreshold) {
-      setState(() {
-        _position = Offset.zero;
-        _size = Size(screen.width / 2, screen.height - dockHeight);
-      });
+    if (_position.dx < snap) {
+      setState(() { _position = Offset(0, topBar); _size = Size(screen.width / 2, screen.height - topBar - dockH); });
+    } else if (_position.dx + _size.width > screen.width - snap) {
+      setState(() { _position = Offset(screen.width / 2, topBar); _size = Size(screen.width / 2, screen.height - topBar - dockH); });
+    } else if (_position.dy < snap + topBar) {
+      _maximize();
+      return;
     }
-    // Snap rechts
-    else if (_position.dx + _size.width > screen.width - snapThreshold) {
-      setState(() {
-        _position = Offset(screen.width / 2, 0);
-        _size = Size(screen.width / 2, screen.height - dockHeight);
-      });
-    }
-    // Snap oben = maximieren
-    else if (_position.dy < snapThreshold) {
-      setState(() {
-        _position = Offset.zero;
-        _size = Size(screen.width, screen.height - dockHeight);
-      });
-    }
-
     widget.manager.updatePosition(widget.window.id, _position);
     widget.manager.updateSize(widget.window.id, _size);
   }
 
-  void _onResize(Offset delta, {bool left = false, bool top = false, bool right = false, bool bottom = false}) {
+  void _maximize() {
+    final screen = MediaQuery.of(context).size;
+    const topBar = 28.0;
+    const dockH = 56.0;
     setState(() {
-      var newLeft = _position.dx;
-      var newTop = _position.dy;
-      var newWidth = _size.width;
-      var newHeight = _size.height;
-
-      if (right) newWidth += delta.dx;
-      if (bottom) newHeight += delta.dy;
-      if (left) {
-        newLeft += delta.dx;
-        newWidth -= delta.dx;
-      }
-      if (top) {
-        newTop += delta.dy;
-        newHeight -= delta.dy;
-      }
-
-      // Min-Size enforcing
-      final minW = widget.window.minSize.width;
-      final minH = widget.window.minSize.height;
-
-      if (newWidth < minW) {
-        if (left) newLeft -= (minW - newWidth);
-        newWidth = minW;
-      }
-      if (newHeight < minH) {
-        if (top) newTop -= (minH - newHeight);
-        newHeight = minH;
-      }
-
-      _position = Offset(newLeft.clamp(0, double.infinity), newTop.clamp(0, double.infinity));
-      _size = Size(newWidth, newHeight);
+      _preMaxPos = _position;
+      _preMaxSize = _size;
+      _position = Offset(0, topBar);
+      _size = Size(screen.width, screen.height - topBar - dockH);
+      _maximized = true;
     });
     widget.manager.updatePosition(widget.window.id, _position);
     widget.manager.updateSize(widget.window.id, _size);
   }
 
+  void _restore() {
+    if (_preMaxPos != null && _preMaxSize != null) {
+      setState(() {
+        _position = _preMaxPos!;
+        _size = _preMaxSize!;
+        _maximized = false;
+      });
+      widget.manager.updatePosition(widget.window.id, _position);
+      widget.manager.updateSize(widget.window.id, _size);
+    }
+  }
+
+  void _toggleMaximize() {
+    if (_maximized) _restore(); else _maximize();
+  }
+
+  void _onResize(Offset delta, {bool left = false, bool top = false, bool right = false, bool bottom = false}) {
+    if (_maximized) return;
+    setState(() {
+      var l = _position.dx, t = _position.dy, w = _size.width, h = _size.height;
+      if (right) w += delta.dx;
+      if (bottom) h += delta.dy;
+      if (left) { l += delta.dx; w -= delta.dx; }
+      if (top) { t += delta.dy; h -= delta.dy; }
+      final minW = widget.window.minSize.width, minH = widget.window.minSize.height;
+      if (w < minW) { if (left) l -= (minW - w); w = minW; }
+      if (h < minH) { if (top) t -= (minH - h); h = minH; }
+      _position = Offset(l.clamp(0, double.infinity), t.clamp(0, double.infinity));
+      _size = Size(w, h);
+    });
+    widget.manager.updatePosition(widget.window.id, _position);
+    widget.manager.updateSize(widget.window.id, _size);
+  }
+
+  void _showWindowMenu(Offset position) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    entry = OverlayEntry(builder: (_) => _WindowMenu(
+      position: position,
+      isMaximized: _maximized,
+      onDismiss: () => entry.remove(),
+      onMinimize: () { entry.remove(); widget.manager.minimizeWindow(widget.window.id); },
+      onMaximize: () { entry.remove(); _toggleMaximize(); },
+      onClose: () { entry.remove(); widget.manager.closeWindow(widget.window.id); },
+    ));
+    overlay.insert(entry);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isFocused = widget.window.isFocused;
-
+    final focused = widget.window.isFocused;
     return Positioned(
-      left: _position.dx,
-      top: _position.dy,
+      left: _position.dx, top: _position.dy,
       child: GestureDetector(
         onTap: () => widget.manager.focusWindow(widget.window.id),
         child: SizedBox(
-          width: _size.width,
-          height: _size.height,
-          child: Stack(
-            children: [
-              // Fenster-Inhalt
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isFocused
-                          ? Colors.blueAccent.withValues(alpha: 0.5)
-                          : Colors.white.withValues(alpha: 0.1),
-                      width: isFocused ? 1.5 : 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isFocused ? 0.6 : 0.3),
-                        blurRadius: isFocused ? 20 : 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(7),
-                    child: Column(
-                      children: [
-                        _TitleBar(
-                          title: widget.window.title,
-                          icon: widget.window.icon,
-                          isFocused: isFocused,
-                          onDragUpdate: _onDragTitle,
-                          onDragEnd: _onDragEnd,
-                          onMinimize: () => widget.manager.minimizeWindow(widget.window.id),
-                          onClose: () => widget.manager.closeWindow(widget.window.id),
-                        ),
-                        Expanded(child: widget.child),
-                      ],
-                    ),
-                  ),
+          width: _size.width, height: _size.height,
+          child: Stack(children: [
+            // Fenster
+            Positioned.fill(child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: _maximized ? null : BorderRadius.circular(8),
+                border: Border.all(
+                  color: focused ? Colors.blueAccent.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.08),
+                  width: focused ? 1.5 : 1,
                 ),
+                boxShadow: _maximized ? null : [BoxShadow(
+                  color: Colors.black.withValues(alpha: focused ? 0.5 : 0.2),
+                  blurRadius: focused ? 16 : 6, offset: const Offset(0, 3),
+                )],
               ),
-
-              // Resize Handles (8 Bereiche: 4 Ecken + 4 Kanten)
-              // Rechts
-              _ResizeHandle(
-                alignment: Alignment.centerRight,
-                cursor: SystemMouseCursors.resizeLeftRight,
-                width: 6,
-                onDrag: (d) => _onResize(d, right: true),
+              child: ClipRRect(
+                borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(7),
+                child: Column(children: [
+                  // Titelleiste
+                  GestureDetector(
+                    onPanUpdate: (d) => _onDragTitle(d.delta),
+                    onPanEnd: (_) => _onDragEnd(),
+                    onDoubleTap: _toggleMaximize,
+                    onSecondaryTapUp: (d) => _showWindowMenu(d.globalPosition),
+                    child: Container(
+                      height: 30,
+                      color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(children: [
+                        Icon(widget.window.icon, color: Colors.white54, size: 13),
+                        const SizedBox(width: 6),
+                        Expanded(child: Text(widget.window.title,
+                          style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 11, fontWeight: FontWeight.w500),
+                          overflow: TextOverflow.ellipsis)),
+                        _WinBtn(Icons.minimize, false, () => widget.manager.minimizeWindow(widget.window.id)),
+                        _WinBtn(_maximized ? Icons.filter_none : Icons.crop_square, false, _toggleMaximize),
+                        _WinBtn(Icons.close, true, () => widget.manager.closeWindow(widget.window.id)),
+                      ]),
+                    ),
+                  ),
+                  Expanded(child: widget.child),
+                ]),
               ),
-              // Unten
-              _ResizeHandle(
-                alignment: Alignment.bottomCenter,
-                cursor: SystemMouseCursors.resizeUpDown,
-                height: 6,
-                onDrag: (d) => _onResize(d, bottom: true),
-              ),
-              // Links
-              _ResizeHandle(
-                alignment: Alignment.centerLeft,
-                cursor: SystemMouseCursors.resizeLeftRight,
-                width: 6,
-                onDrag: (d) => _onResize(d, left: true),
-              ),
-              // Oben (nur unterhalb Titelleiste nutzbar, daher schmaler)
-              // Unten-Rechts (Ecke)
-              _ResizeHandle(
-                alignment: Alignment.bottomRight,
-                cursor: SystemMouseCursors.resizeDownRight,
-                width: 12,
-                height: 12,
-                onDrag: (d) => _onResize(d, right: true, bottom: true),
-              ),
-              // Unten-Links
-              _ResizeHandle(
-                alignment: Alignment.bottomLeft,
-                cursor: SystemMouseCursors.resizeDownLeft,
-                width: 12,
-                height: 12,
-                onDrag: (d) => _onResize(d, left: true, bottom: true),
-              ),
-              // Oben-Rechts
-              _ResizeHandle(
-                alignment: Alignment.topRight,
-                cursor: SystemMouseCursors.resizeUpRight,
-                width: 12,
-                height: 12,
-                onDrag: (d) => _onResize(d, right: true, top: true),
-              ),
-              // Oben-Links
-              _ResizeHandle(
-                alignment: Alignment.topLeft,
-                cursor: SystemMouseCursors.resizeUpLeft,
-                width: 12,
-                height: 12,
-                onDrag: (d) => _onResize(d, left: true, top: true),
-              ),
+            )),
+            // Resize (nicht wenn maximiert)
+            if (!_maximized) ...[
+              _Handle(Alignment.centerRight, SystemMouseCursors.resizeLeftRight, 6, null, (d) => _onResize(d, right: true)),
+              _Handle(Alignment.bottomCenter, SystemMouseCursors.resizeUpDown, null, 6, (d) => _onResize(d, bottom: true)),
+              _Handle(Alignment.centerLeft, SystemMouseCursors.resizeLeftRight, 6, null, (d) => _onResize(d, left: true)),
+              _Handle(Alignment.bottomRight, SystemMouseCursors.resizeDownRight, 12, 12, (d) => _onResize(d, right: true, bottom: true)),
+              _Handle(Alignment.bottomLeft, SystemMouseCursors.resizeDownLeft, 12, 12, (d) => _onResize(d, left: true, bottom: true)),
+              _Handle(Alignment.topRight, SystemMouseCursors.resizeUpRight, 12, 12, (d) => _onResize(d, right: true, top: true)),
+              _Handle(Alignment.topLeft, SystemMouseCursors.resizeUpLeft, 12, 12, (d) => _onResize(d, left: true, top: true)),
             ],
-          ),
+          ]),
         ),
       ),
     );
   }
 }
 
-class _ResizeHandle extends StatelessWidget {
-  final Alignment alignment;
-  final MouseCursor cursor;
-  final double? width;
-  final double? height;
-  final void Function(Offset delta) onDrag;
-
-  const _ResizeHandle({
-    required this.alignment,
-    required this.cursor,
-    this.width,
-    this.height,
-    required this.onDrag,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: alignment,
-      child: MouseRegion(
-        cursor: cursor,
-        child: GestureDetector(
-          onPanUpdate: (details) => onDrag(details.delta),
-          child: Container(
-            width: width ?? double.infinity,
-            height: height ?? double.infinity,
-            color: Colors.transparent,
-          ),
-        ),
-      ),
-    );
-  }
+class _WinBtn extends StatefulWidget {
+  final IconData icon; final bool isClose; final VoidCallback onTap;
+  const _WinBtn(this.icon, this.isClose, this.onTap);
+  @override State<_WinBtn> createState() => _WinBtnState();
 }
-
-class _TitleBar extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final bool isFocused;
-  final void Function(Offset delta) onDragUpdate;
-  final VoidCallback onDragEnd;
-  final VoidCallback onMinimize;
-  final VoidCallback onClose;
-
-  const _TitleBar({
-    required this.title,
-    required this.icon,
-    required this.isFocused,
-    required this.onDragUpdate,
-    required this.onDragEnd,
-    required this.onMinimize,
-    required this.onClose,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onPanUpdate: (details) => onDragUpdate(details.delta),
-      onPanEnd: (_) => onDragEnd(),
-      child: Container(
-        height: 32,
-        color: isFocused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white54, size: 14),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isFocused ? Colors.white : Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            _WindowButton(icon: Icons.minimize, onTap: onMinimize),
-            _WindowButton(icon: Icons.close, onTap: onClose, isClose: true),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WindowButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isClose;
-
-  const _WindowButton({required this.icon, required this.onTap, this.isClose = false});
-
-  @override
-  State<_WindowButton> createState() => _WindowButtonState();
-}
-
-class _WindowButtonState extends State<_WindowButton> {
-  bool _hovering = false;
-
+class _WinBtnState extends State<_WinBtn> {
+  bool _h = false;
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          width: 28,
-          height: 28,
-          margin: const EdgeInsets.only(left: 2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: _hovering
-                ? (widget.isClose ? Colors.red.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.1))
-                : Colors.transparent,
-          ),
-          child: Icon(
-            widget.icon,
-            color: _hovering ? Colors.white : Colors.white38,
-            size: 14,
-          ),
-        ),
-      ),
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(onTap: widget.onTap, child: Container(
+        width: 26, height: 26, margin: const EdgeInsets.only(left: 1),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
+          color: _h ? (widget.isClose ? Colors.red.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.1)) : Colors.transparent),
+        child: Icon(widget.icon, color: _h ? Colors.white : Colors.white38, size: 13),
+      )),
     );
   }
+}
+
+class _Handle extends StatelessWidget {
+  final Alignment align; final MouseCursor cursor; final double? w; final double? h;
+  final void Function(Offset) onDrag;
+  const _Handle(this.align, this.cursor, this.w, this.h, this.onDrag);
+  @override
+  Widget build(BuildContext context) => Align(alignment: align, child: MouseRegion(cursor: cursor,
+    child: GestureDetector(onPanUpdate: (d) => onDrag(d.delta),
+      child: Container(width: w ?? double.infinity, height: h ?? double.infinity, color: Colors.transparent))));
+}
+
+class _WindowMenu extends StatelessWidget {
+  final Offset position; final bool isMaximized;
+  final VoidCallback onDismiss, onMinimize, onMaximize, onClose;
+  const _WindowMenu({required this.position, required this.isMaximized,
+    required this.onDismiss, required this.onMinimize, required this.onMaximize, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    final screen = MediaQuery.of(context).size;
+    var dx = position.dx.clamp(8.0, screen.width - 168.0);
+    var dy = position.dy.clamp(8.0, screen.height - 160.0);
+    return Stack(children: [
+      Positioned.fill(child: GestureDetector(onTap: onDismiss, child: Container(color: Colors.transparent))),
+      Positioned(left: dx, top: dy, child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: const Color(0xF0282828), borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12)],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          _MenuItem(Icons.minimize, 'Minimieren', onMinimize),
+          _MenuItem(isMaximized ? Icons.filter_none : Icons.crop_square,
+            isMaximized ? 'Wiederherstellen' : 'Maximieren', onMaximize),
+          Container(height: 1, margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+            color: Colors.white.withValues(alpha: 0.08)),
+          _MenuItem(Icons.close, 'Schliessen', onClose, danger: true),
+        ]),
+      )),
+    ]);
+  }
+}
+
+class _MenuItem extends StatefulWidget {
+  final IconData icon; final String label; final VoidCallback onTap; final bool danger;
+  const _MenuItem(this.icon, this.label, this.onTap, {this.danger = false});
+  @override State<_MenuItem> createState() => _MenuItemState();
+}
+class _MenuItemState extends State<_MenuItem> {
+  bool _h = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) => setState(() => _h = true), onExit: (_) => setState(() => _h = false),
+    child: GestureDetector(onTap: widget.onTap, child: Container(
+      height: 30, margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
+        color: _h ? Colors.white.withValues(alpha: 0.07) : Colors.transparent),
+      child: Row(children: [
+        Icon(widget.icon, color: widget.danger ? Colors.redAccent : Colors.white70, size: 14),
+        const SizedBox(width: 8),
+        Text(widget.label, style: TextStyle(color: widget.danger ? Colors.redAccent : Colors.white, fontSize: 11)),
+      ]),
+    )),
+  );
 }

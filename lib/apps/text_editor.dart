@@ -108,7 +108,7 @@ class _TextEditorAppState extends State<TextEditorApp> {
           ),
           // Editor
           Expanded(
-            child: TextField(
+            child: TextField(keyboardType: TextInputType.none, 
               controller: _controller,
               maxLines: null,
               expands: true,

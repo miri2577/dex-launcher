@@ -112,6 +112,14 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
           }
           // Zoom anwenden
           _applyZoom();
+          // Soft-Keyboard unterdrücken bei Hardware-Tastatur
+          _controller.runJavaScript('''
+            document.addEventListener('focusin', function(e) {
+              if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+                e.target.setAttribute('inputmode', 'none');
+              }
+            });
+          ''');
           // History
           if (!_history.contains(url)) {
             _history.insert(0, url);
@@ -274,7 +282,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                   child: Container(
                     height: 26,
                     decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(4)),
-                    child: TextField(
+                    child: TextField(keyboardType: TextInputType.none, 
                       controller: _urlController,
                       style: const TextStyle(color: Colors.white, fontSize: 11),
                       decoration: const InputDecoration(
@@ -310,7 +318,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
               height: 30, color: const Color(0xFF202020),
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(children: [
-                Expanded(child: TextField(
+                Expanded(child: TextField(keyboardType: TextInputType.none, 
                   controller: _findController, autofocus: true,
                   style: const TextStyle(color: Colors.white, fontSize: 11),
                   decoration: const InputDecoration(

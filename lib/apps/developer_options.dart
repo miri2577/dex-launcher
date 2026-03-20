@@ -130,7 +130,7 @@ class _DeveloperOptionsAppState extends State<DeveloperOptionsApp> {
                         color: Colors.black.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: TextField(
+                      child: TextField(keyboardType: TextInputType.none, 
                         controller: _cmdController,
                         style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace'),
                         decoration: const InputDecoration(

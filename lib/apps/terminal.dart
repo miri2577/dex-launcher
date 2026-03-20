@@ -212,7 +212,7 @@ class _TerminalAppState extends State<TerminalApp> {
                   child: KeyboardListener(
                     focusNode: FocusNode(),
                     onKeyEvent: _handleKey,
-                    child: TextField(
+                    child: TextField(keyboardType: TextInputType.none, 
                       controller: _inputController,
                       focusNode: _focusNode,
                       autofocus: true,

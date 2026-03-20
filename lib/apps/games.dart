@@ -691,7 +691,10 @@ class _BrowserGameAppState extends State<BrowserGameApp> {
       ..setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (_) { if (mounted) setState(() => _loading = true); },
-        onPageFinished: (_) { if (mounted) setState(() => _loading = false); },
+        onPageFinished: (_) {
+          if (mounted) setState(() => _loading = false);
+          _controller.runJavaScript("document.addEventListener('focusin',function(e){if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')e.target.setAttribute('inputmode','none');});");
+        },
       ))
       ..loadRequest(Uri.parse(widget.url));
   }

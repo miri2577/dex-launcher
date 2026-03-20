@@ -49,7 +49,7 @@ class _GlobalSearchAppState extends State<GlobalSearchApp> {
           Container(
             padding: const EdgeInsets.all(10),
             color: const Color(0xFF252525),
-            child: TextField(
+            child: TextField(keyboardType: TextInputType.none, 
               controller: _controller, autofocus: true,
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(

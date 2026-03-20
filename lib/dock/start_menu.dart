@@ -97,6 +97,7 @@ class _StartMenuState extends State<StartMenu> {
                     ),
                     child: TextField(
                       controller: _searchController,
+                      keyboardType: TextInputType.none,
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
                         hintText: 'Suchen...',
