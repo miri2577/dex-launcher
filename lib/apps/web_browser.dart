@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -87,6 +88,9 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
     late final WebViewController ctrl;
     ctrl = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel('DeXBridge', onMessageReceived: (message) {
+        _handleBridgeMessage(message.message);
+      })
       ..setUserAgent(_desktopMode
           ? 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
           : null)
@@ -125,11 +129,21 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
           }
           // Zoom anwenden
           if (isActiveTab) _applyZoom();
-          // Soft-Keyboard unterdrücken bei Hardware-Tastatur
+          // Soft-Keyboard unterdrücken + Rechtsklick auf Bilder
           ctrl.runJavaScript('''
             document.addEventListener('focusin', function(e) {
               if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
                 e.target.setAttribute('inputmode', 'none');
+              }
+            });
+            document.addEventListener('contextmenu', function(e) {
+              var el = e.target;
+              if (el.tagName === 'IMG' && el.src) {
+                e.preventDefault();
+                window.DeXBridge.postMessage(JSON.stringify({type: 'image_context', url: el.src}));
+              } else if (el.tagName === 'A' && el.href) {
+                e.preventDefault();
+                window.DeXBridge.postMessage(JSON.stringify({type: 'link_context', url: el.href, text: el.textContent}));
               }
             });
           ''');
@@ -144,6 +158,119 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
       ))
       ..loadRequest(Uri.parse(url));
     return ctrl;
+  }
+
+  static const _channel = MethodChannel('com.dexlauncher/apps');
+
+  void _handleBridgeMessage(String message) {
+    try {
+      final data = jsonDecode(message);
+      final type = data['type'] as String?;
+      final url = data['url'] as String?;
+      if (url == null) return;
+
+      if (type == 'image_context') {
+        _showImageContextMenu(url);
+      } else if (type == 'link_context') {
+        _showLinkContextMenu(url, data['text'] as String? ?? url);
+      }
+    } catch (_) {}
+  }
+
+  void _showImageContextMenu(String imageUrl) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    // Menü in der Mitte des Fensters
+    final box = context.findRenderObject() as RenderBox;
+    final center = box.localToGlobal(Offset(box.size.width / 2 - 80, box.size.height / 2 - 40));
+
+    entry = OverlayEntry(builder: (_) => Stack(children: [
+      Positioned.fill(child: GestureDetector(
+        onTap: () => entry.remove(),
+        child: Container(color: Colors.transparent),
+      )),
+      Positioned(left: center.dx, top: center.dy, child: Container(
+        width: 200,
+        decoration: BoxDecoration(
+          color: const Color(0xF0282828), borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12)],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          _ctxItem(Icons.download, 'Bild speichern', () {
+            entry.remove();
+            _downloadFile(imageUrl);
+          }),
+          _ctxItem(Icons.open_in_new, 'Bild in neuem Tab', () {
+            entry.remove();
+            _addTab(imageUrl);
+          }),
+          _ctxItem(Icons.copy, 'URL kopieren', () {
+            entry.remove();
+            Clipboard.setData(ClipboardData(text: imageUrl));
+          }),
+        ]),
+      )),
+    ]));
+    overlay.insert(entry);
+  }
+
+  void _showLinkContextMenu(String linkUrl, String text) {
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+    final box = context.findRenderObject() as RenderBox;
+    final center = box.localToGlobal(Offset(box.size.width / 2 - 80, box.size.height / 2 - 40));
+
+    entry = OverlayEntry(builder: (_) => Stack(children: [
+      Positioned.fill(child: GestureDetector(onTap: () => entry.remove(), child: Container(color: Colors.transparent))),
+      Positioned(left: center.dx, top: center.dy, child: Container(
+        width: 200,
+        decoration: BoxDecoration(
+          color: const Color(0xF0282828), borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12)],
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          _ctxItem(Icons.open_in_new, 'In neuem Tab oeffnen', () { entry.remove(); _addTab(linkUrl); }),
+          _ctxItem(Icons.copy, 'Link kopieren', () { entry.remove(); Clipboard.setData(ClipboardData(text: linkUrl)); }),
+          _ctxItem(Icons.download, 'Link herunterladen', () { entry.remove(); _downloadFile(linkUrl); }),
+        ]),
+      )),
+    ]));
+    overlay.insert(entry);
+  }
+
+  Widget _ctxItem(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 32, padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(children: [
+          Icon(icon, color: Colors.white70, size: 14), const SizedBox(width: 8),
+          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
+        ]),
+      ),
+    );
+  }
+
+  Future<void> _downloadFile(String url) async {
+    try {
+      final filename = url.split('/').last.split('?').first;
+      final savePath = '/storage/emulated/0/Download/$filename';
+      // Download per Shell (wget/curl)
+      await _channel.invokeMethod('executeCommand', {
+        'command': 'curl -L -o "$savePath" "$url" 2>&1 && echo "OK: $savePath" || echo "FEHLER"'
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Gespeichert: $filename', style: const TextStyle(fontSize: 12)),
+          duration: const Duration(seconds: 3),
+          backgroundColor: const Color(0xFF2D2D2D),
+        ));
+      }
+    } catch (_) {}
   }
 
   void _navigate() {
