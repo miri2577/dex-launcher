@@ -20,7 +20,9 @@ class _FileManagerAppState extends State<FileManagerApp> {
   List<FileSystemEntity> _entries = [];
   bool _loading = true;
   bool _showHidden = false;
+  bool _multiSelect = false;
   String? _error;
+  String _sortBy = 'name'; // name, size, date, type
 
   // Clipboard für Kopieren/Verschieben
   String? _clipboardPath;
@@ -29,6 +31,17 @@ class _FileManagerAppState extends State<FileManagerApp> {
   // Selektion
   final Set<String> _selected = {};
   bool get _hasSelection => _selected.isNotEmpty;
+
+  // Schnellzugriff
+  static const _quickAccess = [
+    ('/storage/emulated/0', 'Intern', Icons.phone_android),
+    ('/storage/emulated/0/Download', 'Downloads', Icons.download),
+    ('/storage/emulated/0/Pictures', 'Bilder', Icons.image),
+    ('/storage/emulated/0/Music', 'Musik', Icons.music_note),
+    ('/storage/emulated/0/Movies', 'Videos', Icons.movie),
+    ('/storage/emulated/0/DCIM', 'Kamera', Icons.camera),
+    ('/storage/emulated/0/Documents', 'Dokumente', Icons.description),
+  ];
 
   @override
   void initState() {
@@ -55,8 +68,19 @@ class _FileManagerAppState extends State<FileManagerApp> {
         final aIsDir = a is Directory;
         final bIsDir = b is Directory;
         if (aIsDir != bIsDir) return aIsDir ? -1 : 1;
-        return a.path.split('/').last.toLowerCase().compareTo(
-              b.path.split('/').last.toLowerCase());
+        switch (_sortBy) {
+          case 'size':
+            try { return b.statSync().size.compareTo(a.statSync().size); } catch (_) {}
+            return 0;
+          case 'date':
+            try { return b.statSync().modified.compareTo(a.statSync().modified); } catch (_) {}
+            return 0;
+          case 'type':
+            return a.path.split('.').last.compareTo(b.path.split('.').last);
+          default:
+            return a.path.split('/').last.toLowerCase().compareTo(
+                  b.path.split('/').last.toLowerCase());
+        }
       });
 
       setState(() {
@@ -260,11 +284,40 @@ class _FileManagerAppState extends State<FileManagerApp> {
       color: const Color(0xFF1A1A1A),
       child: Column(
         children: [
+          // Schnellzugriff
+          Container(
+            height: 28,
+            color: const Color(0xFF202020),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              children: _quickAccess.map((q) {
+                final (path, label, icon) = q;
+                final active = _currentPath == path;
+                return GestureDetector(
+                  onTap: () => _loadDirectory(path),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 1),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: active ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Icon(icon, color: active ? Colors.white : Colors.white38, size: 12),
+                      const SizedBox(width: 4),
+                      Text(label, style: TextStyle(color: active ? Colors.white : Colors.white54, fontSize: 10)),
+                    ]),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
           // Toolbar
           Container(
-            height: 36,
+            height: 32,
             color: const Color(0xFF252525),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Row(
               children: [
                 _ToolButton(icon: Icons.arrow_upward, tooltip: 'Hoch', onTap: _navigateUp),
@@ -275,22 +328,47 @@ class _FileManagerAppState extends State<FileManagerApp> {
                   onTap: () { _showHidden = !_showHidden; _loadDirectory(); },
                 ),
                 _ToolButton(icon: Icons.create_new_folder, tooltip: 'Neuer Ordner', onTap: _createFolder),
+                _ToolButton(
+                  icon: Icons.checklist,
+                  tooltip: _multiSelect ? 'Einzelauswahl' : 'Mehrfachauswahl',
+                  onTap: () => setState(() { _multiSelect = !_multiSelect; if (!_multiSelect) _selected.clear(); }),
+                ),
+                // Sortierung
+                PopupMenuButton<String>(
+                  onSelected: (v) { _sortBy = v; _loadDirectory(); },
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(value: 'name', child: Text('Name')),
+                    const PopupMenuItem(value: 'size', child: Text('Groesse')),
+                    const PopupMenuItem(value: 'date', child: Text('Datum')),
+                    const PopupMenuItem(value: 'type', child: Text('Typ')),
+                  ],
+                  child: Container(
+                    width: 28, height: 28,
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.sort, color: Colors.white70, size: 14),
+                  ),
+                ),
                 if (_clipboardPath != null)
                   _ToolButton(icon: Icons.paste, tooltip: 'Einfuegen', onTap: _paste),
-                if (_hasSelection)
+                if (_hasSelection) ...[
+                  _ToolButton(icon: Icons.copy, tooltip: 'Kopieren', onTap: () {
+                    _copyToClipboard(_selected.first);
+                  }),
                   _ToolButton(icon: Icons.delete, tooltip: 'Loeschen', onTap: _deleteSelected),
-                const SizedBox(width: 8),
+                  Text('${_selected.length}', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                ],
+                const SizedBox(width: 6),
                 Expanded(
                   child: Container(
-                    height: 26,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    height: 24,
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     alignment: Alignment.centerLeft,
                     child: Text(_currentPath,
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontFamily: 'monospace'),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10, fontFamily: 'monospace'),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -317,8 +395,14 @@ class _FileManagerAppState extends State<FileManagerApp> {
                                 icon: isDir ? Icons.folder : _iconForFile(name),
                                 iconColor: isDir ? Colors.amber : Colors.white54,
                                 subtitle: isDir ? null : _getFileSize(entry),
+                                selected: _selected.contains(entry.path),
                                 onTap: () {
-                                  if (isDir) { _loadDirectory(entry.path); }
+                                  if (_multiSelect) {
+                                    setState(() {
+                                      if (_selected.contains(entry.path)) _selected.remove(entry.path);
+                                      else _selected.add(entry.path);
+                                    });
+                                  } else if (isDir) { _loadDirectory(entry.path); }
                                   else { _openFile(entry.path); }
                                 },
                                 onSecondaryTap: (pos) => _showFileContextMenu(pos, entry),
@@ -469,12 +553,13 @@ class _FileRow extends StatefulWidget {
   final IconData icon;
   final Color iconColor;
   final String? subtitle;
+  final bool selected;
   final VoidCallback onTap;
   final void Function(Offset)? onSecondaryTap;
 
   const _FileRow({
     required this.name, required this.icon, required this.iconColor,
-    this.subtitle, required this.onTap, this.onSecondaryTap,
+    this.subtitle, this.selected = false, required this.onTap, this.onSecondaryTap,
   });
 
   @override
@@ -497,7 +582,9 @@ class _FileRowState extends State<_FileRow> {
         child: Container(
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          color: _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
+          color: widget.selected
+              ? Colors.blueAccent.withValues(alpha: 0.15)
+              : _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
           child: Row(
             children: [
               Icon(widget.icon, color: widget.iconColor, size: 18),

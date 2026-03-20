@@ -29,6 +29,7 @@ import '../apps/speed_test.dart';
 import '../apps/vpn_manager.dart';
 import '../apps/notification_center.dart';
 import '../apps/games.dart';
+import '../apps/about_app.dart';
 import '../widgets/screensaver.dart';
 import '../widgets/splash_screen.dart';
 import '../widgets/setup_wizard.dart';
@@ -400,6 +401,7 @@ class _DesktopShellState extends State<DesktopShell> {
           url: window.initialData?['url'] as String? ?? 'https://dos.zone/',
           title: window.title,
         ),
+      'about' => const AboutApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
