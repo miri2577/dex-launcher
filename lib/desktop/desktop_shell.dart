@@ -22,6 +22,12 @@ import '../apps/network_scanner.dart';
 import '../apps/music_player.dart';
 import '../apps/weather_widget.dart';
 import '../apps/developer_options.dart';
+import '../apps/global_search.dart';
+import '../apps/quick_settings.dart';
+import '../apps/usb_manager.dart';
+import '../apps/speed_test.dart';
+import '../apps/vpn_manager.dart';
+import '../apps/notification_center.dart';
 import '../widgets/screensaver.dart';
 import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
@@ -351,6 +357,12 @@ class _DesktopShellState extends State<DesktopShell> {
       'music_player' => const MusicPlayerApp(),
       'weather' => const WeatherApp(),
       'developer' => const DeveloperOptionsApp(),
+      'search' => const GlobalSearchApp(),
+      'quick_settings' => const QuickSettingsApp(),
+      'usb_manager' => const UsbManagerApp(),
+      'speed_test' => const SpeedTestApp(),
+      'vpn_manager' => const VpnManagerApp(),
+      'notifications' => const NotificationCenterApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),

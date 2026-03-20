@@ -36,6 +36,17 @@ import java.io.ByteArrayOutputStream
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.dexlauncher/apps"
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Bildschirmtastatur permanent unterdrücken bei Hardware-Tastatur
+        try {
+            Settings.Secure.putInt(contentResolver, "show_ime_with_hard_keyboard", 0)
+        } catch (_: Exception) {
+            // Fallback per Shell
+            try { Runtime.getRuntime().exec(arrayOf("sh", "-c", "settings put secure show_ime_with_hard_keyboard 0")) } catch (_: Exception) {}
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -97,6 +108,20 @@ class MainActivity : FlutterActivity() {
                     // obwohl appops SYSTEM_ALERT_WINDOW allow gesetzt ist.
                     // Wir versuchen es einfach — der Service fängt den Fehler ab.
                     result.success(true)
+                }
+                "getUsbDevices" -> {
+                    result.success(getUsbDevices())
+                }
+                "getNotifications" -> {
+                    // Notifications brauchen NotificationListenerService — Platzhalter
+                    result.success(emptyList<Map<String, Any?>>())
+                }
+                "searchFiles" -> {
+                    val query = call.argument<String>("query") ?: ""
+                    result.success(searchFiles(query))
+                }
+                "runSpeedTest" -> {
+                    result.success(runSpeedTest())
                 }
                 "getRunningApps" -> {
                     result.success(getRunningApps())
@@ -397,6 +422,49 @@ class MainActivity : FlutterActivity() {
             .sortedByDescending { it.lastTimeUsed }
             .take(limit)
             .map { it.packageName }
+    }
+
+    private fun getUsbDevices(): List<Map<String, String>> {
+        val usbManager = getSystemService(Context.USB_SERVICE) as? android.hardware.usb.UsbManager
+            ?: return emptyList()
+        return usbManager.deviceList.values.map { device ->
+            mapOf(
+                "name" to (device.productName ?: "USB Geraet"),
+                "vendor" to "VID:${device.vendorId} PID:${device.productId}",
+                "class" to "Klasse ${device.deviceClass}",
+            )
+        }.toList()
+    }
+
+    private fun searchFiles(query: String): List<Map<String, String>> {
+        if (query.length < 2) return emptyList()
+        val results = mutableListOf<Map<String, String>>()
+        val root = java.io.File("/storage/emulated/0")
+        val q = query.lowercase()
+        root.walkTopDown().maxDepth(4).take(5000).forEach { file ->
+            if (file.name.lowercase().contains(q)) {
+                results.add(mapOf("path" to file.absolutePath, "name" to file.name, "isDir" to file.isDirectory.toString()))
+                if (results.size >= 50) return@forEach
+            }
+        }
+        return results
+    }
+
+    private fun runSpeedTest(): Map<String, Any?> {
+        return try {
+            val start = System.currentTimeMillis()
+            val url = java.net.URL("https://speed.cloudflare.com/__down?bytes=1000000")
+            val conn = url.openConnection() as java.net.HttpURLConnection
+            conn.connectTimeout = 10000
+            conn.readTimeout = 10000
+            val bytes = conn.inputStream.readBytes()
+            val elapsed = System.currentTimeMillis() - start
+            conn.disconnect()
+            val mbps = if (elapsed > 0) (bytes.size * 8.0 / 1000.0 / elapsed) else 0.0
+            mapOf("mbps" to "%.1f".format(mbps), "bytes" to bytes.size, "ms" to elapsed)
+        } catch (e: Exception) {
+            mapOf("mbps" to "0", "bytes" to 0, "ms" to 0, "error" to (e.message ?: "Fehler"))
+        }
     }
 
     @Suppress("DEPRECATION")

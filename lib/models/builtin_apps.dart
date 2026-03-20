@@ -34,6 +34,12 @@ const builtinApps = [
   BuiltinApp(id: 'music_player', name: 'Musik', icon: Icons.music_note, defaultSize: Size(450, 380)),
   BuiltinApp(id: 'weather', name: 'Wetter', icon: Icons.cloud, defaultSize: Size(320, 340)),
   BuiltinApp(id: 'developer', name: 'Entwickleroptionen', icon: Icons.developer_mode, defaultSize: Size(550, 450)),
+  BuiltinApp(id: 'search', name: 'Suche', icon: Icons.search, defaultSize: Size(450, 400)),
+  BuiltinApp(id: 'quick_settings', name: 'Schnelleinstellungen', icon: Icons.tune, defaultSize: Size(350, 350)),
+  BuiltinApp(id: 'usb_manager', name: 'USB-Geraete', icon: Icons.usb, defaultSize: Size(400, 350)),
+  BuiltinApp(id: 'speed_test', name: 'Speed Test', icon: Icons.speed, defaultSize: Size(350, 380)),
+  BuiltinApp(id: 'vpn_manager', name: 'VPN', icon: Icons.vpn_lock, defaultSize: Size(400, 380)),
+  BuiltinApp(id: 'notifications', name: 'Benachrichtigungen', icon: Icons.notifications, defaultSize: Size(420, 400)),
 ];
 
 BuiltinApp? getBuiltinApp(String id) {
