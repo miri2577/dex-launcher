@@ -390,12 +390,16 @@ class _FileManagerAppState extends State<FileManagerApp> {
                               final entry = _entries[index];
                               final name = entry.path.split('/').last;
                               final isDir = entry is Directory;
+                              final ext = name.split('.').last.toLowerCase();
+                              final isImage = {'jpg','jpeg','png','webp','bmp','gif'}.contains(ext);
                               return _FileRow(
                                 name: name,
+                                path: entry.path,
                                 icon: isDir ? Icons.folder : _iconForFile(name),
                                 iconColor: isDir ? Colors.amber : Colors.white54,
                                 subtitle: isDir ? null : _getFileSize(entry),
                                 selected: _selected.contains(entry.path),
+                                isImage: isImage,
                                 onTap: () {
                                   if (_multiSelect) {
                                     setState(() {
@@ -550,16 +554,19 @@ class _ToolButtonState extends State<_ToolButton> {
 
 class _FileRow extends StatefulWidget {
   final String name;
+  final String path;
   final IconData icon;
   final Color iconColor;
   final String? subtitle;
   final bool selected;
+  final bool isImage;
   final VoidCallback onTap;
   final void Function(Offset)? onSecondaryTap;
 
   const _FileRow({
-    required this.name, required this.icon, required this.iconColor,
-    this.subtitle, this.selected = false, required this.onTap, this.onSecondaryTap,
+    required this.name, required this.path, required this.icon, required this.iconColor,
+    this.subtitle, this.selected = false, this.isImage = false,
+    required this.onTap, this.onSecondaryTap,
   });
 
   @override
@@ -580,14 +587,25 @@ class _FileRowState extends State<_FileRow> {
         onLongPressStart: widget.onSecondaryTap != null
             ? (d) => widget.onSecondaryTap!(d.globalPosition) : null,
         child: Container(
-          height: 32,
+          height: widget.isImage ? 40 : 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: widget.selected
               ? const Color(0xFF86BE43).withValues(alpha: 0.15)
               : _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
           child: Row(
             children: [
-              Icon(widget.icon, color: widget.iconColor, size: 18),
+              // Thumbnail für Bilder
+              if (widget.isImage)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: SizedBox(
+                    width: 32, height: 32,
+                    child: Image.file(File(widget.path), fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(widget.icon, color: widget.iconColor, size: 18)),
+                  ),
+                )
+              else
+                Icon(widget.icon, color: widget.iconColor, size: 18),
               const SizedBox(width: 10),
               Expanded(child: Text(widget.name, style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis)),
               if (widget.subtitle != null)
