@@ -44,6 +44,22 @@ class _StartMenuState extends State<StartMenu> {
     );
   }
 
+  void _launchOrWeb(BuildContext context, String packageName, String title, String url) {
+    widget.onClose();
+    // Versuche die installierte App zu starten
+    final state = context.read<DesktopState>();
+    final app = state.allApps.where((a) => a.packageName == packageName).firstOrNull;
+    if (app != null) {
+      state.launchApp(app);
+    } else {
+      // Fallback: im Browser öffnen
+      context.read<WindowManager>().openWindow(
+        appType: 'browser', title: title, icon: Icons.language,
+        size: const Size(700, 450), initialData: {'url': url},
+      );
+    }
+  }
+
   void _openWebApp(BuildContext context, String title, String url) {
     widget.onClose();
     context.read<WindowManager>().openWindow(
@@ -118,6 +134,7 @@ class _StartMenuState extends State<StartMenu> {
                     onSecondaryTap: (pos) {
                       final state = context.read<DesktopState>();
                       final pinned = state.isToolPinned(tool.id);
+                      final autoStart = state.isAutoStart(tool.id);
                       ContextMenu.show(context: context, position: pos, items: [
                         ContextMenuItem(icon: Icons.open_in_new, label: 'Oeffnen', onTap: () => _openTool(context, tool)),
                         ContextMenuItem(
@@ -125,9 +142,26 @@ class _StartMenuState extends State<StartMenu> {
                           label: pinned ? 'Vom Dock entfernen' : 'An Dock anheften',
                           onTap: () => state.toggleToolPin(tool.id),
                         ),
+                        ContextMenuItem(
+                          icon: autoStart ? Icons.play_disabled : Icons.play_arrow,
+                          label: autoStart ? 'Nicht bei Start oeffnen' : 'Bei Start oeffnen',
+                          onTap: () => state.toggleAutoStart(tool.id),
+                        ),
                       ]);
                     },
                   )),
+
+                  _SectionHeader('Streaming'),
+                  _ListItem(icon: Icons.play_circle, label: 'YouTube',
+                    onTap: () => _openWebApp(context, 'YouTube', 'https://www.youtube.com')),
+                  _ListItem(icon: Icons.movie, label: 'Netflix',
+                    onTap: () => _launchOrWeb(context, 'com.netflix.ninja', 'Netflix', 'https://www.netflix.com')),
+                  _ListItem(icon: Icons.movie, label: 'Disney+',
+                    onTap: () => _launchOrWeb(context, 'com.disney.disneyplus', 'Disney+', 'https://www.disneyplus.com')),
+                  _ListItem(icon: Icons.movie, label: 'Amazon Prime',
+                    onTap: () => _launchOrWeb(context, 'com.amazon.amazonvideo.livingroom', 'Prime', 'https://www.amazon.de/gp/video')),
+                  _ListItem(icon: Icons.music_note, label: 'Spotify',
+                    onTap: () => _launchOrWeb(context, 'com.spotify.tv.android', 'Spotify', 'https://open.spotify.com')),
 
                   _SectionHeader('Google'),
                   _ListItem(icon: Icons.search, label: 'Google Suche',

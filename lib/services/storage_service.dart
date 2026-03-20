@@ -80,6 +80,21 @@ class StorageService {
   int get accentColorValue => _prefs.getInt('accent_color') ?? 0xFF448AFF;
   set accentColorValue(int value) => _prefs.setInt('accent_color', value);
 
+  // Auto-Start Tools (IDs die beim Start geöffnet werden)
+  List<String> get autoStartTools => _prefs.getStringList('auto_start_tools') ?? [];
+  set autoStartTools(List<String> ids) => _prefs.setStringList('auto_start_tools', ids);
+
+  // Bildschirmschoner Timeout (Minuten, 0 = aus)
+  int get screensaverTimeout => _prefs.getInt('screensaver_timeout') ?? 0;
+  set screensaverTimeout(int min) => _prefs.setInt('screensaver_timeout', min);
+
+  // Fenster-Vorlagen
+  String? get savedWindowLayout => _prefs.getString('saved_window_layout');
+  set savedWindowLayout(String? json) {
+    if (json == null) { _prefs.remove('saved_window_layout'); }
+    else { _prefs.setString('saved_window_layout', json); }
+  }
+
   // Custom Wallpaper Image Path
   String? get customWallpaperPath => _prefs.getString('custom_wallpaper_path');
   set customWallpaperPath(String? path) {

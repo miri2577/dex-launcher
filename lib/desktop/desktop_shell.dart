@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,8 @@ import '../apps/task_manager.dart';
 import '../apps/network_scanner.dart';
 import '../apps/music_player.dart';
 import '../apps/weather_widget.dart';
+import '../widgets/screensaver.dart';
+import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
@@ -40,8 +43,18 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _settingsOpen = false;
   bool _appSwitcherOpen = false;
   bool _dockVisible = true;
+  bool _screensaverActive = false;
+  bool _autoStartDone = false;
+  DateTime _lastActivity = DateTime.now();
+  Timer? _screensaverTimer;
   final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
   final _dockKey = GlobalKey<DockState>();
+
+  @override
+  void dispose() {
+    _screensaverTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,8 +80,34 @@ class _DesktopShellState extends State<DesktopShell> {
             );
           }
 
-          // Bildschirmgröße für Fenster-Positionierung
           state.updateScreenSize(MediaQuery.of(context).size);
+
+          // Auto-Start
+          if (!_autoStartDone && state.autoStartTools.isNotEmpty) {
+            _autoStartDone = true;
+            final wm = context.read<WindowManager>();
+            for (final toolId in state.autoStartTools) {
+              final tool = getBuiltinApp(toolId);
+              if (tool != null) {
+                wm.openWindow(appType: tool.id, title: tool.name, icon: tool.icon, size: tool.defaultSize);
+              }
+            }
+          }
+
+          // Screensaver Timer
+          _screensaverTimer?.cancel();
+          if (state.screensaverTimeout > 0 && !_screensaverActive) {
+            _screensaverTimer = Timer(Duration(minutes: state.screensaverTimeout), () {
+              if (mounted) setState(() => _screensaverActive = true);
+            });
+          }
+
+          if (_screensaverActive) {
+            return Screensaver(onDismiss: () => setState(() {
+              _screensaverActive = false;
+              _lastActivity = DateTime.now();
+            }));
+          }
 
           return CursorOverlay(
             child: Shortcuts(

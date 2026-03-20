@@ -22,6 +22,8 @@ class DesktopState extends ChangeNotifier {
   List<String> _activeWidgets = [];
   String _themeMode = 'dark';
   Color _accentColor = const Color(0xFF448AFF);
+  int _screensaverTimeout = 0;
+  List<String> _autoStartTools = [];
   Map<String, Offset> _desktopPositions = {};
 
   // Bildschirmgröße für Fenster-Positionierung
@@ -51,6 +53,8 @@ class DesktopState extends ChangeNotifier {
   List<String> get activeWidgets => _activeWidgets;
   String get themeMode => _themeMode;
   Color get accentColor => _accentColor;
+  int get screensaverTimeout => _screensaverTimeout;
+  List<String> get autoStartTools => _autoStartTools;
   Map<String, Offset> get desktopPositions => _desktopPositions;
 
   Future<void> init() async {
@@ -62,6 +66,8 @@ class DesktopState extends ChangeNotifier {
     _activeWidgets = storage.activeWidgets;
     _themeMode = storage.themeMode;
     _accentColor = Color(storage.accentColorValue);
+    _screensaverTimeout = storage.screensaverTimeout;
+    _autoStartTools = storage.autoStartTools;
     _iconSize = storage.iconSize;
     _loadPositions();
     await loadApps();
@@ -304,6 +310,24 @@ class DesktopState extends ChangeNotifier {
   void setAccentColor(Color color) {
     _accentColor = color;
     storage.accentColorValue = color.toARGB32();
+    notifyListeners();
+  }
+
+  void setScreensaverTimeout(int minutes) {
+    _screensaverTimeout = minutes;
+    storage.screensaverTimeout = minutes;
+    notifyListeners();
+  }
+
+  bool isAutoStart(String toolId) => _autoStartTools.contains(toolId);
+
+  void toggleAutoStart(String toolId) {
+    if (_autoStartTools.contains(toolId)) {
+      _autoStartTools.remove(toolId);
+    } else {
+      _autoStartTools.add(toolId);
+    }
+    storage.autoStartTools = _autoStartTools;
     notifyListeners();
   }
 

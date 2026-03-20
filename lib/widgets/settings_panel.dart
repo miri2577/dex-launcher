@@ -161,6 +161,39 @@ class _SettingsPanelState extends State<SettingsPanel> {
                   ),
 
                   const SizedBox(height: 24),
+                  _SectionTitle('Bildschirmschoner'),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.nightlight, color: Colors.white70, size: 20),
+                        const SizedBox(width: 12),
+                        const Text('Nach', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        const SizedBox(width: 8),
+                        DropdownButton<int>(
+                          value: state.screensaverTimeout,
+                          dropdownColor: const Color(0xFF303030),
+                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          underline: const SizedBox(),
+                          items: [
+                            const DropdownMenuItem(value: 0, child: Text('Aus')),
+                            const DropdownMenuItem(value: 1, child: Text('1 Min')),
+                            const DropdownMenuItem(value: 5, child: Text('5 Min')),
+                            const DropdownMenuItem(value: 10, child: Text('10 Min')),
+                            const DropdownMenuItem(value: 30, child: Text('30 Min')),
+                          ],
+                          onChanged: (v) => state.setScreensaverTimeout(v ?? 0),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
                   _SectionTitle('Erscheinungsbild'),
                   const SizedBox(height: 8),
                   _AccentColorPicker(
