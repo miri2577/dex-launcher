@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/cinnamon_theme.dart';
 import '../models/app_info.dart';
 import '../models/builtin_apps.dart';
@@ -77,9 +78,25 @@ class _StartMenuState extends State<StartMenu> {
       ),
       child: Column(
         children: [
-          // Suche oben
+          // User-Info oben
+          FutureBuilder<String>(
+            future: SharedPreferences.getInstance().then((p) => p.getString('user_name') ?? 'Benutzer'),
+            builder: (context, snap) {
+              final name = snap.data ?? 'Benutzer';
+              return Container(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+                child: Row(children: [
+                  CircleAvatar(radius: 14, backgroundColor: C.accentDim,
+                    child: Text(name[0].toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 12))),
+                  const SizedBox(width: 8),
+                  Text(name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500)),
+                ]),
+              );
+            },
+          ),
+          // Suche
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
             ),

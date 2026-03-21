@@ -20,11 +20,21 @@ class _ControlCenterAppState extends State<ControlCenterApp> {
   String _activeSection = 'desktop';
   String _userName = 'Benutzer';
   final _nameController = TextEditingController();
+  List<String>? _wallpaperImages;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _loadWallpaperImages();
+  }
+
+  Future<void> _loadWallpaperImages() async {
+    try {
+      final state = context.read<DesktopState>();
+      final images = await state.appService.getWallpaperImages();
+      if (mounted) setState(() => _wallpaperImages = images);
+    } catch (_) {}
   }
 
   @override
@@ -148,8 +158,37 @@ class _ControlCenterAppState extends State<ControlCenterApp> {
           );
         },
       ),
+      // Eigene Bilder vom Gerät
+      if (_wallpaperImages != null && _wallpaperImages!.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        _Title('Eigene Bilder'),
+        const SizedBox(height: 8),
+        GridView.builder(
+          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5, childAspectRatio: 16/9, crossAxisSpacing: 6, mainAxisSpacing: 6),
+          itemCount: _wallpaperImages!.length,
+          itemBuilder: (context, i) {
+            final path = _wallpaperImages![i];
+            final selected = state.customWallpaperPath == path;
+            return GestureDetector(
+              onTap: () => state.setCustomWallpaper(path),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: selected ? Colors.white : C.border, width: selected ? 2 : 1),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.file(File(path), fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(color: C.surfaceDim,
+                    child: const Icon(Icons.broken_image, color: Colors.white24))),
+              ),
+            );
+          },
+        ),
+      ],
       const SizedBox(height: 12),
-      // Custom wallpaper
+      // Custom wallpaper Pfad manuell
       GestureDetector(
         onTap: () async {
           final ctrl = TextEditingController(text: state.customWallpaperPath ?? '/storage/emulated/0/Pictures/');

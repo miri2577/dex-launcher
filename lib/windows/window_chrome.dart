@@ -147,10 +147,14 @@ class _WindowChromeState extends State<WindowChrome> {
                   color: focused ? C.accent.withValues(alpha: 0.35) : Colors.white.withValues(alpha: 0.1),
                   width: focused ? 2 : 1,
                 ),
-                boxShadow: _maximized ? null : [BoxShadow(
-                  color: Colors.black.withValues(alpha: focused ? 0.5 : 0.2),
-                  blurRadius: focused ? 16 : 6, offset: const Offset(0, 3),
-                )],
+                boxShadow: _maximized ? null : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: focused ? 0.6 : 0.25),
+                    blurRadius: focused ? 24 : 8,
+                    offset: const Offset(0, 4),
+                    spreadRadius: focused ? 2 : 0,
+                  ),
+                ],
               ),
               child: ClipRRect(
                 borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(7),
