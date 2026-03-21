@@ -168,7 +168,7 @@ class _WindowChromeState extends State<WindowChrome> {
                     child: Container(
                       height: 38,
                       decoration: BoxDecoration(
-                        color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
+                        color: focused ? Colors.black.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.45),
                         border: const Border(bottom: BorderSide(color: C.separator, width: 1)),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -263,7 +263,7 @@ class _WindowMenu extends StatelessWidget {
       Positioned(left: dx, top: dy, child: Container(
         width: 160,
         decoration: BoxDecoration(
-          color: const Color(0xF0282828), borderRadius: BorderRadius.circular(6),
+          color: Colors.black.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 12)],
         ),

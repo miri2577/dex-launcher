@@ -543,9 +543,9 @@ class _DesktopContextMenu extends StatelessWidget {
           child: Container(
               width: menuWidth,
               decoration: BoxDecoration(
-                color: C.menuBg,
+                color: Colors.black.withValues(alpha: 0.75),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: C.border),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.4),

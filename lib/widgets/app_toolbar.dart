@@ -20,7 +20,7 @@ class AppToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 32,
-      color: C.windowChromeUnfocused,
+      color: Colors.black.withValues(alpha: 0.3),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [

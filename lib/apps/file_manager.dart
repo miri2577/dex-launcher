@@ -341,7 +341,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
           // Schnellzugriff
           Container(
             height: 32,
-            color: const Color(0xFF202020),
+            color: Colors.black.withValues(alpha: 0.3),
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 6),

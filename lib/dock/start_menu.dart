@@ -71,7 +71,7 @@ class _StartMenuState extends State<StartMenu> {
       height: screenH * 0.72,
       margin: const EdgeInsets.only(left: 8, bottom: 4),
       decoration: BoxDecoration(
-        color: C.menuBg,
+        color: Colors.black.withValues(alpha: 0.65),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.6), blurRadius: 20)],
@@ -135,7 +135,7 @@ class _StartMenuState extends State<StartMenu> {
                       // Kategorien-Sidebar
                       Container(
                         width: 130,
-                        color: C.sidebarBg,
+                        color: Colors.black.withValues(alpha: 0.2),
                         child: Column(
                           children: [
                             Expanded(child: ListView(

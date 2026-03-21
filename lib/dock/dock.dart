@@ -49,7 +49,10 @@ class DockState extends State<Dock> {
           // Dock Bar — full-width solid taskbar panel
           Container(
             height: 44,
-            color: C.panelBg,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.5),
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Row(
               children: [
