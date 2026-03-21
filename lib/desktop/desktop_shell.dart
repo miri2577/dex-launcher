@@ -39,7 +39,6 @@ import '../models/builtin_apps.dart';
 import '../dock/dock.dart';
 import '../cursor/cursor_overlay.dart';
 import '../widgets/settings_panel.dart';
-import '../widgets/app_switcher.dart';
 import '../widgets/desktop_widgets.dart';
 import '../widgets/top_bar.dart';
 import 'desktop_background.dart';
@@ -56,12 +55,10 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _showSplash = true;
   bool _showWizard = false;
   // Settings ist jetzt ein MDI-Fenster
-  bool _appSwitcherOpen = false;
   bool _dockVisible = true;
   bool _screensaverActive = false;
   bool _autoStartDone = false;
   Timer? _screensaverTimer;
-  final _appSwitcherKey = GlobalKey<AppSwitcherState2>();
   final _dockKey = GlobalKey<DockState>();
 
   @override
@@ -181,24 +178,23 @@ class _DesktopShellState extends State<DesktopShell> {
                 actions: {
                   _AppSwitcherIntent: CallbackAction<_AppSwitcherIntent>(
                     onInvoke: (_) {
-                      if (_appSwitcherOpen) {
-                        _appSwitcherKey.currentState?.selectNext();
+                      final wm = context.read<WindowManager>();
+                      final windows = wm.windows;
+                      if (windows.isEmpty) return null;
+                      final focused = wm.focusedWindow;
+                      if (focused == null) {
+                        wm.focusWindow(windows.first.id);
                       } else {
-                        setState(() => _appSwitcherOpen = true);
+                        final idx = windows.indexWhere((w) => w.id == focused.id);
+                        final next = (idx + 1) % windows.length;
+                        wm.focusWindow(windows[next].id);
                       }
                       return null;
                     },
                   ),
                   _DismissIntent: CallbackAction<_DismissIntent>(
                     onInvoke: (_) {
-                      setState(() {
-                        if (_appSwitcherOpen) {
-                          _appSwitcherKey.currentState?.confirmSelection();
-                          _appSwitcherOpen = false;
-                        } else {
-                          // Escape schließt nichts mehr
-                        }
-                      });
+                      // Escape — currently no global panel to dismiss
                       return null;
                     },
                   ),
@@ -325,31 +321,6 @@ class _DesktopShellState extends State<DesktopShell> {
                         ),
                       ),
 
-                      // App Switcher (Alt+Tab)
-                      if (_appSwitcherOpen)
-                        Positioned.fill(
-                          child: GestureDetector(
-                            onTap: () {
-                              _appSwitcherKey.currentState?.confirmSelection();
-                              setState(() => _appSwitcherOpen = false);
-                            },
-                            child: Container(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              child: AppSwitcher(
-                                key: _appSwitcherKey,
-                                apps: state.recentApps.isNotEmpty
-                                    ? state.recentApps
-                                    : state.pinnedApps,
-                                onSelect: (app) {
-                                  setState(() => _appSwitcherOpen = false);
-                                  state.launchApp(app);
-                                },
-                                onDismiss: () =>
-                                    setState(() => _appSwitcherOpen = false),
-                              ),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),

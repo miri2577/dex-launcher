@@ -137,7 +137,7 @@ class DockState extends State<Dock> {
     return Container(
       width: 1, height: 28,
       margin: const EdgeInsets.symmetric(horizontal: 6),
-      color: Colors.white.withValues(alpha: 0.15),
+      color: C.borderLight,
     );
   }
 }
@@ -179,7 +179,7 @@ class _PowerStartButtonState extends State<_PowerStartButton> {
           width: 40, height: 40,
           decoration: BoxDecoration(
             
-            color: widget.isActive || _h ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
+            color: widget.isActive || _h ? C.hover : Colors.transparent,
           ),
           child: Icon(widget.isActive ? Icons.close : Icons.apps_rounded, color: Colors.white, size: 20),
         ),
@@ -233,7 +233,7 @@ class _DockToolButtonState extends State<_DockToolButton> {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               
-              color: _h ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+              color: _h ? C.hover : Colors.transparent,
             ),
             child: Icon(widget.tool.icon, color: Colors.white, size: 20),
           ),
@@ -285,7 +285,7 @@ class _DockAppItemState extends State<_DockAppItem> {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               
-              color: _h ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+              color: _h ? C.hover : Colors.transparent,
             ),
             padding: const EdgeInsets.all(5),
             child: AppIconWidget(app: widget.app, size: 30),

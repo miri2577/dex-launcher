@@ -133,6 +133,7 @@ class _WindowChromeState extends State<WindowChrome> {
     return Positioned(
       left: _position.dx, top: _position.dy,
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () => widget.manager.focusWindow(widget.window.id),
         child: SizedBox(
           width: _size.width, height: _size.height,

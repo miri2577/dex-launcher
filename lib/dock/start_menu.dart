@@ -123,14 +123,14 @@ class _StartMenuState extends State<StartMenu> {
                             Expanded(child: ListView(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               children: [
-                                _CatItem('favoriten', 'Favoriten', Icons.star),
-                                _CatItem('tools', 'System-Tools', Icons.build),
-                                _CatItem('internet', 'Internet', Icons.language),
-                                _CatItem('multimedia', 'Multimedia', Icons.movie),
-                                _CatItem('spiele', 'Spiele', Icons.sports_esports),
-                                _CatItem('google', 'Google', Icons.cloud),
-                                _CatItem('streaming', 'Streaming', Icons.live_tv),
-                                _CatItem('alle', 'Alle Apps', Icons.apps),
+                                _CatButton(label: 'Favoriten', icon: Icons.star, active: _activeCategory == 'favoriten', onTap: () => setState(() => _activeCategory = 'favoriten')),
+                                _CatButton(label: 'System-Tools', icon: Icons.build, active: _activeCategory == 'tools', onTap: () => setState(() => _activeCategory = 'tools')),
+                                _CatButton(label: 'Internet', icon: Icons.language, active: _activeCategory == 'internet', onTap: () => setState(() => _activeCategory = 'internet')),
+                                _CatButton(label: 'Multimedia', icon: Icons.movie, active: _activeCategory == 'multimedia', onTap: () => setState(() => _activeCategory = 'multimedia')),
+                                _CatButton(label: 'Spiele', icon: Icons.sports_esports, active: _activeCategory == 'spiele', onTap: () => setState(() => _activeCategory = 'spiele')),
+                                _CatButton(label: 'Google', icon: Icons.cloud, active: _activeCategory == 'google', onTap: () => setState(() => _activeCategory = 'google')),
+                                _CatButton(label: 'Streaming', icon: Icons.live_tv, active: _activeCategory == 'streaming', onTap: () => setState(() => _activeCategory = 'streaming')),
+                                _CatButton(label: 'Alle Apps', icon: Icons.apps, active: _activeCategory == 'alle', onTap: () => setState(() => _activeCategory = 'alle')),
                               ],
                             )),
                             // Power-Buttons unten with labels
@@ -170,25 +170,6 @@ class _StartMenuState extends State<StartMenu> {
     );
   }
 
-  Widget _CatItem(String id, String label, IconData icon) {
-    final active = _activeCategory == id;
-    return GestureDetector(
-      onTap: () => setState(() => _activeCategory = id),
-      child: Container(
-        height: 34,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: active ? C.accentDim : Colors.transparent,
-          border: active ? const Border(left: BorderSide(color: C.accent, width: 2)) : null,
-        ),
-        child: Row(children: [
-          Icon(icon, color: active ? Colors.white : Colors.white54, size: 14),
-          const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: active ? Colors.white : Colors.white70, fontSize: 11)),
-        ]),
-      ),
-    );
-  }
 
   Widget _buildSearchResults() {
     final apps = _filteredApps;
@@ -417,6 +398,42 @@ class _ToolRowState extends State<_ToolRow> {
       ),
     ),
   );
+}
+
+class _CatButton extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+  const _CatButton({required this.label, required this.icon, required this.active, required this.onTap});
+  @override State<_CatButton> createState() => _CatButtonState();
+}
+
+class _CatButtonState extends State<_CatButton> {
+  bool _h = false;
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          height: 34,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: widget.active ? C.accentDim : _h ? C.hover : Colors.transparent,
+            border: widget.active ? const Border(left: BorderSide(color: C.accent, width: 2)) : null,
+          ),
+          child: Row(children: [
+            Icon(widget.icon, color: widget.active ? Colors.white : Colors.white54, size: 14),
+            const SizedBox(width: 8),
+            Text(widget.label, style: TextStyle(color: widget.active ? Colors.white : Colors.white70, fontSize: 11)),
+          ]),
+        ),
+      ),
+    );
+  }
 }
 
 class _PowerBtn extends StatefulWidget {
