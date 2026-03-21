@@ -7,6 +7,8 @@ import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
 import '../windows/mdi_window.dart';
 import '../windows/window_manager.dart';
+import 'dart:async';
+import '../services/system_status_service.dart';
 import '../widgets/context_menu.dart';
 import '../widgets/app_icon_widget.dart';
 import 'start_menu.dart';
@@ -80,6 +82,49 @@ class DockState extends State<Dock> {
                   },
                 ),
                 const Spacer(),
+                // System Tray (rechts)
+                _divider(),
+                Consumer<SystemStatusService>(
+                  builder: (context, service, _) {
+                    final s = service.status;
+                    return Row(mainAxisSize: MainAxisSize.min, children: [
+                      // Volume
+                      GestureDetector(
+                        onTap: () => context.read<WindowManager>().openWindow(
+                          appType: 'quick_settings', title: 'Schnelleinstellungen',
+                          icon: Icons.tune, size: const Size(350, 350)),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          Icon(s.volumeIcon, color: Colors.white54, size: 14),
+                          const SizedBox(width: 2),
+                          Text('${s.volumePercent}%', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                        ]),
+                      ),
+                      const SizedBox(width: 8),
+                      // WiFi
+                      GestureDetector(
+                        onTap: () => context.read<WindowManager>().openWindow(
+                          appType: 'wifi_manager', title: 'WLAN', icon: Icons.wifi, size: const Size(400, 420)),
+                        child: Icon(s.networkIcon, color: s.hasNetwork ? Colors.white : Colors.white38, size: 14),
+                      ),
+                      const SizedBox(width: 6),
+                      // BT
+                      GestureDetector(
+                        onTap: () => context.read<WindowManager>().openWindow(
+                          appType: 'bluetooth_manager', title: 'Bluetooth', icon: Icons.bluetooth, size: const Size(400, 400)),
+                        child: const Icon(Icons.bluetooth, color: Colors.white38, size: 14),
+                      ),
+                      // Batterie
+                      if (s.hasBattery) ...[
+                        const SizedBox(width: 6),
+                        Icon(s.batteryIcon, color: s.batteryColor, size: 14),
+                      ],
+                    ]);
+                  },
+                ),
+                _divider(),
+                // Uhr
+                _DockClock(),
+                const SizedBox(width: 8),
               ],
             ),
           ),
@@ -334,6 +379,51 @@ class _DockMDIItemState extends State<_DockMDIItem> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DockClock extends StatefulWidget {
+  @override
+  State<_DockClock> createState() => _DockClockState();
+}
+
+class _DockClockState extends State<_DockClock> {
+  late Timer _timer;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() { _timer.cancel(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    return GestureDetector(
+      onTap: () => context.read<WindowManager>().openWindow(
+        appType: 'notifications', title: 'Benachrichtigungen',
+        icon: Icons.notifications, size: const Size(420, 400)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
+            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500, height: 1),
+          ),
+          Text(
+            '${weekdays[_now.weekday - 1]} ${_now.day}.${_now.month}.${_now.year}',
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 8, height: 1.2),
+          ),
+        ],
       ),
     );
   }

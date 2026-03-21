@@ -246,15 +246,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         customImagePath: state.customWallpaperPath,
                       ),
 
-                      // Top Bar
-                      const Positioned(
-                        left: 0, right: 0, top: 0,
-                        child: TopBar(),
-                      ),
-
-                      // Desktop Icons (zwischen Top-Bar und Dock)
+                      // Desktop Icons
                       Positioned.fill(
-                        top: 32,
                         bottom: _dockVisible ? 40 : 0,
                         child: GestureDetector(
                           onTap: () {
@@ -272,7 +265,7 @@ class _DesktopShellState extends State<DesktopShell> {
                       if (state.activeWidgets.isNotEmpty)
                         Positioned(
                           right: 16,
-                          top: 40,
+                          top: 16,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
