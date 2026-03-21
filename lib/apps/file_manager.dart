@@ -96,20 +96,73 @@ class _FileManagerAppState extends State<FileManagerApp> {
     }
   }
 
+  Widget _buildBreadcrumb() {
+    final parts = _currentPath.split('/').where((p) => p.isNotEmpty).toList();
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      children: [
+        // Root
+        GestureDetector(
+          onTap: () => _loadDirectory('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            alignment: Alignment.center,
+            child: Icon(Icons.computer, color: Colors.white.withValues(alpha: 0.4), size: 12),
+          ),
+        ),
+        ...parts.asMap().entries.map((entry) {
+          final i = entry.key;
+          final part = entry.value;
+          final path = '/${parts.sublist(0, i + 1).join('/')}';
+          final isLast = i == parts.length - 1;
+          return Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.2), size: 14),
+            GestureDetector(
+              onTap: isLast ? null : () => _loadDirectory(path),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                alignment: Alignment.center,
+                child: Text(part,
+                  style: TextStyle(
+                    color: isLast ? Colors.white.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.4),
+                    fontSize: 10,
+                    fontWeight: isLast ? FontWeight.w500 : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          ]);
+        }),
+      ],
+    );
+  }
+
   void _navigateUp() {
     final parent = Directory(_currentPath).parent.path;
     if (parent != _currentPath) _loadDirectory(parent);
   }
 
-  // Datei-Operationen
+  static const _trashDir = '/storage/emulated/0/.trash';
+
+  // Datei-Operationen — verschiebt in Papierkorb statt direkt löschen
   Future<void> _deleteSelected() async {
+    final trashDir = Directory(_trashDir);
+    if (!await trashDir.exists()) await trashDir.create(recursive: true);
+
     for (final path in _selected) {
       try {
-        final entity = FileSystemEntity.typeSync(path) == FileSystemEntityType.directory
-            ? Directory(path)
-            : File(path);
-        await entity.delete(recursive: true);
-      } catch (_) {}
+        final name = path.split('/').last;
+        final dest = '$_trashDir/${DateTime.now().millisecondsSinceEpoch}_$name';
+        await File(path).rename(dest);
+      } catch (_) {
+        // Fallback: direkt löschen wenn Verschieben fehlschlägt
+        try {
+          final entity = FileSystemEntity.typeSync(path) == FileSystemEntityType.directory
+              ? Directory(path) : File(path);
+          await entity.delete(recursive: true);
+        } catch (_) {}
+      }
     }
     _selected.clear();
     _loadDirectory();
@@ -361,16 +414,11 @@ class _FileManagerAppState extends State<FileManagerApp> {
                 Expanded(
                   child: Container(
                     height: 24,
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(_currentPath,
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10, fontFamily: 'monospace'),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    child: _buildBreadcrumb(),
                   ),
                 ),
               ],

@@ -42,6 +42,7 @@ const builtinApps = [
   BuiltinApp(id: 'notifications', name: 'Benachrichtigungen', icon: Icons.notifications, defaultSize: Size(420, 400)),
   BuiltinApp(id: 'games', name: 'Spiele', icon: Icons.sports_esports, defaultSize: Size(400, 350)),
   BuiltinApp(id: 'settings', name: 'Einstellungen', icon: Icons.settings, defaultSize: Size(420, 480)),
+  BuiltinApp(id: 'trash', name: 'Papierkorb', icon: Icons.delete_outline, defaultSize: Size(450, 380)),
   BuiltinApp(id: 'about', name: 'Ueber', icon: Icons.info_outline, defaultSize: Size(420, 380)),
 ];
 

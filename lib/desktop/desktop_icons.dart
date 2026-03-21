@@ -66,7 +66,12 @@ class DesktopIcons extends StatelessWidget {
                   iconSize: iconSize,
                   icon: Icons.delete_outline,
                   label: 'Papierkorb',
-                  onTap: () {},
+                  onTap: () {
+                    context.read<WindowManager>().openWindow(
+                      appType: 'trash', title: 'Papierkorb',
+                      icon: Icons.delete_outline, size: const Size(450, 380),
+                    );
+                  },
                   onPositionChanged: (pos) {
                     state.updateDesktopPosition('__system_trash', pos);
                   },

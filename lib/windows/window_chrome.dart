@@ -233,11 +233,11 @@ class _TrafficBtnState extends State<_TrafficBtn> {
           alignment: Alignment.center,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
-            width: _h ? 20 : 6,
-            height: _h ? 20 : 6,
+            width: _h ? 22 : 16,
+            height: _h ? 22 : 16,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _h ? widget.hoverColor : Colors.white.withValues(alpha: 0.2),
+              color: _h ? widget.hoverColor : widget.hoverColor.withValues(alpha: 0.4),
             ),
             child: _h
                 ? Icon(widget.icon, color: Colors.white, size: 11)

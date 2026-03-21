@@ -30,6 +30,7 @@ import '../apps/vpn_manager.dart';
 import '../apps/notification_center.dart';
 import '../apps/games.dart';
 import '../apps/about_app.dart';
+import '../apps/trash_app.dart';
 import '../widgets/screensaver.dart';
 import '../widgets/splash_screen.dart';
 import '../widgets/setup_wizard.dart';
@@ -402,6 +403,7 @@ class _DesktopShellState extends State<DesktopShell> {
         ),
       'about' => const AboutApp(),
       'settings' => const SettingsPanel(),
+      'trash' => const TrashApp(),
       'video_player' => VideoPlayerApp(
           onTitleChanged: (title) => wm.updateWindowTitle(window.id, title),
         ),
