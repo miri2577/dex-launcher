@@ -254,8 +254,8 @@ class _DesktopShellState extends State<DesktopShell> {
 
                       // Desktop Icons (zwischen Top-Bar und Dock)
                       Positioned.fill(
-                        top: 28,
-                        bottom: _dockVisible ? 56 : 0,
+                        top: 32,
+                        bottom: _dockVisible ? 40 : 0,
                         child: GestureDetector(
                           onTap: () {
                             _dockKey.currentState?.closeStartMenu();
@@ -272,7 +272,7 @@ class _DesktopShellState extends State<DesktopShell> {
                       if (state.activeWidgets.isNotEmpty)
                         Positioned(
                           right: 16,
-                          top: 36,
+                          top: 40,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
@@ -318,7 +318,7 @@ class _DesktopShellState extends State<DesktopShell> {
                         curve: Curves.easeInOut,
                         left: 0,
                         right: 0,
-                        bottom: _dockVisible ? 0 : -60,
+                        bottom: _dockVisible ? 0 : -44,
                         child: Dock(
                           key: _dockKey,
                           onSettingsOpen: () {
