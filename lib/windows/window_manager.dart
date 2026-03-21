@@ -157,6 +157,39 @@ class WindowManager extends ChangeNotifier {
     }
   }
 
+  void tileLeft(String id) {
+    final screen = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize /
+        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final w = _windows.where((w) => w.id == id).firstOrNull;
+    if (w == null) return;
+    w.position = Offset.zero;
+    w.size = Size(screen.width / 2, screen.height - 40);
+    w.isMinimized = false;
+    notifyListeners();
+  }
+
+  void tileRight(String id) {
+    final screen = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize /
+        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final w = _windows.where((w) => w.id == id).firstOrNull;
+    if (w == null) return;
+    w.position = Offset(screen.width / 2, 0);
+    w.size = Size(screen.width / 2, screen.height - 40);
+    w.isMinimized = false;
+    notifyListeners();
+  }
+
+  void maximizeWindow(String id) {
+    final screen = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize /
+        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    final w = _windows.where((w) => w.id == id).firstOrNull;
+    if (w == null) return;
+    w.position = Offset.zero;
+    w.size = Size(screen.width, screen.height - 40);
+    w.isMinimized = false;
+    notifyListeners();
+  }
+
   void closeAll() {
     _windows.clear();
     notifyListeners();

@@ -56,6 +56,7 @@ class _DesktopShellState extends State<DesktopShell> {
   bool _showWizard = false;
   // Settings ist jetzt ein MDI-Fenster
   bool _dockVisible = true;
+  bool _dockAutoHidden = false;
   bool _screensaverActive = false;
   bool _autoStartDone = false;
   Timer? _screensaverTimer;
@@ -178,6 +179,13 @@ class _DesktopShellState extends State<DesktopShell> {
                 // Ctrl+W → Fokussiertes Fenster schließen
                 LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyW):
                     const _CloseWindowIntent(),
+                // Super+Arrow → Window tiling
+                LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft):
+                    const _TileLeftIntent(),
+                LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight):
+                    const _TileRightIntent(),
+                LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp):
+                    const _MaximizeIntent(),
                 // Ctrl+1/2/3 → Desktop wechseln
                 LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
                     const _SwitchDesktopIntent(0),
@@ -251,6 +259,30 @@ class _DesktopShellState extends State<DesktopShell> {
                       final wm = context.read<WindowManager>();
                       final focused = wm.focusedWindow;
                       if (focused != null) wm.closeWindow(focused.id);
+                      return null;
+                    },
+                  ),
+                  _TileLeftIntent: CallbackAction<_TileLeftIntent>(
+                    onInvoke: (_) {
+                      final wm = context.read<WindowManager>();
+                      final focused = wm.focusedWindow;
+                      if (focused != null) wm.tileLeft(focused.id);
+                      return null;
+                    },
+                  ),
+                  _TileRightIntent: CallbackAction<_TileRightIntent>(
+                    onInvoke: (_) {
+                      final wm = context.read<WindowManager>();
+                      final focused = wm.focusedWindow;
+                      if (focused != null) wm.tileRight(focused.id);
+                      return null;
+                    },
+                  ),
+                  _MaximizeIntent: CallbackAction<_MaximizeIntent>(
+                    onInvoke: (_) {
+                      final wm = context.read<WindowManager>();
+                      final focused = wm.focusedWindow;
+                      if (focused != null) wm.maximizeWindow(focused.id);
                       return null;
                     },
                   ),
@@ -331,16 +363,38 @@ class _DesktopShellState extends State<DesktopShell> {
                         left: 0,
                         right: 0,
                         bottom: _dockVisible ? 0 : -44,
-                        child: Dock(
-                          key: _dockKey,
-                          onSettingsOpen: () {
-                            context.read<WindowManager>().openWindow(
-                              appType: 'settings', title: 'Einstellungen',
-                              icon: Icons.settings, size: const Size(420, 480),
-                            );
+                        child: MouseRegion(
+                          onExit: (_) {
+                            // Auto-hide dock when mouse leaves dock area
+                            // (only if it was shown via trigger zone)
+                            if (_dockAutoHidden) {
+                              setState(() => _dockVisible = false);
+                            }
                           },
+                          child: Dock(
+                            key: _dockKey,
+                            onSettingsOpen: () {
+                              context.read<WindowManager>().openWindow(
+                                appType: 'settings', title: 'Einstellungen',
+                                icon: Icons.settings, size: const Size(420, 480),
+                              );
+                            },
+                          ),
                         ),
                       ),
+
+                      // Auto-show trigger zone at bottom
+                      if (!_dockVisible)
+                        Positioned(
+                          left: 0, right: 0, bottom: 0,
+                          child: MouseRegion(
+                            onEnter: (_) => setState(() {
+                              _dockVisible = true;
+                              _dockAutoHidden = true;
+                            }),
+                            child: Container(height: 4, color: Colors.transparent),
+                          ),
+                        ),
 
                     ],
                   ),
@@ -632,4 +686,16 @@ class _SwitchDesktopIntent extends Intent {
 
 class _CloseWindowIntent extends Intent {
   const _CloseWindowIntent();
+}
+
+class _TileLeftIntent extends Intent {
+  const _TileLeftIntent();
+}
+
+class _TileRightIntent extends Intent {
+  const _TileRightIntent();
+}
+
+class _MaximizeIntent extends Intent {
+  const _MaximizeIntent();
 }

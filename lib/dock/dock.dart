@@ -202,6 +202,9 @@ class _DockToolButtonState extends State<_DockToolButton> {
 
   @override
   Widget build(BuildContext context) {
+    final wm = context.watch<WindowManager>();
+    final isRunning = wm.allWindows.any((w) => w.appType == widget.tool.id);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _h = true),
       onExit: (_) => setState(() => _h = false),
@@ -232,10 +235,26 @@ class _DockToolButtonState extends State<_DockToolButton> {
             width: 40, height: 40,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              
+
               color: _h ? C.hover : Colors.transparent,
             ),
-            child: Icon(widget.tool.icon, color: Colors.white, size: 20),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(widget.tool.icon, color: Colors.white, size: 20),
+                if (isRunning)
+                  Positioned(
+                    bottom: 2,
+                    child: Container(
+                      width: 4, height: 2,
+                      decoration: BoxDecoration(
+                        color: C.accent,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
