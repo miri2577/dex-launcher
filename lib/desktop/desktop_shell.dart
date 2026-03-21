@@ -32,6 +32,7 @@ import '../apps/games.dart';
 import '../apps/about_app.dart';
 import '../apps/trash_app.dart';
 import '../apps/calendar_app.dart';
+import '../apps/control_center.dart';
 import '../widgets/screensaver.dart';
 import '../widgets/splash_screen.dart';
 import '../widgets/setup_wizard.dart';
@@ -237,7 +238,7 @@ class _DesktopShellState extends State<DesktopShell> {
                     onInvoke: (_) {
                       context.read<WindowManager>().openWindow(
                         appType: 'settings', title: 'Einstellungen',
-                        icon: Icons.settings, size: const Size(420, 480),
+                        icon: Icons.settings, size: const Size(600, 450),
                       );
                       return null;
                     },
@@ -376,7 +377,7 @@ class _DesktopShellState extends State<DesktopShell> {
                             onSettingsOpen: () {
                               context.read<WindowManager>().openWindow(
                                 appType: 'settings', title: 'Einstellungen',
-                                icon: Icons.settings, size: const Size(420, 480),
+                                icon: Icons.settings, size: const Size(600, 450),
                               );
                             },
                           ),
@@ -450,7 +451,7 @@ class _DesktopShellState extends State<DesktopShell> {
           title: window.title,
         ),
       'about' => const AboutApp(),
-      'settings' => const SettingsPanel(),
+      'settings' => const ControlCenterApp(),
       'trash' => const TrashApp(),
       'calendar' => const CalendarApp(),
       'video_player' => VideoPlayerApp(
@@ -477,7 +478,7 @@ class _DesktopShellState extends State<DesktopShell> {
             entry.remove();
             context.read<WindowManager>().openWindow(
               appType: 'settings', title: 'Einstellungen',
-              icon: Icons.settings, size: const Size(420, 480),
+              icon: Icons.settings, size: const Size(600, 450),
             );
           },
           onRefresh: () {

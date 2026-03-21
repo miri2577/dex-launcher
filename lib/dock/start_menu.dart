@@ -148,8 +148,8 @@ class _StartMenuState extends State<StartMenu> {
                                 _PowerBtn(Icons.settings, 'Settings', () {
                                   widget.onClose();
                                   context.read<WindowManager>().openWindow(
-                                    appType: 'developer', title: 'Einstellungen',
-                                    icon: Icons.settings, size: const Size(550, 450),
+                                    appType: 'settings', title: 'Einstellungen',
+                                    icon: Icons.settings, size: const Size(600, 450),
                                   );
                                 }),
                                 _PowerBtn(Icons.exit_to_app, 'Beenden', () {
