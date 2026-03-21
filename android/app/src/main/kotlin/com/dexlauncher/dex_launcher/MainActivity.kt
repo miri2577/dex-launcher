@@ -55,6 +55,10 @@ class MainActivity : FlutterActivity() {
 
         // Soft keyboard aggressiv unterdrücken
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
+        // Hinweis: Full HD (1920x1080) nicht möglich auf Google TV
+        // System setzt wm size sofort auf 1280x720 zurück
+        // Funktioniert auf AOSP-basierten Sticks (nicht Google TV)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

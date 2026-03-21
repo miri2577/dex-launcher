@@ -340,7 +340,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
         children: [
           // Schnellzugriff
           Container(
-            height: 28,
+            height: 32,
             color: const Color(0xFF202020),
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -352,15 +352,15 @@ class _FileManagerAppState extends State<FileManagerApp> {
                   onTap: () => _loadDirectory(path),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 1),
+                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 1),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
                       color: active ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(icon, color: active ? Colors.white : Colors.white38, size: 12),
+                      Icon(icon, color: active ? Colors.white : Colors.white38, size: 13),
                       const SizedBox(width: 4),
-                      Text(label, style: TextStyle(color: active ? Colors.white : Colors.white54, fontSize: 10)),
+                      Text(label, style: TextStyle(color: active ? Colors.white : Colors.white54, fontSize: 11)),
                     ]),
                   ),
                 );
@@ -369,7 +369,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
           ),
           // Toolbar
           Container(
-            height: 32,
+            height: 36,
             color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Row(
@@ -425,6 +425,19 @@ class _FileManagerAppState extends State<FileManagerApp> {
               ],
             ),
           ),
+          // Column headers
+          Container(
+            height: 24,
+            color: C.windowChromeUnfocused,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Expanded(child: Text('Name', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10))),
+                SizedBox(width: 80, child: Text('Groesse', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10), textAlign: TextAlign.right)),
+                const SizedBox(width: 12),
+              ],
+            ),
+          ),
           // Inhalt
           Expanded(
             child: _loading
@@ -465,12 +478,12 @@ class _FileManagerAppState extends State<FileManagerApp> {
           ),
           // Statusleiste
           Container(
-            height: 24,
+            height: 26,
             color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                Text('${_entries.length} Elemente', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
+                Text('${_entries.length} Elemente', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10)),
                 if (_hasSelection) ...[
                   const SizedBox(width: 8),
                   Text('${_selected.length} ausgewaehlt', style: TextStyle(color: const Color(0xFF86BE43).withValues(alpha: 0.6), fontSize: 10)),
@@ -644,7 +657,7 @@ class _FileRowState extends State<_FileRow> {
         onLongPressStart: widget.onSecondaryTap != null
             ? (d) => widget.onSecondaryTap!(d.globalPosition) : null,
         child: Container(
-          height: widget.isImage ? 40 : 32,
+          height: widget.isImage ? 48 : 38,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           color: widget.selected
               ? const Color(0xFF86BE43).withValues(alpha: 0.15)

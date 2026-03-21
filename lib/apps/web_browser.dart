@@ -389,7 +389,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
           // Tab-Leiste
           if (_tabs.length > 1)
             Container(
-              height: 28,
+              height: 34,
               color: C.windowBg,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -399,9 +399,9 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                     return GestureDetector(
                       onTap: () => _addTab('https://www.google.com'),
                       child: Container(
-                        width: 28, height: 28,
+                        width: 34, height: 34,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.add, color: Colors.white38, size: 14),
+                        child: const Icon(Icons.add, color: Colors.white38, size: 15),
                       ),
                     );
                   }
@@ -410,8 +410,8 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                   return GestureDetector(
                     onTap: () => _switchTab(i),
                     child: Container(
-                      constraints: const BoxConstraints(maxWidth: 160),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      constraints: const BoxConstraints(maxWidth: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         color: active ? C.windowChromeUnfocused : Colors.transparent,
                         border: Border(bottom: BorderSide(
@@ -421,13 +421,13 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Flexible(child: Text(tab.title, style: TextStyle(
-                            color: active ? Colors.white : Colors.white54, fontSize: 10),
+                            color: active ? Colors.white : Colors.white54, fontSize: 11),
                             overflow: TextOverflow.ellipsis)),
                           if (_tabs.length > 1) ...[
                             const SizedBox(width: 4),
                             GestureDetector(
                               onTap: () => _closeTab(i),
-                              child: Icon(Icons.close, size: 12, color: active ? Colors.white54 : Colors.white24),
+                              child: Icon(Icons.close, size: 13, color: active ? Colors.white54 : Colors.white24),
                             ),
                           ],
                         ],
@@ -440,9 +440,9 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
 
           // Navigation Bar
           Container(
-            height: 34,
+            height: 40,
             color: C.windowChromeUnfocused,
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
                 _NavBtn(Icons.arrow_back, _canGoBack, () => _controller.goBack()),
@@ -452,14 +452,14 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                 // URL Bar
                 Expanded(
                   child: Container(
-                    height: 26,
+                    height: 30,
                     decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(4)),
-                    child: TextField(keyboardType: TextInputType.none, 
+                    child: TextField(keyboardType: TextInputType.none,
                       controller: _urlController,
-                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                         isDense: true,
                       ),
                       onSubmitted: (_) => _navigate(),
@@ -524,12 +524,12 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
             ),
 
           if (_loading)
-            const LinearProgressIndicator(minHeight: 2, color: const Color(0xFF86BE43), backgroundColor: Colors.transparent),
+            const LinearProgressIndicator(minHeight: 4, color: Color(0xFF86BE43), backgroundColor: Colors.transparent),
 
           // Bookmarks Bar
           if (_showBookmarks && _bookmarks.isNotEmpty)
             Container(
-              height: 28, color: const Color(0xFF202020),
+              height: 30, color: const Color(0xFF202020),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -625,13 +625,13 @@ class _NavButtonState extends State<_NavButton> {
       child: GestureDetector(
         onTap: widget.enabled ? widget.onTap : null,
         child: Container(
-          width: 26, height: 26,
+          width: 32, height: 32,
           margin: const EdgeInsets.only(right: 1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(3),
             color: _h && widget.enabled ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
           ),
-          child: Icon(widget.icon, color: widget.enabled ? Colors.white70 : Colors.white24, size: 14),
+          child: Icon(widget.icon, color: widget.enabled ? Colors.white70 : Colors.white24, size: 15),
         ),
       ),
     );

@@ -34,7 +34,7 @@ class _TopBarState extends State<TopBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 32,
+      height: 28,
       decoration: const BoxDecoration(
         color: C.panelBg,
         border: Border(bottom: BorderSide(color: C.border, width: 1)),

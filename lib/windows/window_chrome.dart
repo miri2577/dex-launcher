@@ -49,7 +49,7 @@ class _WindowChromeState extends State<WindowChrome> {
   void _onDragEnd() {
     final screen = MediaQuery.of(context).size;
     const snap = 15.0;
-    const topBar = 0.0;
+    const topBar = 28.0;
     const dockH = 40.0;
 
     if (_position.dx < snap) {
@@ -66,7 +66,7 @@ class _WindowChromeState extends State<WindowChrome> {
 
   void _maximize() {
     final screen = MediaQuery.of(context).size;
-    const topBar = 0.0;
+    const topBar = 28.0;
     const dockH = 40.0;
     setState(() {
       _preMaxPos = _position;
@@ -142,22 +142,22 @@ class _WindowChromeState extends State<WindowChrome> {
             Positioned.fill(child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1E1E1E),
-                borderRadius: _maximized ? null : BorderRadius.circular(8),
+                borderRadius: _maximized ? null : BorderRadius.circular(10),
                 border: Border.all(
-                  color: focused ? C.accent.withValues(alpha: 0.35) : Colors.white.withValues(alpha: 0.1),
-                  width: focused ? 2 : 1,
+                  color: focused ? C.accent : C.border,
+                  width: 1,
                 ),
                 boxShadow: _maximized ? null : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: focused ? 0.6 : 0.25),
-                    blurRadius: focused ? 24 : 8,
+                    color: Colors.black.withValues(alpha: focused ? 0.6 : 0.2),
+                    blurRadius: focused ? 32 : 12,
                     offset: const Offset(0, 4),
-                    spreadRadius: focused ? 2 : 0,
+                    spreadRadius: focused ? 4 : 0,
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(7),
+                borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(9),
                 child: Column(children: [
                   // Titelleiste
                   GestureDetector(
@@ -166,14 +166,17 @@ class _WindowChromeState extends State<WindowChrome> {
                     onDoubleTap: _toggleMaximize,
                     onSecondaryTapUp: (d) => _showWindowMenu(d.globalPosition),
                     child: Container(
-                      height: 32,
-                      color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
+                        border: const Border(bottom: BorderSide(color: C.separator, width: 1)),
+                      ),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(children: [
                         Icon(widget.window.icon, color: Colors.white54, size: 13),
                         const SizedBox(width: 6),
                         Expanded(child: Text(widget.window.title,
-                          style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 11, fontWeight: FontWeight.w500),
+                          style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 12, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis)),
                         _WinBtn(Icons.minimize, false, () => widget.manager.minimizeWindow(widget.window.id)),
                         _WinBtn(_maximized ? Icons.filter_none : Icons.crop_square, false, _toggleMaximize),
@@ -219,7 +222,7 @@ class _WinBtnState extends State<_WinBtn> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          width: 28, height: 28,
+          width: 32, height: 32,
           margin: const EdgeInsets.only(left: 1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
@@ -227,7 +230,7 @@ class _WinBtnState extends State<_WinBtn> {
                 ? (widget.isClose ? const Color(0xCCE74C3C) : Colors.white.withValues(alpha: 0.12))
                 : Colors.transparent,
           ),
-          child: Icon(widget.icon, color: _h ? Colors.white : Colors.white.withValues(alpha: 0.4), size: 14),
+          child: Icon(widget.icon, color: _h ? Colors.white : Colors.white.withValues(alpha: 0.4), size: 15),
         ),
       ),
     );
