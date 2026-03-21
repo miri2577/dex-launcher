@@ -22,7 +22,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
   bool _canGoForward = false;
   String _currentUrl = '';
   String _pageTitle = '';
-  int _zoomLevel = 100; // Prozent
+  int _zoomLevel = 50; // Standard 50% für TV
   bool _showBookmarks = false;
   bool _showMenu = false;
   bool _desktopMode = true;
