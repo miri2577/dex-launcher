@@ -49,7 +49,7 @@ class _WindowChromeState extends State<WindowChrome> {
   void _onDragEnd() {
     final screen = MediaQuery.of(context).size;
     const snap = 15.0;
-    const topBar = 28.0;
+    const topBar = 0.0;
     const dockH = 44.0;
 
     if (_position.dx < snap) {
@@ -66,7 +66,7 @@ class _WindowChromeState extends State<WindowChrome> {
 
   void _maximize() {
     final screen = MediaQuery.of(context).size;
-    const topBar = 28.0;
+    const topBar = 0.0;
     const dockH = 44.0;
     setState(() {
       _preMaxPos = _position;

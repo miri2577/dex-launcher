@@ -166,11 +166,7 @@ class DesktopState extends ChangeNotifier {
   }
 
   void launchApp(AppInfo app) {
-    if (_freeformEnabled) {
-      launchAppFreeform(app);
-    } else {
-      appService.launchApp(app.packageName);
-    }
+    appService.launchApp(app.packageName);
     // Recent-Apps-Liste aktualisieren nach kurzem Delay
     Future.delayed(const Duration(seconds: 1), loadRecentApps);
   }

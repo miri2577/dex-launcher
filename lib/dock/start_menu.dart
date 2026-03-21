@@ -67,8 +67,8 @@ class _StartMenuState extends State<StartMenu> {
     final screenH = MediaQuery.of(context).size.height;
 
     return Container(
-      width: 560,
-      height: screenH * 0.82,
+      width: 440,
+      height: screenH * 0.72,
       margin: const EdgeInsets.only(left: 8, bottom: 4),
       decoration: BoxDecoration(
         color: C.menuBg,
@@ -102,7 +102,7 @@ class _StartMenuState extends State<StartMenu> {
             ),
             child: Row(children: [
               Expanded(child: Container(
-                height: 34,
+                height: 30,
                 decoration: BoxDecoration(color: C.inputBg, borderRadius: BorderRadius.circular(4)),
                 child: TextField(
                   controller: _searchController,
@@ -134,7 +134,7 @@ class _StartMenuState extends State<StartMenu> {
                     children: [
                       // Kategorien-Sidebar
                       Container(
-                        width: 160,
+                        width: 130,
                         color: C.sidebarBg,
                         child: Column(
                           children: [
@@ -375,7 +375,7 @@ class _AppRowState extends State<_AppRow> {
       onTap: widget.onTap,
       onSecondaryTapUp: widget.onSecondary != null ? (d) => widget.onSecondary!(d.globalPosition) : null,
       child: Container(
-        height: 34, margin: const EdgeInsets.symmetric(vertical: 1),
+        height: 30, margin: const EdgeInsets.symmetric(vertical: 1),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
           color: _h ? Colors.white.withValues(alpha: 0.07) : Colors.transparent),
@@ -405,7 +405,7 @@ class _ToolRowState extends State<_ToolRow> {
       onTap: widget.onTap,
       onSecondaryTapUp: widget.onSecondary != null ? (d) => widget.onSecondary!(d.globalPosition) : null,
       child: Container(
-        height: 34, margin: const EdgeInsets.symmetric(vertical: 1),
+        height: 30, margin: const EdgeInsets.symmetric(vertical: 1),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
           color: _h ? Colors.white.withValues(alpha: 0.07) : Colors.transparent),
@@ -437,7 +437,7 @@ class _CatButtonState extends State<_CatButton> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          height: 38,
+          height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: widget.active ? C.accentDim : _h ? C.hover : Colors.transparent,

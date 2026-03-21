@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../theme/cinnamon_theme.dart';
 import '../models/desktop_state.dart';
 import '../windows/mdi_window.dart';
 import '../windows/window_manager.dart';
@@ -298,12 +299,8 @@ class _DesktopShellState extends State<DesktopShell> {
                         customImagePath: state.customWallpaperPath,
                       ),
 
-                      // Top Bar
-                      const Positioned(left: 0, right: 0, top: 0, child: TopBar()),
-
                       // Desktop Icons
                       Positioned.fill(
-                        top: 28,
                         bottom: _dockVisible ? 44 : 0,
                         child: GestureDetector(
                           onTap: () {
@@ -321,7 +318,7 @@ class _DesktopShellState extends State<DesktopShell> {
                       if (state.activeWidgets.isNotEmpty)
                         Positioned(
                           right: 16,
-                          top: 36,
+                          top: 16,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
@@ -523,13 +520,13 @@ class _DesktopContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    const menuWidth = 220.0;
-    const menuHeight = 200.0;
+    const menuWidth = 200.0;
+    const menuHeight = 260.0;
 
     var dx = position.dx;
     var dy = position.dy;
-    if (dx + menuWidth > screenSize.width) dx = screenSize.width - menuWidth - 8;
-    if (dy + menuHeight > screenSize.height) dy = screenSize.height - menuHeight - 8;
+    dx = dx.clamp(8, screenSize.width - menuWidth - 8);
+    dy = dy.clamp(8, screenSize.height - menuHeight - 48);
 
     return Stack(
       children: [
@@ -543,30 +540,21 @@ class _DesktopContextMenu extends StatelessWidget {
         Positioned(
           left: dx,
           top: dy,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 120),
-            curve: Curves.easeOut,
-            builder: (context, value, child) => Transform.scale(
-              scale: 0.9 + 0.1 * value,
-              alignment: Alignment.topLeft,
-              child: Opacity(opacity: value, child: child),
-            ),
-            child: Container(
+          child: Container(
               width: menuWidth,
               decoration: BoxDecoration(
-                color: const Color(0xF0282828),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                color: C.menuBg,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: C.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 16,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -609,9 +597,8 @@ class _DesktopContextMenu extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
   }
 
   Widget _sep() => Container(height: 1, margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
@@ -644,18 +631,18 @@ class _HoverMenuItemState extends State<_HoverMenuItem> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          height: 40,
-          margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: 28,
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: _hovering ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+            color: _hovering ? C.hover : Colors.transparent,
           ),
           child: Row(
             children: [
-              Icon(widget.icon, color: Colors.white, size: 18),
-              const SizedBox(width: 12),
-              Text(widget.label, style: const TextStyle(color: Colors.white, fontSize: 13)),
+              Icon(widget.icon, color: Colors.white70, size: 14),
+              const SizedBox(width: 8),
+              Text(widget.label, style: const TextStyle(color: Colors.white, fontSize: 11)),
             ],
           ),
         ),
