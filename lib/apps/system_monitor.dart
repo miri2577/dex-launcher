@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,7 +55,7 @@ class _SystemMonitorAppState extends State<SystemMonitorApp> {
     final usedStorage = totalStorage - freeStorage;
 
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: ListView(
         padding: const EdgeInsets.all(12),
         children: [

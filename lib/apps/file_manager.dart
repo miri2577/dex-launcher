@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -174,7 +175,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: C.windowChromeUnfocused,
         title: const Text('Umbenennen', style: TextStyle(color: Colors.white, fontSize: 14)),
         content: TextField(
           controller: controller, autofocus: true,
@@ -205,7 +206,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: C.windowChromeUnfocused,
         title: const Text('Neuer Ordner', style: TextStyle(color: Colors.white, fontSize: 14)),
         content: TextField(
           controller: controller, autofocus: true,
@@ -334,7 +335,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Schnellzugriff
@@ -369,7 +370,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
           // Toolbar
           Container(
             height: 32,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             child: Row(
               children: [
@@ -465,7 +466,7 @@ class _FileManagerAppState extends State<FileManagerApp> {
           // Statusleiste
           Container(
             height: 24,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [

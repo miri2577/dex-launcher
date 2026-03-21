@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,12 +102,12 @@ class _DeveloperOptionsAppState extends State<DeveloperOptionsApp> {
     if (_loading) return const Center(child: CircularProgressIndicator(strokeWidth: 2));
 
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Toolbar
           Container(
-            height: 32, color: const Color(0xFF252525),
+            height: 32, color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(children: [
               const Icon(Icons.developer_mode, color: Colors.white54, size: 14),

@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -78,11 +79,11 @@ class _TrashAppState extends State<TrashApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           Container(
-            height: 32, color: const Color(0xFF252525),
+            height: 32, color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(children: [
               const Icon(Icons.delete_outline, color: Colors.white54, size: 14),
@@ -93,7 +94,7 @@ class _TrashAppState extends State<TrashApp> {
                 GestureDetector(
                   onTap: () async {
                     final confirm = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
-                      backgroundColor: const Color(0xFF252525),
+                      backgroundColor: C.windowChromeUnfocused,
                       title: const Text('Papierkorb leeren?', style: TextStyle(color: Colors.white, fontSize: 14)),
                       content: Text('${_items.length} Elemente endgueltig loeschen?',
                         style: const TextStyle(color: Colors.white70, fontSize: 12)),

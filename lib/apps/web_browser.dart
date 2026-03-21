@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -382,14 +383,14 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Tab-Leiste
           if (_tabs.length > 1)
             Container(
               height: 28,
-              color: const Color(0xFF1E1E1E),
+              color: C.windowBg,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: _tabs.length + 1, // +1 für "Neuer Tab"
@@ -412,7 +413,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
                       constraints: const BoxConstraints(maxWidth: 160),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       decoration: BoxDecoration(
-                        color: active ? const Color(0xFF252525) : Colors.transparent,
+                        color: active ? C.windowChromeUnfocused : Colors.transparent,
                         border: Border(bottom: BorderSide(
                           color: active ? const Color(0xFF86BE43) : Colors.transparent, width: 2)),
                       ),
@@ -440,7 +441,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
           // Navigation Bar
           Container(
             height: 34,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
             child: Row(
               children: [
@@ -508,7 +509,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
           // Menu
           if (_showMenu)
             Container(
-              color: const Color(0xFF252525),
+              color: C.windowChromeUnfocused,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Wrap(spacing: 4, runSpacing: 4, children: [
                 _MenuChip('Neuer Tab', Icons.add, () { _addTab('https://www.google.com'); setState(() => _showMenu = false); }),
@@ -566,7 +567,7 @@ class _WebBrowserAppState extends State<WebBrowserApp> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: C.windowChromeUnfocused,
         title: const Text('Verlauf', style: TextStyle(color: Colors.white, fontSize: 14)),
         content: SizedBox(
           width: 400, height: 300,

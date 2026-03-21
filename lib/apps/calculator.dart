@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 
 class CalculatorApp extends StatefulWidget {
@@ -112,7 +113,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Display

@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -71,13 +72,13 @@ class _TextEditorAppState extends State<TextEditorApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Toolbar
           Container(
             height: 36,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [

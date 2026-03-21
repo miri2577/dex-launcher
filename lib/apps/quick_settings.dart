@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ class QuickSettingsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       padding: const EdgeInsets.all(12),
       child: Consumer<SystemStatusService>(
         builder: (context, service, _) {

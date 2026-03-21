@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -38,10 +39,10 @@ class _VpnManagerAppState extends State<VpnManagerApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
-          Container(height: 32, color: const Color(0xFF252525),
+          Container(height: 32, color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(children: [
               const Icon(Icons.vpn_lock, color: Colors.white54, size: 14),

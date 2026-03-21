@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +59,7 @@ class _WeatherAppState extends State<WeatherApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       padding: const EdgeInsets.all(16),
       child: _loading
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2))

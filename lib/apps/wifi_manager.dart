@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -69,7 +70,7 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF252525),
+        backgroundColor: C.windowChromeUnfocused,
         title: Text('Verbinden mit $ssid', style: const TextStyle(color: Colors.white, fontSize: 14)),
         content: TextField(
           controller: controller,
@@ -110,13 +111,13 @@ class _WifiManagerAppState extends State<WifiManagerApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Toolbar
           Container(
             height: 36,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [

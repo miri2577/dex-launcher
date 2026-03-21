@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -42,13 +43,13 @@ class _GlobalSearchAppState extends State<GlobalSearchApp> {
         : [];
 
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           // Suchfeld
           Container(
             padding: const EdgeInsets.all(10),
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             child: TextField(keyboardType: TextInputType.none, 
               controller: _controller, autofocus: true,
               style: const TextStyle(color: Colors.white, fontSize: 13),

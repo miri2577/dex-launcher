@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 
 class CalendarApp extends StatefulWidget {
@@ -25,7 +26,7 @@ class _CalendarAppState extends State<CalendarApp> {
       'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [

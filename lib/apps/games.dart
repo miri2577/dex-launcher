@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class GamesHubApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: ListView(
         padding: const EdgeInsets.all(12),
         children: [
@@ -198,7 +199,7 @@ class _SnakeGameState extends State<SnakeGame> {
         child: Container(
           color: const Color(0xFF0C0C0C),
           child: Column(children: [
-            Container(height: 28, color: const Color(0xFF1A1A1A),
+            Container(height: 28, color: C.panelBg,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(children: [
                 Text('Score: $_score', style: const TextStyle(color: Colors.white, fontSize: 12)),
@@ -361,7 +362,7 @@ class _Game2048State extends State<Game2048> {
       child: Container(
         color: const Color(0xFF0C0C0C),
         child: Column(children: [
-          Container(height: 28, color: const Color(0xFF1A1A1A),
+          Container(height: 28, color: C.panelBg,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(children: [
               Text('Score: $_score', style: const TextStyle(color: Colors.white, fontSize: 12)),
@@ -465,7 +466,7 @@ class _MinesweeperGameState extends State<MinesweeperGame> {
     return Container(
       color: const Color(0xFF0C0C0C),
       child: Column(children: [
-        Container(height: 28, color: const Color(0xFF1A1A1A),
+        Container(height: 28, color: C.panelBg,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(children: [
             Text('Minen: $_mines', style: const TextStyle(color: Colors.white, fontSize: 12)),
@@ -637,7 +638,7 @@ class _TetrisGameState extends State<TetrisGame> {
       child: Container(
         color: const Color(0xFF0C0C0C),
         child: Column(children: [
-          Container(height: 28, color: const Color(0xFF1A1A1A),
+          Container(height: 28, color: C.panelBg,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(children: [
               Text('Score: $_score', style: const TextStyle(color: Colors.white, fontSize: 12)),

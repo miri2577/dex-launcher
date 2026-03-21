@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,7 +45,7 @@ class _SpeedTestAppState extends State<SpeedTestApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [

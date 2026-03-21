@@ -1,3 +1,4 @@
+import '../theme/cinnamon_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,12 +72,12 @@ class _VideoPlayerAppState extends State<VideoPlayerApp> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1A1A1A),
+      color: C.panelBg,
       child: Column(
         children: [
           Container(
             height: 36,
-            color: const Color(0xFF252525),
+            color: C.windowChromeUnfocused,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
