@@ -178,7 +178,7 @@ class _PowerStartButtonState extends State<_PowerStartButton> {
         child: Container(
           width: 40, height: 40,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            
             color: widget.isActive || _h ? Colors.white.withValues(alpha: 0.15) : Colors.transparent,
           ),
           child: Icon(widget.isActive ? Icons.close : Icons.apps_rounded, color: Colors.white, size: 20),
@@ -232,7 +232,7 @@ class _DockToolButtonState extends State<_DockToolButton> {
             width: 40, height: 40,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              
               color: _h ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
             ),
             child: Icon(widget.tool.icon, color: Colors.white, size: 20),
@@ -284,7 +284,7 @@ class _DockAppItemState extends State<_DockAppItem> {
             width: 40, height: 40,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              
               color: _h ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
             ),
             padding: const EdgeInsets.all(5),
@@ -336,43 +336,35 @@ class _DockMDIItemState extends State<_DockMDIItem> {
           },
           child: Container(
             height: 40,
-            constraints: const BoxConstraints(minWidth: 40, maxWidth: 160),
+            constraints: const BoxConstraints(minWidth: 40, maxWidth: 180),
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            margin: const EdgeInsets.symmetric(horizontal: 2),
+            margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
               color: widget.window.isFocused
-                  ? Colors.white.withValues(alpha: 0.18)
-                  : _h
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.transparent,
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : _h ? Colors.white.withValues(alpha: 0.06) : Colors.transparent,
+              border: Border(
+                bottom: BorderSide(
+                  color: widget.window.isFocused ? C.accent : Colors.transparent,
+                  width: 2,
+                ),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Opacity(opacity: min ? 0.4 : 1.0,
-                  child: Icon(widget.window.icon, color: Colors.white, size: 18)),
+                  child: Icon(widget.window.icon, color: Colors.white, size: 16)),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    widget.window.title.length > 12
-                        ? '${widget.window.title.substring(0, 12)}...'
-                        : widget.window.title,
+                    widget.window.title,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: min ? 0.5 : 0.9),
-                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: min ? 0.4 : 0.8),
+                      fontSize: 11,
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                  ),
-                ),
-                // Focus indicator dot
-                const SizedBox(width: 4),
-                Container(
-                  width: 6, height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.window.isFocused ? C.accent : Colors.white38,
                   ),
                 ),
               ],
@@ -409,8 +401,8 @@ class _DockClockState extends State<_DockClock> {
     final weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
     return GestureDetector(
       onTap: () => context.read<WindowManager>().openWindow(
-        appType: 'notifications', title: 'Benachrichtigungen',
-        icon: Icons.notifications, size: const Size(420, 400)),
+        appType: 'calendar', title: 'Kalender',
+        icon: Icons.calendar_month, size: const Size(300, 340)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,

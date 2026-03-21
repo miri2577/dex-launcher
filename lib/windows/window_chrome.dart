@@ -170,21 +170,9 @@ class _WindowChromeState extends State<WindowChrome> {
                         Expanded(child: Text(widget.window.title,
                           style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 11, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis)),
-                        _TrafficBtn(
-                          icon: Icons.minimize,
-                          hoverColor: const Color(0xFFF39C12),
-                          onTap: () => widget.manager.minimizeWindow(widget.window.id),
-                        ),
-                        _TrafficBtn(
-                          icon: _maximized ? Icons.filter_none : Icons.crop_square,
-                          hoverColor: const Color(0xFF2ECC71),
-                          onTap: _toggleMaximize,
-                        ),
-                        _TrafficBtn(
-                          icon: Icons.close,
-                          hoverColor: const Color(0xFFE74C3C),
-                          onTap: () => widget.manager.closeWindow(widget.window.id),
-                        ),
+                        _WinBtn(Icons.minimize, false, () => widget.manager.minimizeWindow(widget.window.id)),
+                        _WinBtn(_maximized ? Icons.filter_none : Icons.crop_square, false, _toggleMaximize),
+                        _WinBtn(Icons.close, true, () => widget.manager.closeWindow(widget.window.id)),
                       ]),
                     ),
                   ),
@@ -210,15 +198,13 @@ class _WindowChromeState extends State<WindowChrome> {
 }
 
 /// Traffic-light style window button (Mint-Y / macOS style)
-class _TrafficBtn extends StatefulWidget {
-  final IconData icon;
-  final Color hoverColor;
-  final VoidCallback onTap;
-  const _TrafficBtn({required this.icon, required this.hoverColor, required this.onTap});
-  @override State<_TrafficBtn> createState() => _TrafficBtnState();
+class _WinBtn extends StatefulWidget {
+  final IconData icon; final bool isClose; final VoidCallback onTap;
+  const _WinBtn(this.icon, this.isClose, this.onTap);
+  @override State<_WinBtn> createState() => _WinBtnState();
 }
 
-class _TrafficBtnState extends State<_TrafficBtn> {
+class _WinBtnState extends State<_WinBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) {
@@ -228,21 +214,15 @@ class _TrafficBtnState extends State<_TrafficBtn> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          width: 24, height: 24,
-          margin: const EdgeInsets.only(left: 2),
-          alignment: Alignment.center,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
-            width: _h ? 22 : 16,
-            height: _h ? 22 : 16,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _h ? widget.hoverColor : widget.hoverColor.withValues(alpha: 0.4),
-            ),
-            child: _h
-                ? Icon(widget.icon, color: Colors.white, size: 11)
-                : null,
+          width: 28, height: 28,
+          margin: const EdgeInsets.only(left: 1),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            color: _h
+                ? (widget.isClose ? const Color(0xCCE74C3C) : Colors.white.withValues(alpha: 0.12))
+                : Colors.transparent,
           ),
+          child: Icon(widget.icon, color: _h ? Colors.white : Colors.white.withValues(alpha: 0.4), size: 14),
         ),
       ),
     );
