@@ -56,9 +56,11 @@ class MainActivity : FlutterActivity() {
         // Soft keyboard aggressiv unterdrücken
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 
-        // Hinweis: Full HD (1920x1080) nicht möglich auf Google TV
-        // System setzt wm size sofort auf 1280x720 zurück
-        // Funktioniert auf AOSP-basierten Sticks (nicht Google TV)
+        // Optimize density for 1080p desktop use
+        // density 240 on 1080p gives more screen real estate while keeping text readable
+        try {
+            Runtime.getRuntime().exec(arrayOf("sh", "-c", "wm density 240"))
+        } catch (_: Exception) {}
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -397,23 +399,13 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun isFreeformEnabled(): Boolean {
-        // Prüfe ob das Setting aktiviert ist UND das Gerät Freeform unterstützt
-        val settingEnabled = try {
+        // Wenn das Setting aktiviert ist, versuchen wir es einfach.
+        // setLaunchBounds() wird stillschweigend ignoriert wenn es nicht geht.
+        return try {
             Settings.Global.getInt(contentResolver, "enable_freeform_support", 0) == 1
         } catch (e: Exception) {
             false
         }
-
-        if (!settingEnabled) return false
-
-        // Prüfe ob das Gerät die Feature-Flag hat
-        val hasFeature = packageManager.hasSystemFeature("android.software.freeform_window_management")
-
-        // Auf manchen Geräten fehlt die Feature-Flag aber es geht trotzdem.
-        // Google TV (Leanback) blockiert Freeform aktiv.
-        val isGoogleTV = packageManager.hasSystemFeature("android.software.leanback")
-
-        return hasFeature || !isGoogleTV
     }
 
     private fun enableFreeform(): Boolean {

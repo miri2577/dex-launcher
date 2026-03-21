@@ -304,7 +304,7 @@ class _DesktopShellState extends State<DesktopShell> {
                       // Desktop Icons
                       Positioned.fill(
                         top: 28,
-                        bottom: _dockVisible ? 40 : 0,
+                        bottom: _dockVisible ? 44 : 0,
                         child: GestureDetector(
                           onTap: () {
                             _dockKey.currentState?.closeStartMenu();

@@ -67,7 +67,7 @@ class _StartMenuState extends State<StartMenu> {
     final screenH = MediaQuery.of(context).size.height;
 
     return Container(
-      width: 480,
+      width: 560,
       height: screenH * 0.82,
       margin: const EdgeInsets.only(left: 8, bottom: 4),
       decoration: BoxDecoration(
@@ -102,7 +102,7 @@ class _StartMenuState extends State<StartMenu> {
             ),
             child: Row(children: [
               Expanded(child: Container(
-                height: 30,
+                height: 34,
                 decoration: BoxDecoration(color: C.inputBg, borderRadius: BorderRadius.circular(4)),
                 child: TextField(
                   controller: _searchController,
@@ -134,7 +134,7 @@ class _StartMenuState extends State<StartMenu> {
                     children: [
                       // Kategorien-Sidebar
                       Container(
-                        width: 140,
+                        width: 160,
                         color: C.sidebarBg,
                         child: Column(
                           children: [
@@ -375,7 +375,7 @@ class _AppRowState extends State<_AppRow> {
       onTap: widget.onTap,
       onSecondaryTapUp: widget.onSecondary != null ? (d) => widget.onSecondary!(d.globalPosition) : null,
       child: Container(
-        height: 30, margin: const EdgeInsets.symmetric(vertical: 1),
+        height: 34, margin: const EdgeInsets.symmetric(vertical: 1),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
           color: _h ? Colors.white.withValues(alpha: 0.07) : Colors.transparent),
@@ -405,7 +405,7 @@ class _ToolRowState extends State<_ToolRow> {
       onTap: widget.onTap,
       onSecondaryTapUp: widget.onSecondary != null ? (d) => widget.onSecondary!(d.globalPosition) : null,
       child: Container(
-        height: 30, margin: const EdgeInsets.symmetric(vertical: 1),
+        height: 34, margin: const EdgeInsets.symmetric(vertical: 1),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
           color: _h ? Colors.white.withValues(alpha: 0.07) : Colors.transparent),
@@ -437,7 +437,7 @@ class _CatButtonState extends State<_CatButton> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          height: 34,
+          height: 38,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: widget.active ? C.accentDim : _h ? C.hover : Colors.transparent,
@@ -469,7 +469,7 @@ class _PowerBtnState extends State<_PowerBtn> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 32, height: 32,
+          width: 36, height: 36,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(6),
             color: _h ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
           child: Icon(widget.icon, color: Colors.white54, size: 16),

@@ -50,7 +50,7 @@ class _WindowChromeState extends State<WindowChrome> {
     final screen = MediaQuery.of(context).size;
     const snap = 15.0;
     const topBar = 28.0;
-    const dockH = 40.0;
+    const dockH = 44.0;
 
     if (_position.dx < snap) {
       setState(() { _position = Offset(0, topBar); _size = Size(screen.width / 2, screen.height - topBar - dockH); });
@@ -67,7 +67,7 @@ class _WindowChromeState extends State<WindowChrome> {
   void _maximize() {
     final screen = MediaQuery.of(context).size;
     const topBar = 28.0;
-    const dockH = 40.0;
+    const dockH = 44.0;
     setState(() {
       _preMaxPos = _position;
       _preMaxSize = _size;
@@ -142,7 +142,7 @@ class _WindowChromeState extends State<WindowChrome> {
             Positioned.fill(child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1E1E1E),
-                borderRadius: _maximized ? null : BorderRadius.circular(10),
+                borderRadius: _maximized ? null : BorderRadius.circular(12),
                 border: Border.all(
                   color: focused ? C.accent : C.border,
                   width: 1,
@@ -157,7 +157,7 @@ class _WindowChromeState extends State<WindowChrome> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(9),
+                borderRadius: _maximized ? BorderRadius.zero : BorderRadius.circular(11),
                 child: Column(children: [
                   // Titelleiste
                   GestureDetector(
@@ -166,7 +166,7 @@ class _WindowChromeState extends State<WindowChrome> {
                     onDoubleTap: _toggleMaximize,
                     onSecondaryTapUp: (d) => _showWindowMenu(d.globalPosition),
                     child: Container(
-                      height: 36,
+                      height: 38,
                       decoration: BoxDecoration(
                         color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
                         border: const Border(bottom: BorderSide(color: C.separator, width: 1)),
@@ -176,7 +176,7 @@ class _WindowChromeState extends State<WindowChrome> {
                         Icon(widget.window.icon, color: Colors.white54, size: 13),
                         const SizedBox(width: 6),
                         Expanded(child: Text(widget.window.title,
-                          style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 12, fontWeight: FontWeight.w500),
+                          style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis)),
                         _WinBtn(Icons.minimize, false, () => widget.manager.minimizeWindow(widget.window.id)),
                         _WinBtn(_maximized ? Icons.filter_none : Icons.crop_square, false, _toggleMaximize),
@@ -222,7 +222,7 @@ class _WinBtnState extends State<_WinBtn> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          width: 32, height: 32,
+          width: 34, height: 34,
           margin: const EdgeInsets.only(left: 1),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),

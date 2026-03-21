@@ -48,7 +48,7 @@ class DockState extends State<Dock> {
             ),
           // Dock Bar — full-width solid taskbar panel
           Container(
-            height: 40,
+            height: 44,
             color: C.panelBg,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Row(
@@ -135,7 +135,7 @@ class DockState extends State<Dock> {
 
   Widget _divider() {
     return Container(
-      width: 1, height: 28,
+      width: 1, height: 32,
       margin: const EdgeInsets.symmetric(horizontal: 6),
       color: C.borderLight,
     );
@@ -176,12 +176,12 @@ class _PowerStartButtonState extends State<_PowerStartButton> {
           );
         },
         child: Container(
-          width: 40, height: 40,
+          width: 44, height: 44,
           decoration: BoxDecoration(
-            
+
             color: widget.isActive || _h ? C.hover : Colors.transparent,
           ),
-          child: Icon(widget.isActive ? Icons.close : Icons.apps_rounded, color: Colors.white, size: 20),
+          child: Icon(widget.isActive ? Icons.close : Icons.apps_rounded, color: Colors.white, size: 22),
         ),
       ),
     );
@@ -232,7 +232,7 @@ class _DockToolButtonState extends State<_DockToolButton> {
             );
           },
           child: Container(
-            width: 40, height: 40,
+            width: 44, height: 44,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
 
@@ -241,7 +241,7 @@ class _DockToolButtonState extends State<_DockToolButton> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(widget.tool.icon, color: Colors.white, size: 20),
+                Icon(widget.tool.icon, color: Colors.white, size: 22),
                 if (isRunning)
                   Positioned(
                     bottom: 2,
@@ -300,14 +300,14 @@ class _DockAppItemState extends State<_DockAppItem> {
             );
           },
           child: Container(
-            width: 40, height: 40,
+            width: 44, height: 44,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              
+
               color: _h ? C.hover : Colors.transparent,
             ),
-            padding: const EdgeInsets.all(5),
-            child: AppIconWidget(app: widget.app, size: 30),
+            padding: const EdgeInsets.all(4),
+            child: AppIconWidget(app: widget.app, size: 34),
           ),
         ),
       ),
@@ -354,8 +354,8 @@ class _DockMDIItemState extends State<_DockMDIItem> {
             );
           },
           child: Container(
-            height: 40,
-            constraints: const BoxConstraints(minWidth: 40, maxWidth: 180),
+            height: 44,
+            constraints: const BoxConstraints(minWidth: 44, maxWidth: 180),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
@@ -428,7 +428,7 @@ class _DockClockState extends State<_DockClock> {
         children: [
           Text(
             '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500, height: 1),
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500, height: 1),
           ),
           Text(
             '${weekdays[_now.weekday - 1]} ${_now.day}.${_now.month}.${_now.year}',
