@@ -94,19 +94,24 @@ class _ScreensaverState extends State<Screensaver> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onDismiss,
-      onPanDown: (_) => widget.onDismiss(),
-      child: MouseRegion(
-        onHover: (_) => widget.onDismiss(),
-        child: Container(
-          color: Colors.black,
-          child: switch (_mode) {
-            0 => _buildClock(),
-            1 => _buildStars(),
-            2 => _buildMatrix(),
-            _ => _buildClock(),
-          },
+    return KeyboardListener(
+      focusNode: FocusNode()..requestFocus(),
+      autofocus: true,
+      onKeyEvent: (_) => widget.onDismiss(),
+      child: GestureDetector(
+        onTap: widget.onDismiss,
+        onPanDown: (_) => widget.onDismiss(),
+        child: MouseRegion(
+          onHover: (_) => widget.onDismiss(),
+          child: Container(
+            color: Colors.black,
+            child: switch (_mode) {
+              0 => _buildClock(),
+              1 => _buildStars(),
+              2 => _buildMatrix(),
+              _ => _buildClock(),
+            },
+          ),
         ),
       ),
     );

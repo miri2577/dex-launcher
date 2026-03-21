@@ -144,8 +144,8 @@ class _WindowChromeState extends State<WindowChrome> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: _maximized ? null : BorderRadius.circular(8),
                 border: Border.all(
-                  color: focused ? C.accent.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.08),
-                  width: focused ? 1.5 : 1,
+                  color: focused ? C.accent.withValues(alpha: 0.35) : Colors.white.withValues(alpha: 0.1),
+                  width: focused ? 2 : 1,
                 ),
                 boxShadow: _maximized ? null : [BoxShadow(
                   color: Colors.black.withValues(alpha: focused ? 0.5 : 0.2),

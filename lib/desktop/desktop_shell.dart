@@ -67,6 +67,14 @@ class _DesktopShellState extends State<DesktopShell> {
     super.dispose();
   }
 
+  void _resetScreensaverTimer(DesktopState state) {
+    if (state.screensaverTimeout > 0) {
+      _screensaverTimer = Timer(Duration(minutes: state.screensaverTimeout), () {
+        if (mounted) setState(() => _screensaverActive = true);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_showSplash) {
@@ -142,7 +150,11 @@ class _DesktopShellState extends State<DesktopShell> {
             }));
           }
 
-          return CursorOverlay(
+          return Listener(
+            // Jede Maus/Touch-Aktivität resettet den Screensaver-Timer
+            onPointerDown: (_) { _screensaverTimer?.cancel(); _resetScreensaverTimer(state); },
+            onPointerMove: (_) { _screensaverTimer?.cancel(); _resetScreensaverTimer(state); },
+            child: CursorOverlay(
             child: Shortcuts(
               shortcuts: {
                 // Alt+Tab App Switcher
@@ -194,13 +206,22 @@ class _DesktopShellState extends State<DesktopShell> {
                   ),
                   _DismissIntent: CallbackAction<_DismissIntent>(
                     onInvoke: (_) {
-                      // Escape — currently no global panel to dismiss
+                      // Escape schließt Startmenü
+                      _dockKey.currentState?.closeStartMenu();
                       return null;
                     },
                   ),
                   _ToggleDesktopIntent: CallbackAction<_ToggleDesktopIntent>(
                     onInvoke: (_) {
-                      setState(() => _dockVisible = !_dockVisible);
+                      // Meta+D = Alle Fenster minimieren (Show Desktop)
+                      final wm = context.read<WindowManager>();
+                      final hasVisible = wm.windows.any((w) => !w.isMinimized);
+                      if (hasVisible) {
+                        for (final w in wm.windows) { wm.minimizeWindow(w.id); }
+                      } else {
+                        // Alle wiederherstellen
+                        for (final w in wm.allWindows) { wm.focusWindow(w.id); }
+                      }
                       return null;
                     },
                   ),
@@ -326,6 +347,7 @@ class _DesktopShellState extends State<DesktopShell> {
                 ),
               ),
             ),
+          ),  // Listener close
           );
         },
       ),
