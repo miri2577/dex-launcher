@@ -49,8 +49,8 @@ class _WindowChromeState extends State<WindowChrome> {
   void _onDragEnd() {
     final screen = MediaQuery.of(context).size;
     const snap = 15.0;
-    const topBar = 28.0;
-    const dockH = 56.0;
+    const topBar = 32.0;
+    const dockH = 40.0;
 
     if (_position.dx < snap) {
       setState(() { _position = Offset(0, topBar); _size = Size(screen.width / 2, screen.height - topBar - dockH); });
@@ -66,8 +66,8 @@ class _WindowChromeState extends State<WindowChrome> {
 
   void _maximize() {
     final screen = MediaQuery.of(context).size;
-    const topBar = 28.0;
-    const dockH = 56.0;
+    const topBar = 32.0;
+    const dockH = 40.0;
     setState(() {
       _preMaxPos = _position;
       _preMaxSize = _size;
@@ -161,7 +161,7 @@ class _WindowChromeState extends State<WindowChrome> {
                     onDoubleTap: _toggleMaximize,
                     onSecondaryTapUp: (d) => _showWindowMenu(d.globalPosition),
                     child: Container(
-                      height: 30,
+                      height: 32,
                       color: focused ? const Color(0xFF2D2D3D) : const Color(0xFF252525),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(children: [
@@ -170,9 +170,21 @@ class _WindowChromeState extends State<WindowChrome> {
                         Expanded(child: Text(widget.window.title,
                           style: TextStyle(color: focused ? Colors.white : Colors.white54, fontSize: 11, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis)),
-                        _WinBtn(Icons.minimize, false, () => widget.manager.minimizeWindow(widget.window.id)),
-                        _WinBtn(_maximized ? Icons.filter_none : Icons.crop_square, false, _toggleMaximize),
-                        _WinBtn(Icons.close, true, () => widget.manager.closeWindow(widget.window.id)),
+                        _TrafficBtn(
+                          icon: Icons.minimize,
+                          hoverColor: const Color(0xFFF39C12),
+                          onTap: () => widget.manager.minimizeWindow(widget.window.id),
+                        ),
+                        _TrafficBtn(
+                          icon: _maximized ? Icons.filter_none : Icons.crop_square,
+                          hoverColor: const Color(0xFF2ECC71),
+                          onTap: _toggleMaximize,
+                        ),
+                        _TrafficBtn(
+                          icon: Icons.close,
+                          hoverColor: const Color(0xFFE74C3C),
+                          onTap: () => widget.manager.closeWindow(widget.window.id),
+                        ),
                       ]),
                     ),
                   ),
@@ -197,24 +209,42 @@ class _WindowChromeState extends State<WindowChrome> {
   }
 }
 
-class _WinBtn extends StatefulWidget {
-  final IconData icon; final bool isClose; final VoidCallback onTap;
-  const _WinBtn(this.icon, this.isClose, this.onTap);
-  @override State<_WinBtn> createState() => _WinBtnState();
+/// Traffic-light style window button (Mint-Y / macOS style)
+class _TrafficBtn extends StatefulWidget {
+  final IconData icon;
+  final Color hoverColor;
+  final VoidCallback onTap;
+  const _TrafficBtn({required this.icon, required this.hoverColor, required this.onTap});
+  @override State<_TrafficBtn> createState() => _TrafficBtnState();
 }
-class _WinBtnState extends State<_WinBtn> {
+
+class _TrafficBtnState extends State<_TrafficBtn> {
   bool _h = false;
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => setState(() => _h = true),
       onExit: (_) => setState(() => _h = false),
-      child: GestureDetector(onTap: widget.onTap, child: Container(
-        width: 26, height: 26, margin: const EdgeInsets.only(left: 1),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4),
-          color: _h ? (widget.isClose ? Colors.red.withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.1)) : Colors.transparent),
-        child: Icon(widget.icon, color: _h ? Colors.white : Colors.white38, size: 13),
-      )),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 24, height: 24,
+          margin: const EdgeInsets.only(left: 2),
+          alignment: Alignment.center,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            width: _h ? 20 : 6,
+            height: _h ? 20 : 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _h ? widget.hoverColor : Colors.white.withValues(alpha: 0.2),
+            ),
+            child: _h
+                ? Icon(widget.icon, color: Colors.white, size: 11)
+                : null,
+          ),
+        ),
+      ),
     );
   }
 }

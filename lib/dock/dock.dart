@@ -44,66 +44,43 @@ class DockState extends State<Dock> {
               },
               onClose: () => setState(() => _startMenuOpen = false),
             ),
-          // Dock Bar — passt sich der Größe an
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border(
-                    top: BorderSide(color: Colors.white.withValues(alpha: 0.06), width: 1),
-                    left: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                    right: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                    bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      blurRadius: 16,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
+          // Dock Bar — full-width solid taskbar panel
+          Container(
+            height: 40,
+            color: C.panelBg,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              children: [
+                // Start Button
+                _PowerStartButton(
+                  isActive: _startMenuOpen,
+                  onTap: () => setState(() => _startMenuOpen = !_startMenuOpen),
                 ),
-                child: IntrinsicWidth(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Start Button
-                      _PowerStartButton(
-                        isActive: _startMenuOpen,
-                        onTap: () => setState(() => _startMenuOpen = !_startMenuOpen),
-                      ),
-                      _divider(),
-                      // Gepinnte Tools
-                      ...state.pinnedToolIds.map((toolId) {
-                        final tool = getBuiltinApp(toolId);
-                        if (tool == null) return const SizedBox.shrink();
-                        return _DockToolButton(tool: tool);
-                      }),
-                      // Gepinnte Android-Apps
-                      ...state.pinnedApps.map((app) => _DockAppItem(app: app)),
-                      // Laufende Fenster
-                      Consumer<WindowManager>(
-                        builder: (context, wm, _) {
-                          if (wm.windows.isEmpty) return const SizedBox.shrink();
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _divider(),
-                              ...wm.windows.map((w) => _DockMDIItem(window: w, manager: wm)),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                _divider(),
+                // Gepinnte Tools
+                ...state.pinnedToolIds.map((toolId) {
+                  final tool = getBuiltinApp(toolId);
+                  if (tool == null) return const SizedBox.shrink();
+                  return _DockToolButton(tool: tool);
+                }),
+                _divider(),
+                // Gepinnte Android-Apps
+                ...state.pinnedApps.map((app) => _DockAppItem(app: app)),
+                // Laufende Fenster
+                Consumer<WindowManager>(
+                  builder: (context, wm, _) {
+                    if (wm.windows.isEmpty) return const SizedBox.shrink();
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _divider(),
+                        ...wm.windows.map((w) => _DockMDIItem(window: w, manager: wm)),
+                      ],
+                    );
+                  },
                 ),
-              ),
+                const Spacer(),
+              ],
             ),
           ),
         ],

@@ -5,7 +5,7 @@ import '../theme/cinnamon_theme.dart';
 import '../services/system_status_service.dart';
 import '../windows/window_manager.dart';
 
-/// Schmale obere Leiste wie in Linux/macOS
+/// Schmale obere Leiste wie in Linux Mint Cinnamon
 class TopBar extends StatefulWidget {
   const TopBar({super.key});
 
@@ -34,8 +34,11 @@ class _TopBarState extends State<TopBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 28,
-      color: C.panelBg,
+      height: 32,
+      decoration: const BoxDecoration(
+        color: C.panelBg,
+        border: Border(bottom: BorderSide(color: C.border, width: 1)),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
@@ -49,7 +52,7 @@ class _TopBarState extends State<TopBar> {
                 return GestureDetector(
                   onTap: () => wm.switchDesktop(i),
                   child: Container(
-                    width: 22, height: 18,
+                    width: 26, height: 20,
                     margin: const EdgeInsets.only(right: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
@@ -67,8 +70,8 @@ class _TopBarState extends State<TopBar> {
                     alignment: Alignment.center,
                     child: Text('${i + 1}',
                       style: TextStyle(
-                        color: active ? Colors.white : Colors.white38,
-                        fontSize: 9, fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                        color: active ? Colors.white : Colors.white54,
+                        fontSize: 10, fontWeight: active ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -107,10 +110,10 @@ class _TopBarState extends State<TopBar> {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // WiFi
+                  // WiFi - show SSID only, no "WLAN" prefix
                   _TrayItem(
                     icon: s.networkIcon,
-                    label: s.wifiConnected ? (s.wifiName ?? 'WLAN') : s.ethernetConnected ? 'LAN' : '',
+                    label: s.wifiConnected ? (s.wifiName ?? '') : s.ethernetConnected ? 'LAN' : '',
                     color: s.hasNetwork ? Colors.white : Colors.white38,
                     onTap: () => context.read<WindowManager>().openWindow(
                       appType: 'wifi_manager', title: 'WLAN', icon: Icons.wifi, size: const Size(400, 420),
@@ -153,6 +156,17 @@ class _TopBarState extends State<TopBar> {
 
           const SizedBox(width: 12),
 
+          // Notification bell icon
+          GestureDetector(
+            onTap: () => context.read<WindowManager>().openWindow(
+              appType: 'notifications', title: 'Benachrichtigungen',
+              icon: Icons.notifications, size: const Size(420, 400),
+            ),
+            child: const Icon(Icons.notifications_none, color: Colors.white54, size: 14),
+          ),
+
+          const SizedBox(width: 10),
+
           // Uhr (klickbar → Benachrichtigungen)
           GestureDetector(
             onTap: () => context.read<WindowManager>().openWindow(
@@ -169,11 +183,11 @@ class _TopBarState extends State<TopBar> {
                   children: [
                     Text(
                       '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500, height: 1),
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, height: 1),
                     ),
                     Text(
                       '${weekdays[_now.weekday - 1]} ${_now.day}. ${months[_now.month - 1]}',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 8, height: 1.2),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 9, height: 1.2),
                     ),
                   ],
                 );

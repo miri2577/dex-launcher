@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../theme/cinnamon_theme.dart';
 import '../models/app_info.dart';
 import '../models/builtin_apps.dart';
 import '../models/desktop_state.dart';
@@ -212,44 +213,40 @@ class _DraggableDesktopIconState extends State<_DraggableDesktopIcon> {
         child: MouseRegion(
           onEnter: (_) => setState(() => _hovering = true),
           onExit: (_) => setState(() => _hovering = false),
-          child: AnimatedScale(
-            scale: _hovering ? 1.08 : 1.0,
-            duration: const Duration(milliseconds: 150),
-            child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          width: widget.iconSize + 32,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: _selected
-                ? Colors.white.withValues(alpha: 0.15)
-                : _hovering
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.transparent,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppIconWidget(app: widget.app, size: widget.iconSize),
-              const SizedBox(height: 4),
-              Text(
-                widget.app.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  shadows: [
-                    Shadow(color: Colors.black, blurRadius: 6),
-                    Shadow(color: Colors.black, blurRadius: 3),
-                  ],
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            width: widget.iconSize + 32,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: _selected
+                  ? C.accent.withValues(alpha: 0.2)
+                  : _hovering
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.transparent,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppIconWidget(app: widget.app, size: widget.iconSize),
+                const SizedBox(height: 4),
+                Text(
+                  widget.app.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    shadows: [
+                      Shadow(color: Colors.black, blurRadius: 4),
+                      Shadow(color: Colors.black, blurRadius: 8),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
         ),
       ),
     );
@@ -322,42 +319,38 @@ class _SystemDesktopIconState extends State<_SystemDesktopIcon> {
         child: MouseRegion(
           onEnter: (_) => setState(() => _hovering = true),
           onExit: (_) => setState(() => _hovering = false),
-          child: AnimatedScale(
-            scale: _hovering ? 1.08 : 1.0,
-            duration: const Duration(milliseconds: 150),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 100),
-              width: widget.iconSize + 32,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: _selected
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : _hovering
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.transparent,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(widget.icon, color: Colors.white, size: widget.iconSize),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      shadows: [
-                        Shadow(color: Colors.black, blurRadius: 6),
-                        Shadow(color: Colors.black, blurRadius: 3),
-                      ],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            width: widget.iconSize + 32,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: _selected
+                  ? C.accent.withValues(alpha: 0.2)
+                  : _hovering
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.transparent,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(widget.icon, color: Colors.white, size: widget.iconSize),
+                const SizedBox(height: 4),
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    shadows: [
+                      Shadow(color: Colors.black, blurRadius: 4),
+                      Shadow(color: Colors.black, blurRadius: 8),
+                    ],
                   ),
-                ],
-              ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),

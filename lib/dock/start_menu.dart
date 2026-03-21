@@ -86,7 +86,7 @@ class _StartMenuState extends State<StartMenu> {
             child: Row(children: [
               Expanded(child: Container(
                 height: 30,
-                decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(4)),
+                decoration: BoxDecoration(color: C.inputBg, borderRadius: BorderRadius.circular(4)),
                 child: TextField(
                   controller: _searchController,
                   keyboardType: TextInputType.none,
@@ -133,18 +133,18 @@ class _StartMenuState extends State<StartMenu> {
                                 _CatItem('alle', 'Alle Apps', Icons.apps),
                               ],
                             )),
-                            // Power-Buttons unten
+                            // Power-Buttons unten with labels
                             Container(
                               decoration: BoxDecoration(
                                 border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
                               ),
-                              padding: const EdgeInsets.all(6),
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                                 _PowerBtn(Icons.bedtime, 'Standby', () {
                                   widget.onClose();
                                   const MethodChannel('com.dexlauncher/apps').invokeMethod('goToSleep');
                                 }),
-                                _PowerBtn(Icons.settings, 'Einstellungen', () {
+                                _PowerBtn(Icons.settings, 'Settings', () {
                                   widget.onClose();
                                   context.read<WindowManager>().openWindow(
                                     appType: 'developer', title: 'Einstellungen',
@@ -175,11 +175,11 @@ class _StartMenuState extends State<StartMenu> {
     return GestureDetector(
       onTap: () => setState(() => _activeCategory = id),
       child: Container(
-        height: 32,
+        height: 34,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: active ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
-          border: active ? const Border(left: BorderSide(color: C.accentBorder, width: 2)) : null,
+          color: active ? C.accentDim : Colors.transparent,
+          border: active ? const Border(left: BorderSide(color: C.accent, width: 2)) : null,
         ),
         child: Row(children: [
           Icon(icon, color: active ? Colors.white : Colors.white54, size: 14),
@@ -420,23 +420,28 @@ class _ToolRowState extends State<_ToolRow> {
 }
 
 class _PowerBtn extends StatefulWidget {
-  final IconData icon; final String tooltip; final VoidCallback onTap;
-  const _PowerBtn(this.icon, this.tooltip, this.onTap);
+  final IconData icon; final String label; final VoidCallback onTap;
+  const _PowerBtn(this.icon, this.label, this.onTap);
   @override State<_PowerBtn> createState() => _PowerBtnState();
 }
 
 class _PowerBtnState extends State<_PowerBtn> {
   bool _h = false;
   @override
-  Widget build(BuildContext context) => Tooltip(message: widget.tooltip,
-    child: MouseRegion(
-      onEnter: (_) => setState(() => _h = true), onExit: (_) => setState(() => _h = false),
-      child: GestureDetector(onTap: widget.onTap, child: Container(
-        width: 32, height: 32,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6),
-          color: _h ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
-        child: Icon(widget.icon, color: Colors.white54, size: 16),
-      )),
-    ),
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) => setState(() => _h = true), onExit: (_) => setState(() => _h = false),
+    child: GestureDetector(onTap: widget.onTap, child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 32, height: 32,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(6),
+            color: _h ? Colors.white.withValues(alpha: 0.1) : Colors.transparent),
+          child: Icon(widget.icon, color: Colors.white54, size: 16),
+        ),
+        const SizedBox(height: 2),
+        Text(widget.label, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 8)),
+      ],
+    )),
   );
 }
